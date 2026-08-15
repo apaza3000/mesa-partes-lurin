@@ -1,652 +1,412 @@
-      <aside class="app-sidebar bg-body-secondary shadow" data-bs-theme="dark">
-        <!--begin::Sidebar Brand-->
-        <div class="sidebar-brand">
-          <!--begin::Brand Link-->
-          <a href="./index.html" class="brand-link">
-            <!--begin::Brand Image-->
-            <img
-              src="/view/assets/img/AdminLTELogo.png"
-              alt="AdminLTE Logo"
-              class="brand-image opacity-75 shadow"
-            />
-            <!--end::Brand Image-->
-            <!--begin::Brand Text-->
-            <span class="brand-text fw-light">AdminLTE 4</span>
-            <!--end::Brand Text-->
-          </a>
-          <!--end::Brand Link-->
-        </div>
-        <!--end::Sidebar Brand-->
-        <!--begin::Sidebar Search-->
-        <div class="sidebar-search" role="search">
-          <label for="sidebar-search-input" class="visually-hidden">Filter menu</label>
-          <input
-            type="search"
-            id="sidebar-search-input"
-            class="form-control form-control-sm"
-            placeholder="Filter menu…"
-            autocomplete="off"
-            data-lte-toggle="sidebar-search"
-            data-lte-target="#navigation"
-          />
-          <p class="fs-7 text-secondary mt-2 mb-0" data-lte-search-empty role="status" hidden>
-            No matching pages.
-          </p>
-        </div>
-        <!--end::Sidebar Search-->
-        <!--begin::Sidebar Wrapper-->
-        <div class="sidebar-wrapper">
-          <nav class="mt-2" aria-label="Main navigation">
-            <!--begin::Sidebar Menu-->
-            <ul
-              class="nav sidebar-menu flex-column"
-              data-lte-toggle="treeview"
-              data-accordion="false"
-              id="navigation"
-            >
-              <li class="nav-item">
-                <a href="#" class="nav-link">
-                  <i class="nav-icon bi bi-speedometer"></i>
-                  <p>
-                    Dashboard
-                    <i class="nav-arrow bi bi-chevron-right"></i>
-                  </p>
-                </a>
-                <ul class="nav nav-treeview">
-                  <li class="nav-item">
-                    <a href="./index.html" class="nav-link">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <p>Dashboard v1</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="./index2.html" class="nav-link">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <p>Dashboard v2</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="./index3.html" class="nav-link">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <p>Dashboard v3</p>
-                    </a>
-                  </li>
-                </ul>
-              </li>
-              <li class="nav-item">
-                <a href="./starter.html" class="nav-link active">
-                  <i class="nav-icon bi bi-file-earmark"></i>
-                  <p>Starter Page</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a href="./generate/theme.html" class="nav-link">
-                  <i class="nav-icon bi bi-palette"></i>
-                  <p>Theme Generate</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a href="#" class="nav-link">
-                  <i class="nav-icon bi bi-box-seam-fill"></i>
-                  <p>
-                    Widgets
-                    <i class="nav-arrow bi bi-chevron-right"></i>
-                  </p>
-                </a>
-                <ul class="nav nav-treeview">
-                  <li class="nav-item">
-                    <a href="./widgets/small-box.html" class="nav-link">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <p>Small Box</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="./widgets/info-box.html" class="nav-link">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <p>info Box</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="./widgets/cards.html" class="nav-link">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <p>Cards</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="./widgets/social.html" class="nav-link">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <p>Social &amp; Post</p>
-                    </a>
-                  </li>
-                </ul>
-              </li>
-              <li class="nav-item">
-                <a href="#" class="nav-link">
-                  <i class="nav-icon bi bi-clipboard-fill"></i>
-                  <p>
-                    Layout Options
-                    <span class="nav-badge badge text-bg-secondary me-3">12</span>
-                    <i class="nav-arrow bi bi-chevron-right"></i>
-                  </p>
-                </a>
-                <ul class="nav nav-treeview">
-                  <li class="nav-item">
-                    <a href="./layout/unfixed-sidebar.html" class="nav-link">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <p>Default Sidebar</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="./layout/fixed-sidebar.html" class="nav-link">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <p>Fixed Sidebar</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="./layout/fixed-header.html" class="nav-link">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <p>Fixed Header</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="./layout/fixed-footer.html" class="nav-link">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <p>Fixed Footer</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="./layout/fixed-complete.html" class="nav-link">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <p>Fixed Complete</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="./layout/layout-custom-area.html" class="nav-link">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <p>Layout <small>+ Custom Area </small></p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="./layout/sidebar-mini.html" class="nav-link">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <p>Sidebar Mini</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="./layout/collapsed-sidebar.html" class="nav-link">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <p>Sidebar Mini <small>+ Collapsed</small></p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="./layout/collapsed-sidebar-without-hover.html" class="nav-link">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <p>Sidebar Mini <small>+ Collapsed + No Hover</small></p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="./layout/logo-switch.html" class="nav-link">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <p>Sidebar Mini <small>+ Logo Switch</small></p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="./layout/top-nav.html" class="nav-link">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <p>Top Nav <small>+ No Sidebar</small></p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="./layout/layout-rtl.html" class="nav-link">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <p>Layout RTL</p>
-                    </a>
-                  </li>
-                </ul>
-              </li>
-              <li class="nav-item">
-                <a href="#" class="nav-link">
-                  <i class="nav-icon bi bi-tree-fill"></i>
-                  <p>
-                    UI Elements
-                    <i class="nav-arrow bi bi-chevron-right"></i>
-                  </p>
-                </a>
-                <ul class="nav nav-treeview">
-                  <li class="nav-item">
-                    <a href="./UI/general.html" class="nav-link">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <p>General</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="./UI/icons.html" class="nav-link">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <p>Icons</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="./UI/timeline.html" class="nav-link">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <p>Timeline</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="./UI/ribbons.html" class="nav-link">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <p>Ribbons</p>
-                    </a>
-                  </li>
-                </ul>
-              </li>
-              <li class="nav-item">
-                <a href="#" class="nav-link">
-                  <i class="nav-icon bi bi-envelope"></i>
-                  <p>
-                    Mailbox
-                    <i class="nav-arrow bi bi-chevron-right"></i>
-                  </p>
-                </a>
-                <ul class="nav nav-treeview">
-                  <li class="nav-item">
-                    <a href="./mailbox/inbox.html" class="nav-link">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <p>Inbox</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="./mailbox/read.html" class="nav-link">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <p>Read Message</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="./mailbox/compose.html" class="nav-link">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <p>Compose</p>
-                    </a>
-                  </li>
-                </ul>
-              </li>
+<?php
+// Configuración de roles
+define('ROLE_ADMIN', 'admin');
+define('ROLE_USER', 'user');
+define('ROLE_VIEWER', 'viewer');
 
-              <li class="nav-item">
-                <a href="#" class="nav-link">
-                  <i class="nav-icon bi bi-pencil-square"></i>
-                  <p>
-                    Forms
-                    <i class="nav-arrow bi bi-chevron-right"></i>
-                  </p>
-                </a>
-                <ul class="nav nav-treeview">
-                  <li class="nav-item">
-                    <a href="./forms/elements.html" class="nav-link">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <p>Elements</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="./forms/layout.html" class="nav-link">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <p>Layout</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="./forms/validation.html" class="nav-link">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <p>Validation</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="./forms/wizard.html" class="nav-link">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <p>Wizard</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="./forms/advanced.html" class="nav-link">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <p>Advanced Elements</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="./forms/editors.html" class="nav-link">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <p>Editors</p>
-                    </a>
-                  </li>
-                </ul>
-              </li>
-              <li class="nav-item">
-                <a href="#" class="nav-link">
-                  <i class="nav-icon bi bi-table"></i>
-                  <p>
-                    Tables
-                    <i class="nav-arrow bi bi-chevron-right"></i>
-                  </p>
-                </a>
-                <ul class="nav nav-treeview">
-                  <li class="nav-item">
-                    <a href="./tables/simple.html" class="nav-link">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <p>Simple Tables</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="./tables/data.html" class="nav-link">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <p>Data Tables</p>
-                    </a>
-                  </li>
-                </ul>
-              </li>
-              <li class="nav-item">
-                <a href="#" class="nav-link">
-                  <i class="nav-icon bi bi-graph-up"></i>
-                  <p>
-                    Charts
-                    <i class="nav-arrow bi bi-chevron-right"></i>
-                  </p>
-                </a>
-                <ul class="nav nav-treeview">
-                  <li class="nav-item">
-                    <a href="./charts/apexcharts.html" class="nav-link">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <p>ApexCharts</p>
-                    </a>
-                  </li>
-                </ul>
-              </li>
+// Obtener rol del usuario (ejemplo)
+$userRole = "admin";
 
-              <li class="nav-header">PAGES</li>
-              <li class="nav-item">
-                <a href="#" class="nav-link">
-                  <i class="nav-icon bi bi-file-earmark-text"></i>
-                  <p>
-                    Pages
-                    <i class="nav-arrow bi bi-chevron-right"></i>
-                  </p>
-                </a>
-                <ul class="nav nav-treeview">
-                  <li class="nav-item">
-                    <a href="./pages/profile.html" class="nav-link">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <p>Profile</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="./pages/settings.html" class="nav-link">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <p>Settings</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="./pages/invoice.html" class="nav-link">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <p>Invoice</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="./pages/calendar.html" class="nav-link">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <p>Calendar</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="./pages/kanban.html" class="nav-link">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <p>Kanban</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="./pages/chat.html" class="nav-link">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <p>Chat</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="./pages/file-manager.html" class="nav-link">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <p>File Manager</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="./pages/projects.html" class="nav-link">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <p>Projects</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="./pages/gallery.html" class="nav-link">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <p>Gallery</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="./pages/search-results.html" class="nav-link">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <p>Search Results</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="./pages/pricing.html" class="nav-link">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <p>Pricing</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="./pages/faq.html" class="nav-link">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <p>FAQ</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="#" class="nav-link">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <p>
-                        Error
-                        <i class="nav-arrow bi bi-chevron-right"></i>
-                      </p>
-                    </a>
-                    <ul class="nav nav-treeview">
-                      <li class="nav-item">
-                        <a href="./pages/404.html" class="nav-link">
-                          <i class="nav-icon bi bi-circle"></i>
-                          <p>404</p>
-                        </a>
-                      </li>
-                      <li class="nav-item">
-                        <a href="./pages/500.html" class="nav-link">
-                          <i class="nav-icon bi bi-circle"></i>
-                          <p>500</p>
-                        </a>
-                      </li>
-                      <li class="nav-item">
-                        <a href="./pages/maintenance.html" class="nav-link">
-                          <i class="nav-icon bi bi-circle"></i>
-                          <p>Maintenance</p>
-                        </a>
-                      </li>
-                    </ul>
-                  </li>
-                </ul>
-              </li>
-              <li class="nav-item">
-                <a href="./users.html" class="nav-link">
-                  <i class="nav-icon bi bi-people"></i>
-                  <p>Users</p>
-                </a>
-              </li>
+// Función para verificar si el usuario tiene acceso a un item
+function hasAccess($itemRoles, $userRole)
+{
+  if (empty($itemRoles)) {
+    return true; // Si no se especifican roles, todos tienen acceso
+  }
+  return in_array($userRole, $itemRoles);
+}
 
-              <li class="nav-header">EXAMPLES</li>
-              <li class="nav-item">
-                <a href="#" class="nav-link">
-                  <i class="nav-icon bi bi-box-arrow-in-right"></i>
-                  <p>
-                    Auth
-                    <i class="nav-arrow bi bi-chevron-right"></i>
-                  </p>
-                </a>
-                <ul class="nav nav-treeview">
-                  <li class="nav-item">
-                    <a href="#" class="nav-link">
-                      <i class="nav-icon bi bi-box-arrow-in-right"></i>
-                      <p>
-                        Version 1
-                        <i class="nav-arrow bi bi-chevron-right"></i>
-                      </p>
-                    </a>
-                    <ul class="nav nav-treeview">
-                      <li class="nav-item">
-                        <a href="./examples/login.html" class="nav-link">
-                          <i class="nav-icon bi bi-circle"></i>
-                          <p>Login</p>
-                        </a>
-                      </li>
-                      <li class="nav-item">
-                        <a href="./examples/register.html" class="nav-link">
-                          <i class="nav-icon bi bi-circle"></i>
-                          <p>Register</p>
-                        </a>
-                      </li>
-                      <li class="nav-item">
-                        <a href="./examples/forgot-password.html" class="nav-link">
-                          <i class="nav-icon bi bi-circle"></i>
-                          <p>Forgot Password</p>
-                        </a>
-                      </li>
-                    </ul>
-                  </li>
-                  <li class="nav-item">
-                    <a href="#" class="nav-link">
-                      <i class="nav-icon bi bi-box-arrow-in-right"></i>
-                      <p>
-                        Version 2
-                        <i class="nav-arrow bi bi-chevron-right"></i>
-                      </p>
-                    </a>
-                    <ul class="nav nav-treeview">
-                      <li class="nav-item">
-                        <a href="./examples/login-v2.html" class="nav-link">
-                          <i class="nav-icon bi bi-circle"></i>
-                          <p>Login</p>
-                        </a>
-                      </li>
-                      <li class="nav-item">
-                        <a href="./examples/register-v2.html" class="nav-link">
-                          <i class="nav-icon bi bi-circle"></i>
-                          <p>Register</p>
-                        </a>
-                      </li>
-                    </ul>
-                  </li>
-                  <li class="nav-item">
-                    <a href="./examples/lockscreen.html" class="nav-link">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <p>Lockscreen</p>
-                    </a>
-                  </li>
-                </ul>
-              </li>
+// Array de navegación con roles por item
+$navigation = [
+  [
+    'title' => 'Dashboard',
+    'icon' => 'bi bi-speedometer',
+    'roles' => ['admin', 'user', 'viewer'],
+    'children' => [
+      ['title' => 'Dashboard v1', 'url' => './index.html', 'roles' => ['admin', 'user', 'viewer']],
+      ['title' => 'Dashboard v2', 'url' => './index2.html', 'roles' => ['admin', 'user']],
+      ['title' => 'Dashboard v3', 'url' => './index3.html', 'roles' => ['admin']],
+    ]
+  ],
+  [
+    'title' => 'Starter Page',
+    'icon' => 'bi bi-file-earmark',
+    'url' => './starter.html',
+    'active' => true,
+    'roles' => ['admin', 'user', 'viewer']
+  ],
+  [
+    'title' => 'Theme Generate',
+    'icon' => 'bi bi-palette',
+    'url' => './generate/theme.html',
+    'roles' => ['admin']
+  ],
+  [
+    'title' => 'Widgets',
+    'icon' => 'bi bi-box-seam-fill',
+    'roles' => ['admin', 'user'],
+    'children' => [
+      ['title' => 'Small Box', 'url' => './widgets/small-box.html', 'roles' => ['admin', 'user']],
+      ['title' => 'info Box', 'url' => './widgets/info-box.html', 'roles' => ['admin', 'user']],
+      ['title' => 'Cards', 'url' => './widgets/cards.html', 'roles' => ['admin']],
+      ['title' => 'Social &amp; Post', 'url' => './widgets/social.html', 'roles' => ['admin']],
+    ]
+  ],
+  [
+    'title' => 'Layout Options',
+    'icon' => 'bi bi-clipboard-fill',
+    'badge' => ['text' => '12', 'class' => 'text-bg-secondary'],
+    'roles' => ['admin', 'user'],
+    'children' => [
+      ['title' => 'Default Sidebar', 'url' => './layout/unfixed-sidebar.html', 'roles' => ['admin', 'user']],
+      ['title' => 'Fixed Sidebar', 'url' => './layout/fixed-sidebar.html', 'roles' => ['admin', 'user']],
+      ['title' => 'Fixed Header', 'url' => './layout/fixed-header.html', 'roles' => ['admin']],
+      ['title' => 'Fixed Footer', 'url' => './layout/fixed-footer.html', 'roles' => ['admin']],
+      ['title' => 'Fixed Complete', 'url' => './layout/fixed-complete.html', 'roles' => ['admin']],
+      ['title' => 'Layout <small>+ Custom Area </small>', 'url' => './layout/layout-custom-area.html', 'roles' => ['admin']],
+      ['title' => 'Sidebar Mini', 'url' => './layout/sidebar-mini.html', 'roles' => ['admin', 'user']],
+      ['title' => 'Sidebar Mini <small>+ Collapsed</small>', 'url' => './layout/collapsed-sidebar.html', 'roles' => ['admin']],
+      ['title' => 'Sidebar Mini <small>+ Collapsed + No Hover</small>', 'url' => './layout/collapsed-sidebar-without-hover.html', 'roles' => ['admin']],
+      ['title' => 'Sidebar Mini <small>+ Logo Switch</small>', 'url' => './layout/logo-switch.html', 'roles' => ['admin']],
+      ['title' => 'Top Nav <small>+ No Sidebar</small>', 'url' => './layout/top-nav.html', 'roles' => ['admin', 'user']],
+      ['title' => 'Layout RTL', 'url' => './layout/layout-rtl.html', 'roles' => ['admin']],
+    ]
+  ],
+  [
+    'title' => 'UI Elements',
+    'icon' => 'bi bi-tree-fill',
+    'roles' => ['admin', 'user', 'viewer'],
+    'children' => [
+      ['title' => 'General', 'url' => './UI/general.html', 'roles' => ['admin', 'user']],
+      ['title' => 'Icons', 'url' => './UI/icons.html', 'roles' => ['admin', 'user']],
+      ['title' => 'Timeline', 'url' => './UI/timeline.html', 'roles' => ['admin']],
+      ['title' => 'Ribbons', 'url' => './UI/ribbons.html', 'roles' => ['admin']],
+    ]
+  ],
+  [
+    'title' => 'Mailbox',
+    'icon' => 'bi bi-envelope',
+    'roles' => ['admin', 'user'],
+    'children' => [
+      ['title' => 'Inbox', 'url' => './mailbox/inbox.html', 'roles' => ['admin', 'user']],
+      ['title' => 'Read Message', 'url' => './mailbox/read.html', 'roles' => ['admin']],
+      ['title' => 'Compose', 'url' => './mailbox/compose.html', 'roles' => ['admin']],
+    ]
+  ],
+  [
+    'title' => 'Forms',
+    'icon' => 'bi bi-pencil-square',
+    'roles' => ['admin', 'user'],
+    'children' => [
+      ['title' => 'Elements', 'url' => './forms/elements.html', 'roles' => ['admin', 'user']],
+      ['title' => 'Layout', 'url' => './forms/layout.html', 'roles' => ['admin']],
+      ['title' => 'Validation', 'url' => './forms/validation.html', 'roles' => ['admin']],
+      ['title' => 'Wizard', 'url' => './forms/wizard.html', 'roles' => ['admin']],
+      ['title' => 'Advanced Elements', 'url' => './forms/advanced.html', 'roles' => ['admin']],
+      ['title' => 'Editors', 'url' => './forms/editors.html', 'roles' => ['admin']],
+    ]
+  ],
+  [
+    'title' => 'Tables',
+    'icon' => 'bi bi-table',
+    'roles' => ['admin', 'user'],
+    'children' => [
+      ['title' => 'Simple Tables', 'url' => './tables/simple.html', 'roles' => ['admin', 'user']],
+      ['title' => 'Data Tables', 'url' => './tables/data.html', 'roles' => ['admin']],
+    ]
+  ],
+  [
+    'title' => 'Charts',
+    'icon' => 'bi bi-graph-up',
+    'roles' => ['admin', 'user'],
+    'children' => [
+      ['title' => 'ApexCharts', 'url' => './charts/apexcharts.html', 'roles' => ['admin', 'user']],
+    ]
+  ],
+  // PAGES - Header
+  [
+    'header' => 'PAGES'
+  ],
+  [
+    'title' => 'Pages',
+    'icon' => 'bi bi-file-earmark-text',
+    'roles' => ['admin', 'user'],
+    'children' => [
+      ['title' => 'Profile', 'url' => './pages/profile.html', 'roles' => ['admin', 'user']],
+      ['title' => 'Settings', 'url' => './pages/settings.html', 'roles' => ['admin']],
+      ['title' => 'Invoice', 'url' => './pages/invoice.html', 'roles' => ['admin', 'user']],
+      ['title' => 'Calendar', 'url' => './pages/calendar.html', 'roles' => ['admin', 'user']],
+      ['title' => 'Kanban', 'url' => './pages/kanban.html', 'roles' => ['admin']],
+      ['title' => 'Chat', 'url' => './pages/chat.html', 'roles' => ['admin', 'user']],
+      ['title' => 'File Manager', 'url' => './pages/file-manager.html', 'roles' => ['admin']],
+      ['title' => 'Projects', 'url' => './pages/projects.html', 'roles' => ['admin', 'user']],
+      ['title' => 'Gallery', 'url' => './pages/gallery.html', 'roles' => ['admin', 'user']],
+      ['title' => 'Search Results', 'url' => './pages/search-results.html', 'roles' => ['admin', 'user']],
+      ['title' => 'Pricing', 'url' => './pages/pricing.html', 'roles' => ['admin']],
+      ['title' => 'FAQ', 'url' => './pages/faq.html', 'roles' => ['admin', 'user']],
+      [
+        'title' => 'Error',
+        'roles' => ['admin', 'user'],
+        'children' => [
+          ['title' => '404', 'url' => './pages/404.html', 'roles' => ['admin', 'user']],
+          ['title' => '500', 'url' => './pages/500.html', 'roles' => ['admin']],
+          ['title' => 'Maintenance', 'url' => './pages/maintenance.html', 'roles' => ['admin']],
+        ]
+      ],
+    ]
+  ],
+  [
+    'title' => 'Users',
+    'icon' => 'bi bi-people',
+    'url' => './users.html',
+    'roles' => ['admin'] // Solo admin puede ver Users
+  ],
+  // EXAMPLES - Header
+  [
+    'header' => 'EXAMPLES'
+  ],
+  [
+    'title' => 'Auth',
+    'icon' => 'bi bi-box-arrow-in-right',
+    'roles' => ['admin', 'user'],
+    'children' => [
+      [
+        'title' => 'Version 1',
+        'roles' => ['admin', 'user'],
+        'children' => [
+          ['title' => 'Login', 'url' => './examples/login.html', 'roles' => ['admin', 'user', 'viewer']],
+          ['title' => 'Register', 'url' => './examples/register.html', 'roles' => ['admin', 'user', 'viewer']],
+          ['title' => 'Forgot Password', 'url' => './examples/forgot-password.html', 'roles' => ['admin', 'user', 'viewer']],
+        ]
+      ],
+      [
+        'title' => 'Version 2',
+        'roles' => ['admin'],
+        'children' => [
+          ['title' => 'Login', 'url' => './examples/login-v2.html', 'roles' => ['admin']],
+          ['title' => 'Register', 'url' => './examples/register-v2.html', 'roles' => ['admin']],
+        ]
+      ],
+      ['title' => 'Lockscreen', 'url' => './examples/lockscreen.html', 'roles' => ['admin']],
+    ]
+  ],
+  // MULTI LEVEL EXAMPLE - Header
+  [
+    'header' => 'MULTI LEVEL EXAMPLE'
+  ],
+  [
+    'title' => 'Level 1',
+    'icon' => 'bi bi-circle-fill',
+    'roles' => ['admin', 'user', 'viewer']
+  ],
+  [
+    'title' => 'Level 1',
+    'icon' => 'bi bi-circle-fill',
+    'roles' => ['admin', 'user'],
+    'children' => [
+      ['title' => 'Level 2', 'roles' => ['admin', 'user']],
+      [
+        'title' => 'Level 2',
+        'roles' => ['admin'],
+        'children' => [
+          ['title' => 'Level 3', 'roles' => ['admin']],
+          ['title' => 'Level 3', 'roles' => ['admin']],
+          ['title' => 'Level 3', 'roles' => ['admin']],
+        ]
+      ],
+      ['title' => 'Level 2', 'roles' => ['admin', 'user']],
+    ]
+  ],
+  [
+    'title' => 'Level 1',
+    'icon' => 'bi bi-circle-fill',
+    'roles' => ['admin', 'user', 'viewer']
+  ],
+  // LABELS - Header
+  [
+    'header' => 'LABELS'
+  ],
+  [
+    'title' => 'Important',
+    'icon' => 'bi bi-circle text-danger',
+    'roles' => ['admin', 'user', 'viewer']
+  ],
+  [
+    'title' => 'Warning',
+    'icon' => 'bi bi-circle text-warning',
+    'roles' => ['admin', 'user', 'viewer']
+  ],
+  [
+    'title' => 'Informational',
+    'icon' => 'bi bi-circle text-info',
+    'roles' => ['admin', 'user', 'viewer']
+  ],
+];
 
-              <li class="nav-header">MULTI LEVEL EXAMPLE</li>
-              <li class="nav-item">
-                <a href="#" class="nav-link">
-                  <i class="nav-icon bi bi-circle-fill"></i>
-                  <p>Level 1</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a href="#" class="nav-link">
-                  <i class="nav-icon bi bi-circle-fill"></i>
-                  <p>
-                    Level 1
-                    <i class="nav-arrow bi bi-chevron-right"></i>
-                  </p>
-                </a>
-                <ul class="nav nav-treeview">
-                  <li class="nav-item">
-                    <a href="#" class="nav-link">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <p>Level 2</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="#" class="nav-link">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <p>
-                        Level 2
-                        <i class="nav-arrow bi bi-chevron-right"></i>
-                      </p>
-                    </a>
-                    <ul class="nav nav-treeview">
-                      <li class="nav-item">
-                        <a href="#" class="nav-link">
-                          <i class="nav-icon bi bi-record-circle-fill"></i>
-                          <p>Level 3</p>
-                        </a>
-                      </li>
-                      <li class="nav-item">
-                        <a href="#" class="nav-link">
-                          <i class="nav-icon bi bi-record-circle-fill"></i>
-                          <p>Level 3</p>
-                        </a>
-                      </li>
-                      <li class="nav-item">
-                        <a href="#" class="nav-link">
-                          <i class="nav-icon bi bi-record-circle-fill"></i>
-                          <p>Level 3</p>
-                        </a>
-                      </li>
-                    </ul>
-                  </li>
-                  <li class="nav-item">
-                    <a href="#" class="nav-link">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <p>Level 2</p>
-                    </a>
-                  </li>
-                </ul>
-              </li>
-              <li class="nav-item">
-                <a href="#" class="nav-link">
-                  <i class="nav-icon bi bi-circle-fill"></i>
-                  <p>Level 1</p>
-                </a>
-              </li>
+// Función recursiva para renderizar los items del menú
+function renderNavItem($item, $userRole)
+{
+  // Si es un header
+  if (isset($item['header'])) {
+    return '<li class="nav-header">' . htmlspecialchars($item['header']) . '</li>';
+  }
 
-              <li class="nav-header">LABELS</li>
-              <li class="nav-item">
-                <a href="#" class="nav-link">
-                  <i class="nav-icon bi bi-circle text-danger"></i>
-                  <p class="text">Important</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a href="#" class="nav-link">
-                  <i class="nav-icon bi bi-circle text-warning"></i>
-                  <p>Warning</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a href="#" class="nav-link">
-                  <i class="nav-icon bi bi-circle text-info"></i>
-                  <p>Informational</p>
-                </a>
-              </li>
+  // Verificar si el usuario tiene acceso al item
+  if (!hasAccess($item['roles'] ?? [], $userRole)) {
+    return '';
+  }
+
+  // Verificar si tiene hijos
+  $hasChildren = isset($item['children']) && !empty($item['children']);
+
+  // Clase active
+  $activeClass = isset($item['active']) && $item['active'] ? ' active' : '';
+
+  // Badge
+  $badgeHtml = '';
+  if (isset($item['badge'])) {
+    $badgeHtml = '<span class="nav-badge badge ' . $item['badge']['class'] . ' me-3">' . $item['badge']['text'] . '</span>';
+  }
+
+  // Icon
+  $iconHtml = isset($item['icon']) ? '<i class="nav-icon ' . $item['icon'] . '"></i>' : '';
+
+  // Flecha para items con hijos
+  $arrowHtml = $hasChildren ? '<i class="nav-arrow bi bi-chevron-right"></i>' : '';
+
+  // Si tiene hijos, renderizar como acordeón
+  if ($hasChildren) {
+    $childrenHtml = '';
+    foreach ($item['children'] as $child) {
+      $childrenHtml .= renderNavItem($child, $userRole);
+    }
+
+    // Si todos los hijos están ocultos por roles, ocultar el padre también
+    if (empty(trim($childrenHtml))) {
+      return '';
+    }
+
+    // Verificar si el primer nivel del children tiene children (para mantener compatibilidad con iconos)
+    $hasGrandChildren = false;
+    foreach ($item['children'] as $child) {
+      if (isset($child['children']) && !empty($child['children'])) {
+        $hasGrandChildren = true;
+        break;
+      }
+    }
+
+    // Para items con hijos que a su vez tienen hijos (nivel 3+), mantener el icono bi bi-circle
+    // Para items con hijos directos que no tienen más hijos, usar bi bi-box-arrow-in-right o el icono correspondiente
+    $childIcon = 'bi bi-circle';
+    if (isset($item['icon']) && strpos($item['icon'], 'box-arrow-in-right') !== false) {
+      $childIcon = 'bi bi-box-arrow-in-right';
+    }
+
+    // Modificar los hijos para que usen el icono correcto
+    if ($hasGrandChildren) {
+      // Para los items que tienen nietos, mantener el icono original
+      $childrenHtml = '';
+      foreach ($item['children'] as $child) {
+        // Si el child tiene children, no modificar su icono
+        if (isset($child['children']) && !empty($child['children'])) {
+          $childrenHtml .= renderNavItem($child, $userRole);
+        } else {
+          // Si no tiene children, asegurar que tenga el icono correcto
+          if (!isset($child['icon'])) {
+            $child['icon'] = 'bi bi-circle';
+          }
+          $childrenHtml .= renderNavItem($child, $userRole);
+        }
+      }
+    }
+
+    // Re-renderizar children si es necesario
+    $childrenHtml = '';
+    foreach ($item['children'] as $child) {
+      $childrenHtml .= renderNavItem($child, $userRole);
+    }
+
+    return '
+        <li class="nav-item">
+            <a href="#" class="nav-link' . $activeClass . '">
+                ' . $iconHtml . '
+                <p>
+                    ' . htmlspecialchars($item['title']) . '
+                    ' . $badgeHtml . '
+                    ' . $arrowHtml . '
+                </p>
+            </a>
+            <ul class="nav nav-treeview">
+                ' . $childrenHtml . '
             </ul>
-            <!--end::Sidebar Menu-->
+        </li>';
+  } else {
+    // Item simple con URL
+    $url = $item['url'] ?? '#';
+    return '
+        <li class="nav-item">
+            <a href="' . htmlspecialchars($url) . '" class="nav-link' . $activeClass . '">
+                ' . $iconHtml . '
+                <p>' . htmlspecialchars($item['title']) . '</p>
+            </a>
+        </li>';
+  }
+}
 
-            <!-- Docs CTA (bottom of sidebar) -->
-            <div class="p-3 mt-3 border-top border-secondary border-opacity-25">
-              <a
-                href="./docs/introduction.html"
-                class="btn btn-sm btn-outline-light w-100 d-flex align-items-center justify-content-center gap-2"
-              >
-                <i class="bi bi-book" aria-hidden="true"></i>
-                View documentation
-              </a>
-            </div>
-          </nav>
-        </div>
-        <!--end::Sidebar Wrapper-->
-      </aside>
+// Renderizar el sidebar completo
+function renderSidebar($nav, $userRole)
+{
+  $html = '';
+  foreach ($nav as $item) {
+    $html .= renderNavItem($item, $userRole);
+  }
+  return $html;
+}
+?>
+
+<aside class="app-sidebar bg-body-secondary shadow" data-bs-theme="dark">
+  <!--begin::Sidebar Brand-->
+  <div class="sidebar-brand">
+    <!--begin::Brand Link-->
+    <a href="./index.html" class="brand-link">
+      <!--begin::Brand Image-->
+      <img src="/view/assets/img/AdminLTELogo.png" alt="AdminLTE Logo" class="brand-image opacity-75 shadow" />
+      <!--end::Brand Image-->
+      <!--begin::Brand Text-->
+      <span class="brand-text fw-light">AdminLTE 4</span>
+      <!--end::Brand Text-->
+    </a>
+    <!--end::Brand Link-->
+  </div>
+  <!--end::Sidebar Brand-->
+  <!--begin::Sidebar Search-->
+  <div class="sidebar-search" role="search">
+    <label for="sidebar-search-input" class="visually-hidden">Filter menu</label>
+    <input type="search" id="sidebar-search-input" class="form-control form-control-sm" placeholder="Filter menu…"
+      autocomplete="off" data-lte-toggle="sidebar-search" data-lte-target="#navigation" />
+    <p class="fs-7 text-secondary mt-2 mb-0" data-lte-search-empty role="status" hidden>
+      No matching pages.
+    </p>
+  </div>
+  <!--end::Sidebar Search-->
+  <!--begin::Sidebar Wrapper-->
+  <div class="sidebar-wrapper">
+    <nav class="mt-2" aria-label="Main navigation">
+      <!--begin::Sidebar Menu-->
+      <ul class="nav sidebar-menu flex-column" data-lte-toggle="treeview" data-accordion="false" id="navigation">
+        <?php echo renderSidebar($navigation, $userRole); ?>
+      </ul>
+      <!--end::Sidebar Menu-->
+
+      <!-- Docs CTA (bottom of sidebar) -->
+      <div class="p-3 mt-3 border-top border-secondary border-opacity-25">
+        <a href="./docs/introduction.html"
+          class="btn btn-sm btn-outline-light w-100 d-flex align-items-center justify-content-center gap-2">
+          <i class="bi bi-book" aria-hidden="true"></i>
+          View documentation
+        </a>
+      </div>
+    </nav>
+  </div>
+  <!--end::Sidebar Wrapper-->
+</aside>

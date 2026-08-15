@@ -116,7 +116,7 @@
     <!--end::App Main-->
     <!--begin::Footer-->
     <?php
-    require_once("pages/footer.php");
+    require_once("includes/footer.php");
     ?>
     <!--end::Footer-->
   </div>
