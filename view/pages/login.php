@@ -1,3 +1,14 @@
+<?php
+if (!isset($email_value)) {
+    $email_value = '';
+}
+if (!isset($error_email)) {
+    $error_email = '';
+}
+if (!isset($error_password)) {
+    $error_password = '';
+}
+?>
 <!DOCTYPE html>
 <html lang="es">
 
@@ -5,7 +16,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Sistema de Gestión Documentaria IESTP Lurín</title>
-    <link rel="stylesheet" href="/view/assets/css/login.css">
+    <link rel="stylesheet" href="view/assets/css/login.css">
 </head>
 
 <body>
@@ -20,18 +31,16 @@
                 <span class="badge">Mesa de Partes</span>
             </div>
 
-            <form id="loginForm" method="POST" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>"
-                novalidate>
-
+            <form id="loginForm" method="POST" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" novalidate>
                 <div class="form-group">
                     <label for="email" class="form-label">Correo Institucional</label>
                     <input type="email" name="email" id="email"
                         class="form-input <?php echo !empty($error_email) ? 'input-error' : ''; ?>"
-                        placeholder="DNI@iestplurin.edu.pe" value="<?php echo htmlspecialchars($email_value); ?>"
+                        placeholder="DNI@iestplurin.edu.pe"
+                        value="<?php echo htmlspecialchars($email_value, ENT_QUOTES, 'UTF-8'); ?>"
                         autocomplete="off">
-                    <div id="emailError" class="error-text"
-                        style="display: <?php echo !empty($error_email) ? 'block' : 'none'; ?>;">
-                        <?php echo $error_email; ?>
+                    <div id="emailError" class="error-text" style="display: <?php echo !empty($error_email) ? 'block' : 'none'; ?>;">
+                        <?php echo htmlspecialchars($error_email, ENT_QUOTES, 'UTF-8'); ?>
                     </div>
                 </div>
 
@@ -40,9 +49,8 @@
                     <input type="password" name="password" id="password"
                         class="form-input <?php echo !empty($error_password) ? 'input-error' : ''; ?>"
                         placeholder="••••••••">
-                    <div id="passwordError" class="error-text"
-                        style="display: <?php echo !empty($error_password) ? 'block' : 'none'; ?>;">
-                        <?php echo $error_password; ?>
+                    <div id="passwordError" class="error-text" style="display: <?php echo !empty($error_password) ? 'block' : 'none'; ?>;">
+                        <?php echo htmlspecialchars($error_password, ENT_QUOTES, 'UTF-8'); ?>
                     </div>
                 </div>
 
@@ -58,21 +66,20 @@
         document.getElementById('loginForm').addEventListener('submit', function (e) {
             const emailInput = document.getElementById('email');
             const passwordInput = document.getElementById('password');
-
             const emailError = document.getElementById('emailError');
             const passwordError = document.getElementById('passwordError');
 
             let formularioValido = true;
-            const dniEmailRegex = /^[0-9]{8}@iestplurin\.edu\.pe$/;
+            const dniEmailRegex = /^[0-9]{8}@iestplurin\.edu\.pe$/i;
 
-            if (emailInput.value.trim() === "") {
+            if (emailInput.value.trim() === '') {
                 emailInput.classList.add('input-error');
-                emailError.textContent = "Por favor, ingrese su correo institucional.";
+                emailError.textContent = 'Por favor, ingrese su correo institucional.';
                 emailError.style.display = 'block';
                 formularioValido = false;
             } else if (!dniEmailRegex.test(emailInput.value.trim())) {
                 emailInput.classList.add('input-error');
-                emailError.textContent = "Debe ingresar su DNI seguido de @iestplurin.edu.pe";
+                emailError.textContent = 'Debe ingresar su DNI seguido de @iestplurin.edu.pe';
                 emailError.style.display = 'block';
                 formularioValido = false;
             } else {
@@ -80,9 +87,9 @@
                 emailError.style.display = 'none';
             }
 
-            if (passwordInput.value.trim() === "" || passwordInput.value.length < 6) {
+            if (passwordInput.value.trim() === '' || passwordInput.value.length < 6) {
                 passwordInput.classList.add('input-error');
-                passwordError.textContent = "La contraseña debe tener al menos 6 caracteres.";
+                passwordError.textContent = 'La contraseña debe tener al menos 6 caracteres.';
                 passwordError.style.display = 'block';
                 formularioValido = false;
             } else {
@@ -93,17 +100,22 @@
             if (!formularioValido) {
                 e.preventDefault();
             } else {
-                document.querySelector('.spinner').classList.remove('hidden');
-                document.getElementById('btnSubmit').disabled = true;
+                const spinner = document.querySelector('.spinner');
+                if (spinner) spinner.classList.remove('hidden');
+                const btnSubmit = document.getElementById('btnSubmit');
+                if (btnSubmit) btnSubmit.disabled = true;
             }
         });
 
-        document.getElementById('email').addEventListener('input', function () {
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+
+        emailInput.addEventListener('input', function () {
             this.classList.remove('input-error');
             document.getElementById('emailError').style.display = 'none';
         });
 
-        document.getElementById('password').addEventListener('input', function () {
+        passwordInput.addEventListener('input', function () {
             this.classList.remove('input-error');
             document.getElementById('passwordError').style.display = 'none';
         });

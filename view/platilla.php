@@ -66,7 +66,7 @@
   <!--begin::Accessibility Features-->
   <!-- Skip links will be dynamically added by accessibility.js -->
   <meta name="supported-color-schemes" content="light dark" />
-  <link rel="preload" href="/view/assets/css/admin-lte/adminlte.css" as="style" />
+  <link rel="preload" href="view/assets/css/admin-lte/adminlte.css" as="style" />
   <!--end::Accessibility Features-->
 
   <!--begin::Fonts-->
@@ -86,7 +86,7 @@
   <!--end::Third Party Plugin(Bootstrap Icons)-->
 
   <!--begin::Required Plugin(AdminLTE)-->
-  <link rel="stylesheet" href="/view/assets/css/admin-lte/adminlte.css" />
+  <link rel="stylesheet" href="view/assets/css/admin-lte/adminlte.css" />
   <!--end::Required Plugin(AdminLTE)-->
 </head>
 <!--end::Head-->
@@ -140,7 +140,7 @@
   <!--end::Required Plugin(popperjs for Bootstrap 5)--><!--begin::Required Plugin(Bootstrap 5)-->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.min.js" crossorigin="anonymous"></script>
   <!--end::Required Plugin(Bootstrap 5)--><!--begin::Required Plugin(AdminLTE)-->
-  <script src="/view/assets/js/adminlte.js"></script>
+  <script src="view/assets/js/adminlte.js"></script>
   <!--end::Required Plugin(AdminLTE)-->
   <!--begin::OverlayScrollbars Configure-->
   <script>
