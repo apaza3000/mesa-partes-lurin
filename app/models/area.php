@@ -1,12 +1,13 @@
 <?php
 
-namespace App\Models;
+namespace app\models;
 
-use App\Config\Conexion;
+use InterfaceModel;
+use Override;
 use PDO;
 use PDOException;
 
-class Area
+class Area implements InterfaceModel
 {
     private PDO $db;
 
@@ -15,8 +16,9 @@ class Area
         $this->db = Conexion::getConexion();
     }
 
+
     // Listar todas las áreas activas
-    public function obtenerTodas(): array
+    public function getAll(): array
     {
         try {
             $sql = "SELECT * FROM areas WHERE estado = 'Activo' ORDER BY nombre ASC";
@@ -29,16 +31,34 @@ class Area
     }
 
     // Obtener un área por su ID
-    public function obtenerPorId(int $idArea): ?array
+   
+    public function getById($idArea): array
     {
         try {
             $sql = "SELECT * FROM areas WHERE id_area = :id_area";
             $stmt = $this->db->prepare($sql);
             $stmt->execute([':id_area' => $idArea]);
             $resultado = $stmt->fetch();
-            return $resultado ?: null;
+            return $resultado ?: [];
         } catch (PDOException $e) {
-            return null;
+            return [];
         }
+    }
+    #[Override]
+    public function delete(int|string $id): bool
+    {
+        throw new \Exception('Not implemented');
+    }
+
+    #[Override]
+    public function update(array $datos, int|string $id): bool
+    {
+        throw new \Exception('Not implemented');
+    }
+
+    #[Override]
+    public function create(array $datos): bool
+    {
+        throw new \Exception('Not implemented');
     }
 }
