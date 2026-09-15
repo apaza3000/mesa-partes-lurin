@@ -2,9 +2,7 @@
 session_start();
 $_SESSION["login"] = true;
 if ($_SESSION["login"]) {
-    require_once("view/platilla.php");
+    require_once("view/plantilla.php");
 } else {
     require_once("view/pages/login.php");
 }
-
-?>
