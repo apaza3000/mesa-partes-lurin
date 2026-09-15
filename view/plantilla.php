@@ -109,7 +109,7 @@
         <main class="app-main">
             <!--begin::App Content Header-->
             <?php
-            require_once("pages/inicio.php");
+            require_once("pages/users.php");
             ?>
             <!--end::App Content-->
         </main>
