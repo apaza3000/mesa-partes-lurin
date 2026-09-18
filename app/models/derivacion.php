@@ -1,56 +1,70 @@
 <?php
 
-namespace App\Models;
+require_once __DIR__ . '/Conexion.php';
+require_once __DIR__ . '/InterfaceModel.php';
 
-use App\Config\Conexion;
-use PDO;
-use PDOException;
-
-class Derivacion
-{
+class Derivacion implements InterfaceModel {
     private PDO $db;
 
-    public function __construct()
-    {
+    public function __construct() {
         $this->db = Conexion::getConexion();
     }
 
-    // Derivar un expediente de un área a otra
-    public function crearDerivacion(array $datos): bool
-    {
+    public function getAll(): array {
         try {
-            $sql = "INSERT INTO derivaciones (id_documento, id_area_origen, id_area_destino, id_usuario_envia, observaciones, estado_derivacion) 
-                    VALUES (:id_documento, :id_area_origen, :id_area_destino, :id_usuario_envia, :observaciones, 'Pendiente')";
-            
+            $sql = "SELECT * FROM derivaciones ORDER BY id_derivacion DESC";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute();
+            return $stmt->fetchAll();
+        } catch (PDOException $e) {
+            return [];
+        }
+    }
+
+    public function getById(int | string $id): array {
+        try {
+            $sql = "SELECT * FROM derivaciones WHERE id_derivacion = :id";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([':id' => $id]);
+            $resultado = $stmt->fetch();
+            return $resultado ?: [];
+        } catch (PDOException $e) {
+            return [];
+        }
+    }
+
+    public function create(array $datos): bool {
+        try {
+            $sql = "INSERT INTO derivaciones (id_documento, id_area_origen, id_area_destino, id_usuario_envia, observaciones) 
+                    VALUES (:id_documento, :id_area_origen, :id_area_destino, :id_usuario_envia, :observaciones)";
             $stmt = $this->db->prepare($sql);
             return $stmt->execute([
-                ':id_documento'    => $datos['id_documento'],
-                ':id_area_origen'  => $datos['id_area_origen'],
-                ':id_area_destino' => $datos['id_area_destino'],
-                ':id_usuario_envia'=> $datos['id_usuario_envia'],
-                ':observaciones'   => $datos['observaciones'] ?? null
+                ':id_documento'     => $datos['id_documento'],
+                ':id_area_origen'   => $datos['id_area_origen'],
+                ':id_area_destino'  => $datos['id_area_destino'],
+                ':id_usuario_envia' => $datos['id_usuario_envia'],
+                ':observaciones'    => $datos['observaciones']
             ]);
         } catch (PDOException $e) {
             return false;
         }
     }
 
-    // Obtener historial de pases/derivaciones de un documento especifico
-    public function obtenerPorDocumento(int $idDocumento): array
-    {
-        try {
-            $sql = "SELECT d.*, 
-                           ao.nombre AS area_origen, 
-                           ad.nombre AS area_destino,
-                           CONCAT(p.nombre, ' ', p.apellido_P) AS usuario_remitente
-                    FROM derivaciones d
-                    INNER JOIN areas ao ON d.id_area_origen = ao.id_area
-                    INNER JOIN areas ad ON d.id_area_destino = ad.id_area
-                    INNER JOIN usuarios u ON d.id_usuario_envia = u.id_usuario
-                    INNER JOIN persona p ON u.id_persona = p.id_persoan
-                    WHERE d.id_documento = :id_documento
-                    ORDER BY d.fecha_envio DESC";
+    public function update(array $datos, int | string $id): bool {
+        return false;
+    }
 
+    public function delete(int | string $id): bool {
+        return false;
+    }
+
+    public function crearDerivacion(array $datos): bool {
+        return $this->create($datos);
+    }
+
+    public function obtenerPorDocumento(int $idDocumento): array {
+        try {
+            $sql = "SELECT * FROM derivaciones WHERE id_documento = :id_documento ORDER BY fecha_derivacion DESC";
             $stmt = $this->db->prepare($sql);
             $stmt->execute([':id_documento' => $idDocumento]);
             return $stmt->fetchAll();

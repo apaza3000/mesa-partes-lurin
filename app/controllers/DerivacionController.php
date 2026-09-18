@@ -1,19 +1,17 @@
 <?php
 
-namespace App\Controllers;
+require_once __DIR__ . '/../models/derivacion.php';
 
-use App\Models\Derivacion;
-
-class DerivacionController
-{
+class DerivacionController {
     private Derivacion $derivacionModel;
 
-    public function __construct()
-    {
+    public function __construct() {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
         $this->derivacionModel = new Derivacion();
     }
 
-    // Derivar un expediente a otra área
     public function derivar(): void
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -36,7 +34,6 @@ class DerivacionController
         }
     }
 
-    // Obtener historial de pases de un documento
     public function historial(int $idDocumento): array
     {
         return $this->derivacionModel->obtenerPorDocumento($idDocumento);

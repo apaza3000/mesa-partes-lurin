@@ -1,12 +1,8 @@
 <?php
 
-namespace App\Models;
+require_once __DIR__ . '/Conexion.php';
 
-use App\Config\Conexion;
-use PDO;
-use PDOException;
-
-class TipoDocumento
+class tipoDocumento
 {
     private PDO $db;
 
