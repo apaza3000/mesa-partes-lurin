@@ -1,3 +1,58 @@
+<?php
+require_once __DIR__ . '/../app/models/InterfaceModel.php';
+require_once __DIR__ . '/../app/models/Conexion.php';
+require_once __DIR__ . '/../app/models/area.php';
+
+$pagina = $_GET['p'] ?? 'users';
+$paginasPermitidas = ['users', 'inicio', 'areas/index', 'areas/crear', 'areas/editar'];
+$areaModel = new \app\models\Area();
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && str_starts_with($pagina, 'areas/')) {
+    $nombre = trim($_POST['nombre'] ?? '');
+    $siglas = strtoupper(trim($_POST['siglas'] ?? ''));
+    $estado = $_POST['estado'] ?? 'Activo';
+    $padre = filter_input(INPUT_POST, 'id_area_padre', FILTER_VALIDATE_INT) ?: null;
+
+    if ($pagina === 'areas/eliminar') {
+        $id = filter_input(INPUT_POST, 'id_area', FILTER_VALIDATE_INT);
+        if (!$id || !$areaModel->delete($id)) {
+            $_SESSION['area_error'] = 'No se pudo eliminar el área.';
+        } else {
+            $_SESSION['area_mensaje'] = 'Área eliminada correctamente.';
+        }
+    } elseif ($nombre === '' || $siglas === '' || !in_array($estado, ['Activo', 'Inactivo'], true)) {
+        $_SESSION['area_error'] = 'Complete los campos obligatorios con valores válidos.';
+    } elseif ($pagina === 'areas/guardar') {
+        if (!$areaModel->create(compact('nombre', 'siglas', 'estado') + ['id_area_padre' => $padre])) {
+            $_SESSION['area_error'] = 'No se pudo registrar el área. Verifique que nombre y siglas no estén repetidos.';
+        } else {
+            $_SESSION['area_mensaje'] = 'Área registrada correctamente.';
+        }
+    } elseif ($pagina === 'areas/actualizar') {
+        $id = filter_input(INPUT_POST, 'id_area', FILTER_VALIDATE_INT);
+        if (!$id || !$areaModel->update(compact('nombre', 'siglas', 'estado') + ['id_area_padre' => $padre], $id)) {
+            $_SESSION['area_error'] = 'No se pudo actualizar el área. Verifique que nombre y siglas no estén repetidos.';
+        } else {
+            $_SESSION['area_mensaje'] = 'Área actualizada correctamente.';
+        }
+    }
+    header('Location: plantilla.php?p=areas/index');
+    exit;
+}
+
+if (!in_array($pagina, $paginasPermitidas, true)) {
+    $pagina = 'users';
+}
+
+$areas = $pagina === 'areas/index' ? $areaModel->getAll(false) : [];
+$area = $pagina === 'areas/editar'
+    ? $areaModel->getById(filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT) ?: 0)
+    : [];
+$areasPadre = in_array($pagina, ['areas/crear', 'areas/editar'], true) ? $areaModel->getAll(false) : [];
+if ($area) {
+    $areasPadre = array_filter($areasPadre, static fn (array $item): bool => (int) $item['id_area'] !== (int) $area['id_area']);
+}
+?>
 <!doctype html>
 <html lang="en">
 <!--begin::Head-->
@@ -97,26 +152,26 @@
     <div class="app-wrapper">
         <!--begin::Header-->
         <?php
-        require_once("includes/heder.php");
+        require_once __DIR__ . "/includes/heder.php";
         ?>
         <!--end::Header-->
         <!--begin::Sidebar-->
         <?php
-        require_once("includes/sidebar.php");
+        require_once __DIR__ . "/includes/sidebar.php";
         ?>
         <!--end::Sidebar-->
         <!--begin::App Main-->
         <main class="app-main">
             <!--begin::App Content Header-->
             <?php
-            require_once("pages/users.php");
+            require_once __DIR__ . "/pages/" . $pagina . ".php";
             ?>
             <!--end::App Content-->
         </main>
         <!--end::App Main-->
         <!--begin::Footer-->
         <?php
-        require_once("includes/footer.php");
+        require_once __DIR__ . "/includes/footer.php";
         ?>
         <!--end::Footer-->
     </div>

@@ -15,7 +15,7 @@ class Conexion {
             $host    = getenv("DB_SERVER") ?: "localhost";
             $db      = getenv("DB_NAME")   ?: "ER_logico_MesaDeParte";
             $user    = getenv("DB_USER")   ?: "root";
-            $pass    = getenv("DB_PASS")   ?: "";
+            $pass    = getenv("DB_PASS") ?: (getenv("DB_PASSWORD") ?: "");
             $charset = getenv("DB_CHARSET") ?: "utf8mb4";
             $port    = getenv("DB_PORT")   ?: "3306";
 

@@ -64,7 +64,7 @@ $navigation = [
       [
         'title' => 'Áreas',
         'icon' => 'bi bi-diagram-3-fill',
-        'url' => '#',
+        'url' => '/view/plantilla.php?p=areas/index',
         'roles' => ['admin']
       ],
 
