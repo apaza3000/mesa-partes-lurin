@@ -7,7 +7,7 @@ use PDOException;
 class Conexion {
     public static function getConexion() {
         $host = 'localhost';
-        $db   = 'ER_logico_MesaDeParte'; 
+        $db   = 'er_logico_MesaDeParte'; 
         $user = 'root';
         $pass = '';
         $charset = 'utf8mb4';
