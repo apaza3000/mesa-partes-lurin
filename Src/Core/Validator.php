@@ -86,7 +86,7 @@ class Validator
                 if (is_int($params)) {
                     $params = array($params);
                 }
-                if ($rule === 'nullable' && $this->nullable($data[$field] ?? null, $field)) {
+                if ($rule == 'nullable' && $this->nullable($data[$field] ?? null, $field)) {
                     // No ejecutar más validaciones para este campo
                     break;
                 }
@@ -298,7 +298,8 @@ class Validator
     private function nullable($value, $fieldName)
     {
 
-        return !isset($value) || is_null($value);
+
+        return !isset($value) || is_null($value) || trim($value) == '';
     }
 
     private function max($value, $fieldName, $maxValue)

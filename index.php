@@ -1,7 +1,7 @@
 <?php
 
 use Dotenv\Dotenv;
-use src\Core\Path;
+use Src\Core\Path;
 
 session_start();
 
