@@ -5,6 +5,7 @@ namespace App\Models;
 use PDO;
 use PDOException;
 use Exception;
+use Src\Core\Conexion;
 
 class Usuario
 {
