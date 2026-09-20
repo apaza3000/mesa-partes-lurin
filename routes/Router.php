@@ -3,12 +3,13 @@
 
 // Manejo de la solicitud actual
 
-use App\Controllers\AreaController;
+use App\Controllers\DashboardController;
 use src\Core\Router;
 
+require_once __DIR__ . "/areas.php";
+require_once __DIR__ . "/error.php";
 
-Router::get("/area", [AreaController::class, "index"]);
-
+Router::get("/",[DashboardController::class,"index"]);
 
 
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
@@ -27,10 +28,12 @@ if (strpos($requestUri, '/backend') === 0) {
     $requestUri = substr($requestUri, strlen('/backend'));
 }
 
-$callbac = function () {
-    header("Location: /error/404", true, 404);
+function error404()
+{
+    
+    header("Location: /error/404");
 };
 
-
+$callbac = "error404";
 
 Router::dispatch($requestUri, $requestMethod, $callbac);

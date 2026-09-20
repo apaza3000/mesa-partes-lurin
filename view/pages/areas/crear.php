@@ -9,7 +9,7 @@
         <div class="row">
             <div class="col-md-6">
                 <div class="card card-primary card-outline mb-4">
-                    <form action="plantilla.php?p=areas/guardar" method="POST">
+                    <form action="/areas/store" method="POST">
                         <div class="card-body">
                             <div class="mb-3">
                                 <label for="id_area_padre" class="form-label">Área superior (opcional)</label>
@@ -38,7 +38,7 @@
                         </div>
                         <div class="card-footer">
                             <button type="submit" class="btn btn-primary">Guardar Área</button>
-                            <a href="plantilla.php?p=areas/index" class="btn btn-secondary">Cancelar</a>
+                            <a href="/areas" class="btn btn-secondary">Cancelar</a>
                         </div>
                     </form>
                 </div>

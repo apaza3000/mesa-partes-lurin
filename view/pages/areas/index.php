@@ -1,4 +1,3 @@
-
 <div class="app-content-header">
     <div class="container-fluid">
         <div class="row">
@@ -8,7 +7,7 @@
             <div class="col-sm-6">
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb float-sm-end">
-                        <li class="breadcrumb-item"><a href="plantilla.php?p=inicio">Home</a></li>
+                        <li class="breadcrumb-item"><a href="/inicio">Home</a></li>
                         <li class="breadcrumb-item active" aria-current="page">Áreas</li>
                     </ol>
                 </nav>
@@ -29,7 +28,7 @@
                             </div>
                             <div class="col-6 text-end">
                                 <!-- Botón que lleva a la página independiente de creación -->
-                                <a href="plantilla.php?p=areas/crear" class="btn btn-sm btn-primary">
+                                <a href="/areas/nuevo" class="btn btn-sm btn-primary">
                                     <i class="bi bi-plus-circle-fill me-1"></i> Nueva Área
                                 </a>
                             </div>
@@ -61,12 +60,11 @@
                                                 <td><?= htmlspecialchars($item['siglas'], ENT_QUOTES, 'UTF-8') ?></td>
                                                 <td><span class="badge bg-<?= $item['estado'] === 'Activo' ? 'success' : 'secondary' ?>"><?= htmlspecialchars($item['estado'], ENT_QUOTES, 'UTF-8') ?></span></td>
                                                 <td class="text-center">
-                                                    <a href="plantilla.php?p=areas/editar&id=<?= (int) $item['id_area'] ?>" class="btn btn-sm btn-warning text-white" title="Editar">
+                                                    <a href="/areas/<?= (int) $item['id_area'] ?>/editar" class="btn btn-sm btn-warning text-white" title="Editar">
                                                         <i class="bi bi-pencil-square"></i>
                                                     </a>
                                                     <?php if ($item['estado'] === 'Activo'): ?>
-                                                        <form action="plantilla.php?p=areas/eliminar" method="POST" class="d-inline" onsubmit="return confirm('¿Está seguro de eliminar esta área?');">
-                                                            <input type="hidden" name="id_area" value="<?= (int) $item['id_area'] ?>">
+                                                        <form action="/areas/<?= (int) $item['id_area'] ?>/delete" method="POST" class="d-inline" onsubmit="return confirm('¿Está seguro de eliminar esta área?');">
                                                             <button type="submit" class="btn btn-sm btn-danger" title="Eliminar"><i class="bi bi-trash"></i></button>
                                                         </form>
                                                     <?php endif; ?>

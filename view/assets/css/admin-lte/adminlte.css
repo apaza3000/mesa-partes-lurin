@@ -1,6 +1,6 @@
 @charset "UTF-8";
 /*!
- *   AdminLTE v4.3.1
+ *   AdminLTE v4.9.1
  *   Author: Colorlib
  *   Website: AdminLTE.io <https://adminlte.io>
  *   License: Open source - MIT <https://opensource.org/licenses/MIT>
@@ -12849,6 +12849,90 @@ textarea.form-control-lg {
   position: relative;
   height: 2.5rem;
 }
+@media (max-width: 575.98px) {
+  .app-header {
+    --bs-navbar-nav-link-padding-x: 0.5rem;
+  }
+}
+
+.navbar-search {
+  --lte-search-field-width: 14rem;
+  --lte-search-field-focus-width: 18rem;
+  --lte-search-field-bg: rgba(var(--bs-emphasis-color-rgb), .06);
+  --lte-search-field-hover-bg: rgba(var(--bs-emphasis-color-rgb), .09);
+  --lte-search-field-focus-bg: rgba(var(--bs-emphasis-color-rgb), .1);
+  --lte-search-field-border-color: rgba(var(--bs-emphasis-color-rgb), .1);
+  --lte-search-field-focus-border-color: rgba(var(--bs-emphasis-color-rgb), .35);
+  --lte-search-field-focus-ring: 0 0 0 .2rem rgba(var(--bs-emphasis-color-rgb), .12);
+  --lte-search-field-color: var(--bs-body-color);
+  --lte-search-field-placeholder-color: var(--bs-secondary-color);
+  --lte-search-field-icon-color: var(--bs-secondary-color);
+}
+.navbar-search .form-control {
+  padding: 0.3rem 0.75rem;
+  font-size: 0.875rem;
+  color: var(--lte-search-field-color);
+  background-color: var(--lte-search-field-bg);
+  border-color: var(--lte-search-field-border-color);
+  box-shadow: none;
+  border-radius: 50rem;
+  transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .navbar-search .form-control {
+    transition: none;
+  }
+}
+.navbar-search .form-control::placeholder {
+  color: var(--lte-search-field-placeholder-color);
+  opacity: 1;
+}
+.navbar-search .form-control:hover {
+  background-color: var(--lte-search-field-hover-bg);
+}
+.navbar-search .form-control:focus {
+  background-color: var(--lte-search-field-focus-bg);
+  border-color: var(--lte-search-field-focus-border-color);
+  box-shadow: var(--lte-search-field-focus-ring);
+}
+.navbar-search .navbar-search-field {
+  position: relative;
+  width: var(--lte-search-field-width);
+  max-width: 100%;
+  transition: width 0.2s ease-in-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .navbar-search .navbar-search-field {
+    transition: none;
+  }
+}
+.navbar-search:focus-within .navbar-search-field {
+  width: var(--lte-search-field-focus-width);
+}
+.navbar-search .form-control {
+  padding-left: 2.125rem;
+}
+.navbar-search .navbar-search-submit {
+  position: absolute;
+  top: 50%;
+  left: 0.75rem;
+  display: flex;
+  align-items: center;
+  padding: 0;
+  line-height: 1;
+  color: var(--lte-search-field-icon-color);
+  background: transparent;
+  border: 0;
+  transform: translateY(-50%);
+  border-radius: 50rem;
+}
+.navbar-search .navbar-search-submit:hover, .navbar-search .navbar-search-submit:focus-visible {
+  color: var(--lte-search-field-color);
+}
+.navbar-search .navbar-search-submit:focus-visible {
+  outline: 2px solid var(--bs-focus-ring-color);
+  outline-offset: 2px;
+}
 
 .navbar-badge {
   position: absolute;
@@ -12871,7 +12955,6 @@ textarea.form-control-lg {
     max-height: 100vh;
   }
   .fixed-header.sidebar-expand-sm .app-sidebar .sidebar-wrapper {
-    height: calc(100vh - (calc(3.5rem + 1px)));
     overflow-x: hidden;
     overflow-y: auto;
   }
@@ -12883,7 +12966,6 @@ textarea.form-control-lg {
     max-height: 100vh;
   }
   .fixed-header.sidebar-expand-md .app-sidebar .sidebar-wrapper {
-    height: calc(100vh - (calc(3.5rem + 1px)));
     overflow-x: hidden;
     overflow-y: auto;
   }
@@ -12895,7 +12977,6 @@ textarea.form-control-lg {
     max-height: 100vh;
   }
   .fixed-header.sidebar-expand-lg .app-sidebar .sidebar-wrapper {
-    height: calc(100vh - (calc(3.5rem + 1px)));
     overflow-x: hidden;
     overflow-y: auto;
   }
@@ -12907,7 +12988,6 @@ textarea.form-control-lg {
     max-height: 100vh;
   }
   .fixed-header.sidebar-expand-xl .app-sidebar .sidebar-wrapper {
-    height: calc(100vh - (calc(3.5rem + 1px)));
     overflow-x: hidden;
     overflow-y: auto;
   }
@@ -12919,7 +12999,6 @@ textarea.form-control-lg {
     max-height: 100vh;
   }
   .fixed-header.sidebar-expand-xxl .app-sidebar .sidebar-wrapper {
-    height: calc(100vh - (calc(3.5rem + 1px)));
     overflow-x: hidden;
     overflow-y: auto;
   }
@@ -12930,7 +13009,6 @@ textarea.form-control-lg {
   max-height: 100vh;
 }
 .fixed-header.sidebar-expand .app-sidebar .sidebar-wrapper {
-  height: calc(100vh - (calc(3.5rem + 1px)));
   overflow-x: hidden;
   overflow-y: auto;
 }
@@ -12950,6 +13028,8 @@ textarea.form-control-lg {
   --lte-sidebar-submenu-active-bg: rgba(0, 0, 0, 0.1);
   --lte-sidebar-header-color: rgb(19.3725490196%, 21.6078431373%, 23.8431372549%);
   z-index: 1038;
+  display: flex;
+  flex-direction: column;
   grid-area: lte-app-sidebar;
   min-width: var(--lte-sidebar-width);
   max-width: var(--lte-sidebar-width);
@@ -12963,6 +13043,7 @@ textarea.form-control-lg {
 
 .sidebar-brand {
   display: flex;
+  flex: 0 0 auto;
   align-items: center;
   justify-content: center;
   height: 3.5rem;
@@ -13019,6 +13100,8 @@ textarea.form-control-lg {
 }
 
 .sidebar-wrapper {
+  flex: 1 1 auto;
+  min-height: 0;
   padding-top: 0.5rem;
   padding-right: 0.5rem;
   padding-bottom: 0.5rem;
@@ -13218,7 +13301,44 @@ textarea.form-control-lg {
 }
 
 .sidebar-search {
+  flex: 0 0 auto;
   padding: 0.5rem 1rem;
+  --lte-search-field-bg: rgba(var(--bs-emphasis-color-rgb), .06);
+  --lte-search-field-hover-bg: rgba(var(--bs-emphasis-color-rgb), .09);
+  --lte-search-field-focus-bg: rgba(var(--bs-emphasis-color-rgb), .1);
+  --lte-search-field-border-color: rgba(var(--bs-emphasis-color-rgb), .1);
+  --lte-search-field-focus-border-color: rgba(var(--bs-emphasis-color-rgb), .35);
+  --lte-search-field-focus-ring: 0 0 0 .2rem rgba(var(--bs-emphasis-color-rgb), .12);
+  --lte-search-field-color: var(--bs-body-color);
+  --lte-search-field-placeholder-color: var(--bs-secondary-color);
+  --lte-search-field-icon-color: var(--bs-secondary-color);
+}
+.sidebar-search .form-control {
+  padding: 0.3rem 0.75rem;
+  font-size: 0.875rem;
+  color: var(--lte-search-field-color);
+  background-color: var(--lte-search-field-bg);
+  border-color: var(--lte-search-field-border-color);
+  box-shadow: none;
+  border-radius: 50rem;
+  transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .sidebar-search .form-control {
+    transition: none;
+  }
+}
+.sidebar-search .form-control::placeholder {
+  color: var(--lte-search-field-placeholder-color);
+  opacity: 1;
+}
+.sidebar-search .form-control:hover {
+  background-color: var(--lte-search-field-hover-bg);
+}
+.sidebar-search .form-control:focus {
+  background-color: var(--lte-search-field-focus-bg);
+  border-color: var(--lte-search-field-focus-border-color);
+  box-shadow: var(--lte-search-field-focus-ring);
 }
 
 .logo-xs,
@@ -13371,7 +13491,6 @@ textarea.form-control-lg {
     max-height: 100vh;
   }
   .sidebar-expand-sm.layout-fixed .app-sidebar .sidebar-wrapper {
-    height: calc(100vh - (calc(3.5rem + 1px)));
     overflow-x: hidden;
     overflow-y: auto;
   }
@@ -13403,7 +13522,6 @@ textarea.form-control-lg {
     margin-left: calc(var(--lte-sidebar-width) * -1);
   }
   .sidebar-expand-sm .app-sidebar .sidebar-wrapper {
-    height: calc(100vh - (calc(3.5rem + 1px)));
     overflow-x: hidden;
     overflow-y: auto;
   }
@@ -13446,7 +13564,6 @@ textarea.form-control-lg {
     max-height: 100vh;
   }
   .sidebar-expand-md.layout-fixed .app-sidebar .sidebar-wrapper {
-    height: calc(100vh - (calc(3.5rem + 1px)));
     overflow-x: hidden;
     overflow-y: auto;
   }
@@ -13478,7 +13595,6 @@ textarea.form-control-lg {
     margin-left: calc(var(--lte-sidebar-width) * -1);
   }
   .sidebar-expand-md .app-sidebar .sidebar-wrapper {
-    height: calc(100vh - (calc(3.5rem + 1px)));
     overflow-x: hidden;
     overflow-y: auto;
   }
@@ -13521,7 +13637,6 @@ textarea.form-control-lg {
     max-height: 100vh;
   }
   .sidebar-expand-lg.layout-fixed .app-sidebar .sidebar-wrapper {
-    height: calc(100vh - (calc(3.5rem + 1px)));
     overflow-x: hidden;
     overflow-y: auto;
   }
@@ -13553,7 +13668,6 @@ textarea.form-control-lg {
     margin-left: calc(var(--lte-sidebar-width) * -1);
   }
   .sidebar-expand-lg .app-sidebar .sidebar-wrapper {
-    height: calc(100vh - (calc(3.5rem + 1px)));
     overflow-x: hidden;
     overflow-y: auto;
   }
@@ -13596,7 +13710,6 @@ textarea.form-control-lg {
     max-height: 100vh;
   }
   .sidebar-expand-xl.layout-fixed .app-sidebar .sidebar-wrapper {
-    height: calc(100vh - (calc(3.5rem + 1px)));
     overflow-x: hidden;
     overflow-y: auto;
   }
@@ -13628,7 +13741,6 @@ textarea.form-control-lg {
     margin-left: calc(var(--lte-sidebar-width) * -1);
   }
   .sidebar-expand-xl .app-sidebar .sidebar-wrapper {
-    height: calc(100vh - (calc(3.5rem + 1px)));
     overflow-x: hidden;
     overflow-y: auto;
   }
@@ -13671,7 +13783,6 @@ textarea.form-control-lg {
     max-height: 100vh;
   }
   .sidebar-expand-xxl.layout-fixed .app-sidebar .sidebar-wrapper {
-    height: calc(100vh - (calc(3.5rem + 1px)));
     overflow-x: hidden;
     overflow-y: auto;
   }
@@ -13703,7 +13814,6 @@ textarea.form-control-lg {
     margin-left: calc(var(--lte-sidebar-width) * -1);
   }
   .sidebar-expand-xxl .app-sidebar .sidebar-wrapper {
-    height: calc(100vh - (calc(3.5rem + 1px)));
     overflow-x: hidden;
     overflow-y: auto;
   }
@@ -13745,7 +13855,6 @@ textarea.form-control-lg {
   max-height: 100vh;
 }
 .sidebar-expand.layout-fixed .app-sidebar .sidebar-wrapper {
-  height: calc(100vh - (calc(3.5rem + 1px)));
   overflow-x: hidden;
   overflow-y: auto;
 }
@@ -13775,7 +13884,6 @@ textarea.form-control-lg {
   margin-left: calc(var(--lte-sidebar-width) * -1);
 }
 .sidebar-expand .app-sidebar .sidebar-wrapper {
-  height: calc(100vh - (calc(3.5rem + 1px)));
   overflow-x: hidden;
   overflow-y: auto;
 }
@@ -15646,9 +15754,9 @@ html.maximized-card {
   outline-offset: 2px;
 }
 .skip-link:hover {
-  color: var(--bs-white);
+  color: var(--bs-body-bg);
   text-decoration: none;
-  background: var(--bs-primary-emphasis);
+  background: var(--bs-primary-text-emphasis);
 }
 
 /* Enhanced Focus Indicators - WCAG 2.4.7: Focus Visible */
@@ -15871,47 +15979,72 @@ fieldset legend {
   .nav-link {
     color: #000 !important;
     background: transparent !important;
+  }
+  .btn {
     border: 1px solid #000 !important;
   }
   a[href^=http]::after {
     font-size: 0.8em;
     content: " (" attr(href) ")";
   }
-  /* Print Layout Fix - Ensure sidebar and main content are both visible */
-  .app-wrapper {
+  [data-lte-print~=plain] a[href^=http]::after {
+    content: none;
+  }
+  [data-lte-print~=plain] .btn {
+    border-color: transparent !important;
+  }
+  /* Print Layout — paged media cannot scroll, so every sticky position and
+     every scroll container has to be unwound here or the browser clips what
+     is inside it: that is what printed the main content blank in 4.0.0
+     (#5982). `:not(.d-print-none)` on the rule that forces `display`, so
+     Bootstrap's print display utilities keep working (#6106). */
+  .app-header,
+  .app-sidebar,
+  .app-footer {
+    position: static !important;
+  }
+  .app-wrapper:not(.d-print-none) {
     display: grid !important;
     grid-template-rows: auto 1fr auto !important;
     grid-template-columns: auto 1fr !important;
   }
-  .sidebar-overlay {
-    display: none !important;
+  .app-main {
+    width: auto !important;
+    padding-bottom: 0 !important;
   }
-  .app-sidebar {
-    position: static !important;
-    display: block !important;
-    min-width: 200px !important;
-    max-width: 200px !important;
-    max-height: none !important;
-    margin-left: 0 !important;
+  .app-content-bottom-area {
+    margin-bottom: 0 !important;
+  }
+  .app-main,
+  .app-content,
+  .sidebar-wrapper {
     overflow: visible !important;
   }
   .sidebar-wrapper {
     height: auto !important;
-    overflow: visible !important;
   }
-  .app-header {
-    position: static !important;
+  .app-sidebar {
+    min-width: 200px !important;
+    max-width: 200px !important;
+    max-height: none !important;
+    margin-left: 0 !important;
   }
-  .app-main {
-    width: auto !important;
-    max-width: 100% !important;
-    overflow: visible !important;
+  .app-wrapper {
+    min-height: 0 !important;
   }
-  .app-content {
-    overflow: visible !important;
-  }
+  .app-wrapper,
+  .app-header,
+  .app-main,
   .app-footer {
-    position: static !important;
+    max-width: none !important;
+  }
+  html:not([data-lte-print~=app]) body:not([data-lte-print~=app]) .app-header:not(.d-print-block):not(.d-print-flex),
+  html:not([data-lte-print~=app]) body:not([data-lte-print~=app]) .app-sidebar:not(.d-print-block):not(.d-print-flex),
+  html:not([data-lte-print~=app]) body:not([data-lte-print~=app]) .app-footer:not(.d-print-block):not(.d-print-flex) {
+    display: none !important;
+  }
+  .sidebar-overlay {
+    display: none !important;
   }
 }
 
