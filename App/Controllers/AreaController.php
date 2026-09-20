@@ -18,7 +18,7 @@ class AreaController extends Controller
     public function index()
     {
         $areas = $this->area->getAll();
-        return $this->view("areas.index", ['areas' => $areas], "plantilla");
+        return $this->view("areas.index", ['areas' => $areas], "app");
     }
 
     public function edit($id)
@@ -26,13 +26,13 @@ class AreaController extends Controller
 
         $area = $this->area->getById($id);
         $areas = $this->area->getAll();
-        return $this->view("areas.editar", ["area" => $area, "areasPadre" => $areas], "plantilla");
+        return $this->view("areas.editar", ["area" => $area, "areasPadre" => $areas], "app");
     }
 
     public function create()
     {
         $areas = $this->area->getAll();
-        return $this->view("areas.crear", ["areasPadre" => $areas], "plantilla");
+        return $this->view("areas.crear", ["areasPadre" => $areas], "app");
     }
 
     public function store()
@@ -41,8 +41,8 @@ class AreaController extends Controller
         $data = $req->all();
 
         $rule = [
-            'nombre'        => ['required', 'string', 'max' => 100],
-            'siglas'        => ['required', 'string', 'max' => 20],
+            'nombre'        => ['required', 'string', 'maxLength' => 100],
+            'siglas'        => ['required', 'string', 'maxLength' => 20],
             'estado'        => ['required', 'string', 'in' => ['Activo', 'Inactivo']],
             'id_area_padre' => ['nullable', 'number'], // opcional
         ];
@@ -50,7 +50,7 @@ class AreaController extends Controller
         // 3. Validar
         $validator = new Validator();
 
-        if (!$validator->validate($data, $rule)) {
+        if (!$validator->validate($rule, $data)) {
             // Necesitamos las áreas padre para repoblar el <select>
             $areasPadre = $this->area->getAll();
 
@@ -61,7 +61,7 @@ class AreaController extends Controller
                     "errors"       => $validator->getErrors(),
                     "datos_viejos" => $data,
                 ],
-                "plantilla"
+                "app"
             );
         }
 
@@ -115,8 +115,8 @@ class AreaController extends Controller
 
         // 3. Reglas (igual que store, quizá sin 'id_area_padre' por el tema de ciclos)
         $rule = [
-            'nombre'        => ['required', 'string', 'max' => 100],
-            'siglas'        => ['required', 'string', 'max' => 20],
+            'nombre'        => ['required', 'string', 'maxLength' => 100],
+            'siglas'        => ['required', 'string', 'maxLength' => 20],
             'estado'        => ['required', 'string', 'in' => ['Activo', 'Inactivo']],
             'id_area_padre' => ['nullable', 'number'],
         ];
@@ -124,7 +124,7 @@ class AreaController extends Controller
         // 4. Validar
         $validator = new Validator();
 
-        if (!$validator->validate($data, $rule)) {
+        if (!$validator->validate($rule, $data)) {
             return $this->view(
                 "areas.editar",
                 [
@@ -133,7 +133,7 @@ class AreaController extends Controller
                     "errors"     => $validator->getErrors(),
                     "datos_viejos" => $data,
                 ],
-                "plantilla"
+                "app"
             );
         }
 
@@ -164,7 +164,7 @@ class AreaController extends Controller
                     "errors"     => ['db' => 'No se pudo actualizar el área. Intenta de nuevo.'],
                     "datos_viejos" => $datos,
                 ],
-                "plantilla"
+                "app"
             );
         }
 
