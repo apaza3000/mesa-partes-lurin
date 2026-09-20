@@ -1,4 +1,9 @@
 <?php 
+namespace App\Models;
+
+use PDO;
+use PDOException;
+
 class Conexion
 {
     private static ?PDO $instance = null;

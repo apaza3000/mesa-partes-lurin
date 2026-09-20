@@ -1,5 +1,8 @@
 <?php
-require_once __DIR__ . '/Conexion.php';
+namespace App\Models;
+
+use PDO;
+use PDOException;
 
 class Documento
 {

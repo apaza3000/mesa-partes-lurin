@@ -1,7 +1,8 @@
 <?php
+namespace App\Models;
 
-require_once __DIR__ . '/Conexion.php';
-require_once __DIR__ . '/InterfaceModel.php';
+use PDO;
+use PDOException;
 
 class Derivacion implements InterfaceModel {
     private PDO $db;

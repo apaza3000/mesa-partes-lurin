@@ -1,6 +1,7 @@
 <?php
+namespace App\Controllers;
 
-require_once __DIR__ . '/../models/documento.php';
+use App\Models\Documento;
 
 class DocumentoController {
     private Documento $documentoModel;

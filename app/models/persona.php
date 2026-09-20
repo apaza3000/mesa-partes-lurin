@@ -1,6 +1,8 @@
 <?php
+namespace App\Models;
 
-require_once __DIR__ . '/Conexion.php';
+use PDO;
+use PDOException;
 
 class Persona
 {

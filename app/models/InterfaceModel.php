@@ -1,4 +1,5 @@
 <?php
+namespace App\Models;
 interface InterfaceModel
 {
     function getAll(): array;

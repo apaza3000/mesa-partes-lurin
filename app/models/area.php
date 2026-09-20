@@ -1,13 +1,14 @@
 <?php
+namespace App\Models;
 
-require_once __DIR__ . '/Conexion.php';
-require_once __DIR__ . '/InterfaceModel.php';
+use PDO;
+use PDOException;
 
 class Area implements InterfaceModel {
     private PDO $db;
 
     public function __construct() {
-        $this->db = \Conexion::getConexion();
+        $this->db = Conexion::getConexion();
     }
 
     public function getAll(): array {

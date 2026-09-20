@@ -1,6 +1,7 @@
 <?php
+namespace App\Controllers;
 
-require_once __DIR__ . '/../models/derivacion.php';
+use App\Models\Derivacion;
 
 class DerivacionController {
     private Derivacion $derivacionModel;
