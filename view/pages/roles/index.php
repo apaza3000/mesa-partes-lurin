@@ -1,91 +1,67 @@
-<!--begin::App Content Header-->
 <div class="app-content-header">
     <div class="container-fluid">
         <div class="row">
-            <div class="col-sm-6">
-                <h3 class="mb-0">Gestión de Roles</h3>
-            </div>
+            <div class="col-sm-6"><h1 class="mb-0 fs-3">Gestión de Roles</h1></div>
             <div class="col-sm-6 text-end">
-                <a href="plantilla.php?p=roles/crear" class="btn btn-primary">
-                    <i class="bi bi-plus-circle"></i> Nuevo Rol
+                <a href="/roles/nuevo" class="btn btn-primary">
+                    <i class="bi bi-plus-circle me-1"></i> Nuevo Rol
                 </a>
             </div>
         </div>
     </div>
 </div>
-<!--end::App Content Header-->
 
-<!--begin::App Content-->
 <div class="app-content">
     <div class="container-fluid">
-        
-        <!-- Alertas de éxito o error -->
-        <?php if (isset($_SESSION['rol_mensaje'])): ?>
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <?= $_SESSION['rol_mensaje']; unset($_SESSION['rol_mensaje']); ?>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        <?php if (!empty($_SESSION['rol_mensaje']) || !empty($_SESSION['rol_error'])): ?>
+            <div class="alert alert-<?= !empty($_SESSION['rol_error']) ? 'danger' : 'success' ?>">
+                <?= htmlspecialchars($_SESSION['rol_error'] ?? $_SESSION['rol_mensaje'], ENT_QUOTES, 'UTF-8') ?>
             </div>
-        <?php endif; ?>
-
-        <?php if (isset($_SESSION['rol_error'])): ?>
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <?= $_SESSION['rol_error']; unset($_SESSION['rol_error']); ?>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
+            <?php unset($_SESSION['rol_error'], $_SESSION['rol_mensaje']); ?>
         <?php endif; ?>
 
         <div class="card mb-4">
-            <div class="card-header">
-                <h3 class="card-title">Lista de Roles Registrados</h3>
-            </div>
-            <div class="card-body">
-                <table class="table table-bordered table-striped">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Nombre del Rol</th>
-                            <th>Slug</th>
-                            <th>Estado</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php if (!empty($roles)): ?>
-                            <?php foreach ($roles as $r): ?>
-                                <tr>
-                                    <td><?= $r['id']; ?></td>
-                                    <td><?= htmlspecialchars($r['nombre_rol']); ?></td>
-                                    <td><code><?= htmlspecialchars($r['slug']); ?></code></td>
-                                    <td>
-                                        <span class="badge <?= $r['estado'] == 1 ? 'bg-success' : 'bg-secondary'; ?>">
-                                            <?= $r['estado'] == 1 ? 'Activo' : 'Inactivo'; ?>
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <a href="plantilla.php?p=roles/editar&id=<?= $r['id']; ?>" class="btn btn-warning btn-sm">
-                                            <i class="bi bi-pencil-square"></i>
-                                        </a>
-                                        
-                                        <!-- Formulario para cambiar estado -->
-                                        <form action="plantilla.php?p=roles/estado" method="POST" style="display:inline-block;">
-                                            <input type="hidden" name="id" value="<?= $r['id']; ?>">
-                                            <input type="hidden" name="estado" value="<?= $r['estado'] == 1 ? 0 : 1; ?>">
-                                            <button type="submit" class="btn btn-sm <?= $r['estado'] == 1 ? 'btn-danger' : 'btn-success'; ?>" title="Cambiar estado">
-                                                <i class="bi <?= $r['estado'] == 1 ? 'bi-lock' : 'bi-unlock'; ?>"></i>
-                                            </button>
-                                        </form>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        <?php else: ?>
+            <div class="card-header"><h3 class="card-title">Listado de Roles</h3></div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-striped align-middle mb-0">
+                        <thead>
                             <tr>
-                                <td colspan="5" class="text-center">No hay roles registrados.</td>
+                                <th>#</th><th>Nombre</th><th>Descripción</th><th>Estado</th>
+                                <th class="text-center">Acciones</th>
                             </tr>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            <?php if (!$roles): ?>
+                                <tr><td colspan="5" class="text-center py-4">No hay roles registrados.</td></tr>
+                            <?php else: ?>
+                                <?php foreach ($roles as $indice => $rol): ?>
+                                    <tr>
+                                        <td><?= $indice + 1 ?></td>
+                                        <td><?= htmlspecialchars($rol['nombre'], ENT_QUOTES, 'UTF-8') ?></td>
+                                        <td><?= htmlspecialchars($rol['descripcion'] ?? '', ENT_QUOTES, 'UTF-8') ?></td>
+                                        <td>
+                                            <span class="badge bg-<?= $rol['estado'] === 'Activo' ? 'success' : 'secondary' ?>">
+                                                <?= htmlspecialchars($rol['estado'], ENT_QUOTES, 'UTF-8') ?>
+                                            </span>
+                                        </td>
+                                        <td class="text-center">
+                                            <a href="/roles/<?= (int) $rol['id_rol'] ?>/editar" class="btn btn-sm btn-warning text-white" title="Editar">
+                                                <i class="bi bi-pencil-square"></i>
+                                            </a>
+                                            <form action="/roles/<?= (int) $rol['id_rol'] ?>/delete" method="POST" class="d-inline" onsubmit="return confirm('¿Está seguro de eliminar este rol?');">
+                                                <button type="submit" class="btn btn-sm btn-danger" title="Eliminar">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
 </div>
-<!--end::App Content-->

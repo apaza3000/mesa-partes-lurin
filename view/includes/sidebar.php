@@ -48,7 +48,7 @@ $navigation = [
       [
         'title' => 'Roles y permisos',
         'icon' => 'bi bi-shield-lock-fill',
-        'url' => '#',
+        'url' => '/roles',
         'roles' => ['admin']
       ]
 

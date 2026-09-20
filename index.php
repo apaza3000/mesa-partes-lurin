@@ -1,12 +1,11 @@
 <?php
 
-use Dotenv\Dotenv;
-use src\Core\Path;
+use Src\Core\Dotenv;
+use Src\Core\Path;
 
 session_start();
 
-require_once "autoload.php";
-require_once "vendor/autoload.php";
+require_once __DIR__ . DIRECTORY_SEPARATOR . "autoload.php";
 
 /**
  * Obtener una variable de entorno con un valor predeterminado.
@@ -34,4 +33,4 @@ $dotenv->load();
 Path::setBasePath(__DIR__);
 
 
-require_once "routes/Router.php";
+require_once __DIR__ . DIRECTORY_SEPARATOR . "routes" . DIRECTORY_SEPARATOR . "Router.php";

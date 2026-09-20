@@ -16,15 +16,16 @@ class Conexion
     // Método para obtener la instancia de PDO
     public static function getConexion(): ?PDO
     {
-        $config =require Path::base() . 'config/database.php';
-        $dsn = "" . $config['driver'] . ':host=' . $config['host'] . ';dbname=' . $config['database'] . ';charset=' . $config['charset'];;
+        $config = require Path::base() . 'config/database.php';
+
         if (self::$pdo === null) {
-            try {
-                self::$pdo = new PDO($dsn, $config['username'], $config['password']);
-                self::$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            } catch (PDOException $e) {
-                throw $e;
-            }
+            $dsn = $config['driver'] . ':host=' . $config['host']
+                . ';port=' . $config['port']
+                . ';dbname=' . $config['database']
+                . ';charset=' . $config['charset'];
+
+            self::$pdo = new PDO($dsn, $config['username'], $config['password']);
+            self::$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         }
         return self::$pdo;
     }

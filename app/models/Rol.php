@@ -3,108 +3,85 @@ namespace App\Models;
 
 use PDO;
 use PDOException;
+use Src\Core\Conexion;
 
-class Rol implements InterfaceModel {
+class Rol implements InterfaceModel
+{
     private PDO $db;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->db = Conexion::getConexion();
     }
 
-    public function obtenerTodos(): array {
+    public function getAll(): array
+    {
         try {
-            $sql = "SELECT * FROM roles ORDER BY id ASC";
-            $stmt = $this->db->prepare($sql);
-            $stmt->execute();
+            $stmt = $this->db->query(
+                'SELECT id_rol, nombre, descripcion, estado FROM roles ORDER BY nombre ASC'
+            );
             return $stmt->fetchAll();
         } catch (PDOException $e) {
             return [];
         }
     }
 
-    public function getAll(): array {
-        return $this->obtenerTodos();
-    }
-
-    public function obtenerPorId(int $id): array {
+    public function getById(int|string $id): array
+    {
         try {
-            $sql = "SELECT * FROM roles WHERE id = :id";
-            $stmt = $this->db->prepare($sql);
-            $stmt->execute([':id' => $id]);
-            $resultado = $stmt->fetch();
-            return $resultado ?: [];
+            $stmt = $this->db->prepare(
+                'SELECT id_rol, nombre, descripcion, estado FROM roles WHERE id_rol = :id'
+            );
+            $stmt->execute([':id' => (int) $id]);
+            return $stmt->fetch() ?: [];
         } catch (PDOException $e) {
             return [];
         }
     }
 
-    public function getById(int | string $id): array {
-        return $this->obtenerPorId((int)$id);
-    }
-
-    public function obtenerPorSlug(string $slug): array {
+    public function create(array $datos): bool
+    {
         try {
-            $sql = "SELECT * FROM roles WHERE slug = :slug";
-            $stmt = $this->db->prepare($sql);
-            $stmt->execute([':slug' => $slug]);
-            $resultado = $stmt->fetch();
-            return $resultado ?: [];
-        } catch (PDOException $e) {
-            return [];
-        }
-    }
-
-    public function registrar(array $datos): bool {
-        try {
-            $sql = "INSERT INTO roles (nombre_rol, slug, estado) VALUES (:nombre_rol, :slug, :estado)";
-            $stmt = $this->db->prepare($sql);
+            $stmt = $this->db->prepare(
+                'INSERT INTO roles (nombre, descripcion, estado)
+                 VALUES (:nombre, :descripcion, :estado)'
+            );
             return $stmt->execute([
-                ':nombre_rol' => $datos['nombre_rol'],
-                ':slug'       => $datos['slug'],
-                ':estado'     => $datos['estado'] ?? 1
+                ':nombre' => $datos['nombre'],
+                ':descripcion' => $datos['descripcion'] ?: null,
+                ':estado' => $datos['estado'],
             ]);
         } catch (PDOException $e) {
             return false;
         }
     }
 
-    public function create(array $datos): bool {
-        return $this->registrar($datos);
-    }
-
-    public function actualizar(int $id, array $datos): bool {
+    public function update(array $datos, int|string $id): bool
+    {
         try {
-            $sql = "UPDATE roles SET nombre_rol = :nombre_rol, slug = :slug, estado = :estado WHERE id = :id";
-            $stmt = $this->db->prepare($sql);
+            $stmt = $this->db->prepare(
+                'UPDATE roles
+                 SET nombre = :nombre, descripcion = :descripcion, estado = :estado
+                 WHERE id_rol = :id'
+            );
             return $stmt->execute([
-                ':id'         => $id,
-                ':nombre_rol' => $datos['nombre_rol'],
-                ':slug'       => $datos['slug'],
-                ':estado'     => $datos['estado']
+                ':id' => (int) $id,
+                ':nombre' => $datos['nombre'],
+                ':descripcion' => $datos['descripcion'] ?: null,
+                ':estado' => $datos['estado'],
             ]);
         } catch (PDOException $e) {
             return false;
         }
     }
 
-    public function update(array $datos, int | string $id): bool {
-        return $this->actualizar((int)$id, $datos);
-    }
-
-    public function cambiarEstado(int $id, int $estado): bool {
+    public function delete(int|string $id): bool
+    {
         try {
-            $sql = "UPDATE roles SET estado = :estado WHERE id = :id";
-            $stmt = $this->db->prepare($sql);
-            return $stmt->execute([
-                ':id'     => $id,
-                ':estado' => $estado
-            ]);
+            $stmt = $this->db->prepare('DELETE FROM roles WHERE id_rol = :id');
+            return $stmt->execute([':id' => (int) $id]);
         } catch (PDOException $e) {
             return false;
         }
-    }
-
-    public function delete(int | string $id): bool {
-        return false;
     }
 }
