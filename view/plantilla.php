@@ -1,3 +1,5 @@
+
+
 <!doctype html>
 <html lang="en">
 <!--begin::Head-->
@@ -22,7 +24,7 @@ require_once("includes/head.php");
         <main class="app-main">
             <!--begin::App Content Header-->
             <?php
-            require_once("pages/inicio.php");
+            echo $contenido;
             ?>
             <!--end::App Content-->
         </main>

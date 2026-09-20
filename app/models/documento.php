@@ -7,7 +7,7 @@ use PDOException;
 class Documento
 {
     private PDO $db;
-
+ 
     public function __construct()
     {
         $this->db = Conexion::getConexion();

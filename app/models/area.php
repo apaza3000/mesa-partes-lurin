@@ -3,6 +3,7 @@ namespace App\Models;
 
 use PDO;
 use PDOException;
+use Src\Core\Conexion;
 
 class Area implements InterfaceModel {
     private PDO $db;
@@ -12,7 +13,7 @@ class Area implements InterfaceModel {
     }
 
     public function getAll(): array {
-        try {
+
             $sql = "SELECT a.*, p.nombre AS area_padre 
                     FROM areas a 
                     LEFT JOIN areas p ON p.id_area = a.id_area_padre 
@@ -20,9 +21,7 @@ class Area implements InterfaceModel {
             $stmt = $this->db->prepare($sql);
             $stmt->execute();
             return $stmt->fetchAll();
-        } catch (PDOException $e) {
-            return [];
-        }
+     
     }
 
     public function getById(int | string $id): array {

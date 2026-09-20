@@ -1,22 +1,37 @@
 <?php
 
 use Dotenv\Dotenv;
+use src\Core\Path;
 
 session_start();
 
-$autoload = __DIR__ . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php';
-if (is_file($autoload)) {
-    require_once $autoload;
-}
 require_once "autoload.php";
+require_once "vendor/autoload.php";
 
-$envFile = __DIR__ . DIRECTORY_SEPARATOR . '.env';
-Dotenv::createImmutable(__DIR__)->load();
+/**
+ * Obtener una variable de entorno con un valor predeterminado.
+ *
+ * @param string $key
+ * @param mixed $default
+ * @return mixed
+ */
+function env($key, $default = null)
+{
+    if (isset($_ENV[$key])) {
+        return $_ENV[$key];
+    } elseif (isset($_SERVER[$key])) {
+        return $_SERVER[$key];
+    }
 
-
-$_SESSION["login"] = true;
-if ($_SESSION["login"]) {
-    require_once __DIR__ . DIRECTORY_SEPARATOR . "view" . DIRECTORY_SEPARATOR . "plantilla.php";
-} else {
-    require_once __DIR__ . DIRECTORY_SEPARATOR . "view" . DIRECTORY_SEPARATOR . "pages" . DIRECTORY_SEPARATOR . "login.php";
+    return $default;
 }
+
+
+// Cargar variables de entorno desde .env
+$dotenv = Dotenv::createImmutable(__DIR__);
+$dotenv->load();
+
+Path::setBasePath(__DIR__);
+
+
+require_once "routes/Router.php";
