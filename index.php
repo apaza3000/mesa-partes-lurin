@@ -5,6 +5,7 @@ if ($_SESSION["login"]) {
     require_once("view/plantilla.php");
 } else {
     require_once("view/pages/login.php");
+<<<<<<< HEAD
 }
 
 
@@ -57,3 +58,6 @@ Path::setBasePath(__DIR__);
 require_once __DIR__ . DIRECTORY_SEPARATOR . "routes" . DIRECTORY_SEPARATOR . "Router.php";
  */
 ?>
+=======
+}
+>>>>>>> parent of 25582e8 (creacion del CRUD incompleto)

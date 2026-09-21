@@ -4,8 +4,11 @@ namespace App\Models;
 
 use PDO;
 use PDOException;
+<<<<<<< HEAD:App/Models/Usuario.php
 use Exception;
 use Src\Core\Conexion;
+=======
+>>>>>>> parent of 25582e8 (creacion del CRUD incompleto):app/models/usuario.php
 
 class Usuario
 {
@@ -16,11 +19,11 @@ class Usuario
         $this->db = Conexion::getConexion();
     }
 
-    // 1. Obtener usuario por email para el Login
+    // Obtener usuario por email para el Login
     public function obtenerPorEmail(string $email): ?array
     {
         try {
-            $sql = "SELECT u.*, r.nombre AS rol, a.nombre AS area, p.nombre, p.apellido_P, p.apellido_M, p.email, p.dni
+            $sql = "SELECT u.*, r.nombre AS rol, a.nombre AS area, p.nombre, p.apellido_P, p.email
                     FROM usuarios u
                     INNER JOIN persona p ON u.id_persona = p.id_persona
                     INNER JOIN roles r ON u.id_rol = r.id
@@ -28,13 +31,14 @@ class Usuario
                     WHERE p.email = :email AND u.estado = 'Activo'";
             $stmt = $this->db->prepare($sql);
             $stmt->execute([':email' => $email]);
-            $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
+            $resultado = $stmt->fetch();
 
             return $resultado ?: null;
         } catch (PDOException $e) {
             return null;
         }
     }
+<<<<<<< HEAD:App/Models/Usuario.php
 
     // 2. Obtener todos los usuarios (para la tabla principal)
     public function obtenerTodos(): array
@@ -197,3 +201,6 @@ class Usuario
         ]);
     }
 }
+=======
+}
+>>>>>>> parent of 25582e8 (creacion del CRUD incompleto):app/models/usuario.php
