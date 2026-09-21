@@ -104,11 +104,11 @@ class RolController extends Controller
 
     private function validate(Validator $validator, array $data): bool
     {
-        return $validator->validate($data, [
+        return $validator->validate([
             'nombre' => ['required', 'string', 'max' => 50],
             'descripcion' => ['nullable', 'string', 'max' => 255],
             'estado' => ['required', 'string', 'in' => ['Activo', 'Inactivo']],
-        ]);
+        ], $data);
     }
 
     private function normalize(array $data): array
