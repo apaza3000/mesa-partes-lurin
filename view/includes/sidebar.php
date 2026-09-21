@@ -41,7 +41,7 @@ $navigation = [
       [
         'title' => 'Usuarios',
         'icon' => 'bi bi-person-fill',
-        'url' => '/view/pages/users.php',
+        'url' => 'view/pages/administerUser.php',
         'roles' => ['admin']
       ],
 
@@ -539,7 +539,7 @@ function renderSidebar($nav, $userRole)
     <!--begin::Brand Link-->
     <a href="./index.html" class="brand-link">
       <!--begin::Brand Image-->
-      <img src="/view/assets/img/AdminLTELogo.png" alt="AdminLTE Logo" class="brand-image opacity-75 shadow">
+      <img src="view/assets/img/AdminLTELogo.png" alt="AdminLTE Logo" class="brand-image opacity-75 shadow">
       <!--end::Brand Image-->
       <!--begin::Brand Text-->
       <span class="brand-text fw-light">AdminLTE 4</span>

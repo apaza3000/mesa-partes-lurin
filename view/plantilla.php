@@ -66,6 +66,7 @@
     <!--begin::Accessibility Features-->
     <!-- Skip links will be dynamically added by accessibility.js -->
     <meta name="supported-color-schemes" content="light dark" />
+
     <link rel="stylesheet" href="view/assets/css/admin-lte/adminlte.css">
 
     <!--end::Accessibility Features-->
@@ -83,7 +84,7 @@
 
     <!--begin::Third Party Plugin(Bootstrap Icons)-->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"
-        crossorigin="anonymous" />
+        crossorigin="anonymous">
     <!--end::Third Party Plugin(Bootstrap Icons)-->
 
 
@@ -98,24 +99,11 @@
         <!--begin::Header-->
         <?php
         require_once("includes/header.php");
-        ?>
-        <!--end::Header-->
-        <!--begin::Sidebar-->
-        <?php
+
         require_once("includes/sidebar.php");
-        ?>
-        <!--end::Sidebar-->
-        <!--begin::App Main-->
-        <main class="app-main">
-            <!--begin::App Content Header-->
-            <?php
-            require_once("pages/inicio.php");
-            ?>
-            <!--end::App Content-->
-        </main>
-        <!--end::App Main-->
-        <!--begin::Footer-->
-        <?php
+
+        require_once("pages/inicio.php");
+
         require_once("includes/footer.php");
         ?>
         <!--end::Footer-->
@@ -132,7 +120,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.min.js"
         crossorigin="anonymous"></script>
     <!--end::Required Plugin(Bootstrap 5)--><!--begin::Required Plugin(AdminLTE)-->
-    <script src="/view/assets/js/adminlte.js"></script>
+    <script src="view/assets/js/adminlte.js"></script>
     <!--end::Required Plugin(AdminLTE)-->
     <!--begin::OverlayScrollbars Configure-->
     <script>
@@ -163,15 +151,8 @@
             }
         });
     </script>
-    <!--end::OverlayScrollbars Configure-->
 
-    <!--begin::Color Mode Toggle-->
-    <!-- The light/dark/auto switcher ships in adminlte.js as the ColorMode
-     module (since 4.1) — no page script needed. Only the no-flash snippet
-     in <head> stays inline, because it must run before first paint. -->
-    <!--end::Color Mode Toggle-->
-    <!--end::Script-->
 </body>
-<!--end::Body-->
+
 
 </html>

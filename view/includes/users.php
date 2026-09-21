@@ -1,7 +1,6 @@
-
-
 <!--end::Sidebar-->
 <!--begin::App Main-->
+
 <main class="app-main">
   <!--Header (Users    Home/Users)-->
   <div class="app-content-header">
@@ -51,8 +50,7 @@
                         aria-label="Search users" style="width: 180px" />
                     </div>
                     <!--combo box de ROLES 👇-->
-                    <select id="user-role-filter" class="form-select form-select-sm w-auto"
-                      aria-label="Filter by role">
+                    <select id="user-role-filter" class="form-select form-select-sm w-auto" aria-label="Filter by role">
                       <option value="all" selected>All roles</option>
                       <option value="administrator">Administrator</option>
                       <option value="editor">Editor</option>

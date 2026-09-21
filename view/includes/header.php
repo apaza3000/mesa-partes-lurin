@@ -170,14 +170,14 @@
             <!--begin::User Menu Dropdown-->
             <li class="nav-item dropdown user-menu">
                 <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
-                    <img src="/view/assets/img/user2-160x160.jpg" class="user-image rounded-circle shadow"
+                    <img src="view/assets/img/user2-160x160.jpg" class="user-image rounded-circle shadow"
                         alt="Alexander Pierce" />
                     <span class="d-none d-md-inline">Alexander Pierce</span>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
                     <!--begin::User Image-->
                     <li class="user-header text-bg-primary">
-                        <img src="/view/assets/img/user2-160x160.jpg" class="rounded-circle shadow"
+                        <img src="view/assets/img/user2-160x160.jpg" class="rounded-circle shadow"
                             alt="Alexander Pierce" />
                         <p>
                             Alexander Pierce - Web Developer
