@@ -89,7 +89,7 @@ protected $rules = [
 
     'fecha_nacimiento' => [
         'nullable',
-        'date' => 'Y-m-d'
+        'date' => ['Y-m-d']
     ]
 
 ];
