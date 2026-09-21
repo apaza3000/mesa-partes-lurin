@@ -22,7 +22,7 @@ require_once("head.php");
         <main class="app-main">
             <!--begin::App Content Header-->
             <?php
-            echo $contenido;
+            echo $contenido ?? "";
             ?>
             <!--end::App Content-->
         </main>
