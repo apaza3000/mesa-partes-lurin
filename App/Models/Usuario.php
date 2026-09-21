@@ -6,8 +6,11 @@ use PDO;
 use PDOException;
 <<<<<<< HEAD:App/Models/Usuario.php
 <<<<<<< HEAD:App/Models/Usuario.php
+<<<<<<< HEAD:App/Models/Usuario.php
 use Exception;
 use Src\Core\Conexion;
+=======
+>>>>>>> parent of 25582e8 (creacion del CRUD incompleto):app/models/usuario.php
 =======
 >>>>>>> parent of 25582e8 (creacion del CRUD incompleto):app/models/usuario.php
 =======
@@ -41,6 +44,7 @@ class Usuario
             return null;
         }
     }
+<<<<<<< HEAD:App/Models/Usuario.php
 <<<<<<< HEAD:App/Models/Usuario.php
 <<<<<<< HEAD:App/Models/Usuario.php
 
@@ -205,6 +209,9 @@ class Usuario
         ]);
     }
 }
+=======
+}
+>>>>>>> parent of 25582e8 (creacion del CRUD incompleto):app/models/usuario.php
 =======
 }
 >>>>>>> parent of 25582e8 (creacion del CRUD incompleto):app/models/usuario.php
