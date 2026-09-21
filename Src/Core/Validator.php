@@ -304,16 +304,13 @@ class Validator
 
     private function max($value, $fieldName, $maxValue)
     {
-        if (is_string($value) && strlen($value) > $maxValue) {
-            $this->setError($fieldName, 'maxLength', $maxValue);
-            return false;
-        }
-        if (is_numeric($value) && $value > $maxValue) {
-            $this->setError($fieldName, 'max', $maxValue);
-            return false;
-        }
-        if (!is_string($value) && !is_numeric($value)) {
+
+        if (!is_numeric($value)) {
             $this->setError($fieldName, 'number');
+            return false;
+        }
+        if ($value > $maxValue) {
+            $this->setError($fieldName, 'max', $maxValue);
             return false;
         }
         return true;
@@ -321,16 +318,12 @@ class Validator
 
     private function min($value, $fieldName, $minValue)
     {
-        if (is_string($value) && strlen($value) < $minValue) {
-            $this->setError($fieldName, 'minLength', $minValue);
-            return false;
-        }
-        if (is_numeric($value) && $value < $minValue) {
-            $this->setError($fieldName, 'min', $minValue);
-            return false;
-        }
-        if (!is_string($value) && !is_numeric($value)) {
+        if (!is_numeric($value)) {
             $this->setError($fieldName, 'number');
+            return false;
+        }
+        if ($value < $minValue) {
+            $this->setError($fieldName, 'min', $minValue);
             return false;
         }
         return true;
