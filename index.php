@@ -1,7 +1,16 @@
 <?php
+<<<<<<< Updated upstream
 // 1. Iniciar sesión si no está activa
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
+=======
+session_start();
+$_SESSION["login"] = true;
+if ($_SESSION["login"]) {
+    require_once("view/plantilla.php");
+} else {
+    require_once("view/pages/login.php");
+>>>>>>> Stashed changes
 }
 
 // 2. Cargar el Autoload de Composer o un Autoloader personalizado
