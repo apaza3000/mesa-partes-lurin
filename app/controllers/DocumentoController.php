@@ -1,15 +1,12 @@
 <?php
-
 namespace App\Controllers;
 
 use App\Models\Documento;
 
-class DocumentoController
-{
+class DocumentoController {
     private Documento $documentoModel;
 
-    public function __construct()
-    {
+    public function __construct() {
         $this->documentoModel = new Documento();
     }
 

@@ -1,17 +1,14 @@
 <?php
-
 namespace App\Controllers;
 
 use App\Models\Usuario;
 use App\Validators\UsuarioValidator;
 
-class UsuarioController
-{
+class UsuarioController {
     private Usuario $usuarioModel;
     private UsuarioValidator $validator;
 
-    public function __construct()
-    {
+    public function __construct() {
         $this->usuarioModel = new Usuario();
         $this->validator = new UsuarioValidator();
     }

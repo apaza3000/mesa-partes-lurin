@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
-use App\Config\Conexion;
 use PDO;
 use PDOException;
 use Exception;
+use Src\Core\Conexion;
 
 class Usuario
 {
@@ -23,10 +23,9 @@ class Usuario
             $sql = "SELECT u.*, r.nombre AS rol, a.nombre AS area, p.nombre, p.apellido_P, p.apellido_M, p.email, p.dni
                     FROM usuarios u
                     INNER JOIN persona p ON u.id_persona = p.id_persona
-                    INNER JOIN roles r ON u.id_rol = r.id_rol
+                    INNER JOIN roles r ON u.id_rol = r.id
                     INNER JOIN areas a ON u.id_area = a.id_area
                     WHERE p.email = :email AND u.estado = 'Activo'";
-
             $stmt = $this->db->prepare($sql);
             $stmt->execute([':email' => $email]);
             $resultado = $stmt->fetch(PDO::FETCH_ASSOC);

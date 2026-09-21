@@ -48,7 +48,7 @@ $navigation = [
       [
         'title' => 'Roles y permisos',
         'icon' => 'bi bi-shield-lock-fill',
-        'url' => '#',
+        'url' => '/roles',
         'roles' => ['admin']
       ]
 
@@ -64,7 +64,7 @@ $navigation = [
       [
         'title' => 'Áreas',
         'icon' => 'bi bi-diagram-3-fill',
-        'url' => '#',
+        'url' => '/areas',
         'roles' => ['admin']
       ],
 
@@ -548,16 +548,7 @@ function renderSidebar($nav, $userRole)
     <!--end::Brand Link-->
   </div>
   <!--end::Sidebar Brand-->
-  <!--begin::Sidebar Search-->
-  <div class="sidebar-search" role="search">
-    <label for="sidebar-search-input" class="visually-hidden">Filter menu</label>
-    <input type="search" id="sidebar-search-input" class="form-control form-control-sm" placeholder="Filter menu…"
-      autocomplete="off" data-lte-toggle="sidebar-search" data-lte-target="#navigation" />
-    <p class="fs-7 text-secondary mt-2 mb-0" data-lte-search-empty role="status" hidden>
-      No matching pages.
-    </p>
-  </div>
-  <!--end::Sidebar Search-->
+
   <!--begin::Sidebar Wrapper-->
   <div class="sidebar-wrapper">
     <nav class="mt-2" aria-label="Main navigation">

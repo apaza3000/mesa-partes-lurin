@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
-use App\Config\Conexion;
 use PDO;
 use PDOException;
+use Src\Core\Conexion;
 
 class TipoDocumento
 {
