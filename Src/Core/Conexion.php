@@ -19,13 +19,17 @@ class Conexion
         $config = require Path::base() . 'config/database.php';
 
         if (self::$pdo === null) {
-            $dsn = $config['driver'] . ':host=' . $config['host']
-                . ';port=' . $config['port']
-                . ';dbname=' . $config['database']
-                . ';charset=' . $config['charset'];
+            try {
+                $dsn = $config['driver'] . ':host=' . $config['host']
+                    . ';port=' . $config['port']
+                    . ';dbname=' . $config['database']
+                    . ';charset=' . $config['charset'];
 
-            self::$pdo = new PDO($dsn, $config['username'], $config['password']);
-            self::$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+                self::$pdo = new PDO($dsn, $config['username'], $config['password']);
+                self::$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            } catch (\Throwable $th) {
+                throw $th;
+            }
         }
         return self::$pdo;
     }

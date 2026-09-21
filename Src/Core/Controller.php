@@ -27,8 +27,7 @@ class Controller
 
         // Si se pidió un layout, lo envolvemos
         if ($layout !== null) {
-            $layoutPath = $layout === 'plantilla' ? 'app' : str_replace('.', '/', $layout);
-            $archivoLayout = Path::base('view/includes/') . $layoutPath . '.php';
+            $archivoLayout = Path::base('view/includes/') . str_replace('.', '/', $layout) . '.php';
 
             if (!file_exists($archivoLayout)) {
                 throw new \Exception("Layout no encontrado: $layout");

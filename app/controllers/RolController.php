@@ -18,17 +18,17 @@ class RolController extends Controller
 
     public function index(): void
     {
-        $this->view('roles.index', ['roles' => $this->rol->getAll()], 'plantilla');
+        $this->view('roles.index', ['roles' => $this->rol->getAll()], 'app');
     }
 
     public function create(): void
     {
-        $this->view('roles.crear', [], 'plantilla');
+        $this->view('roles.crear', [], 'app');
     }
 
     public function edit(int|string $id): void
     {
-        $this->view('roles.editar', ['rol' => $this->rol->getById($id)], 'plantilla');
+        $this->view('roles.editar', ['rol' => $this->rol->getById($id)], 'app');
     }
 
     public function store(): void
@@ -40,7 +40,7 @@ class RolController extends Controller
             $this->view('roles.crear', [
                 'errors' => $validator->getErrors(),
                 'datos_viejos' => $data,
-            ], 'plantilla');
+            ], 'app');
             return;
         }
 
@@ -48,7 +48,7 @@ class RolController extends Controller
             $this->view('roles.crear', [
                 'errors' => ['db' => 'No se pudo guardar el rol.'],
                 'datos_viejos' => $data,
-            ], 'plantilla');
+            ], 'app');
             return;
         }
 
@@ -73,7 +73,7 @@ class RolController extends Controller
             $this->view('roles.editar', [
                 'rol' => array_merge($rolActual, $data),
                 'errors' => $validator->getErrors(),
-            ], 'plantilla');
+            ], 'app');
             return;
         }
 
@@ -81,7 +81,7 @@ class RolController extends Controller
             $this->view('roles.editar', [
                 'rol' => array_merge($rolActual, $data),
                 'errors' => ['db' => 'No se pudo actualizar el rol.'],
-            ], 'plantilla');
+            ], 'app');
             return;
         }
 
@@ -104,11 +104,12 @@ class RolController extends Controller
 
     private function validate(Validator $validator, array $data): bool
     {
-        return $validator->validate($data, [
-            'nombre' => ['required', 'string', 'max' => 50],
-            'descripcion' => ['nullable', 'string', 'max' => 255],
+        $rules = [
+            'nombre' => ['required', 'string', 'maxLength' => 50],
+            'descripcion' => ['nullable', 'string', 'maxLength' => 255],
             'estado' => ['required', 'string', 'in' => ['Activo', 'Inactivo']],
-        ]);
+        ];
+        return $validator->validate($rules, $data);
     }
 
     private function normalize(array $data): array
