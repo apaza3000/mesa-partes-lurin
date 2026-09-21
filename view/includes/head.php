@@ -82,9 +82,8 @@
   <!--end::Third Party Plugin(Bootstrap Icons)-->
 
   <!--begin::Required Plugin(AdminLTE)-->
-  <link rel="stylesheet" href="/view/assets/css/admin-lte/adminlte.css" />
+  <link rel="stylesheet" href="view\assets\css\admin-lte\adminlte.css" />
   <!--end::Required Plugin(AdminLTE)-->
-  =======
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <title>AdminLTE 4 | Starter Page</title>
 
@@ -172,6 +171,7 @@
   <!--end::Required Plugin(AdminLTE)-->
 
 </head>
+
 <!--end::Head-->
 <!--begin::Body-->
 

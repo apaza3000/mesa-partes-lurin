@@ -1,4 +1,14 @@
 <?php
+session_start();
+$_SESSION["login"] = true;
+if ($_SESSION["login"]) {
+    require_once("view/plantilla.php");
+} else {
+    require_once("view/pages/login.php");
+}
+
+
+/*
 // 1. Iniciar sesión si no está activa
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -24,7 +34,7 @@ require_once __DIR__ . DIRECTORY_SEPARATOR . "autoload.php";
  * @param string $key
  * @param mixed $default
  * @return mixed
- */
+
 function env($key, $default = null)
 {
     if (isset($_ENV[$key])) {
@@ -45,3 +55,5 @@ Path::setBasePath(__DIR__);
 
 
 require_once __DIR__ . DIRECTORY_SEPARATOR . "routes" . DIRECTORY_SEPARATOR . "Router.php";
+ */
+?>

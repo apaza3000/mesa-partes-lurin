@@ -27,8 +27,9 @@
                         <!--begin::Message-->
                         <div class="d-flex">
                             <div class="flex-shrink-0">
+
                                 <img src="/view/assets/img/user1-128x128.jpg" alt=""
-                                    class="img-size-50 rounded-circle me-3" />
+                                    class="img-size-50 rounded-circle me-3" >
                             </div>
                             <div class="flex-grow-1">
                                 <p class="dropdown-item-title">
