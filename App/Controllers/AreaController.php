@@ -88,7 +88,7 @@ class AreaController extends Controller
                     "errors"       => ['db' => 'No se pudo guardar el área. Intenta de nuevo.'],
                     "datos_viejos" => $data,
                 ],
-                "plantilla"
+                "app"
             );
         }
 
