@@ -2,15 +2,16 @@
 namespace App\Controllers;
 
 use App\Services\TipoDocumentoService;
+use PDO;
 
 class TipoDocumentoController {
-    private $service;
+    private TipoDocumentoService $service;
 
-    public function __construct($db) {
+    public function __construct(PDO $db) {
         $this->service = new TipoDocumentoService($db);
     }
 
-    private function initSession() {
+    private function initSession(): void {
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
@@ -18,7 +19,7 @@ class TipoDocumentoController {
         if (empty($_SESSION['csrf_token'])) $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
     }
 
-    public function index() {
+    public function index(): void {
         $this->initSession();
         if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
             header('Content-Type: application/json');
@@ -28,7 +29,7 @@ class TipoDocumentoController {
         require __DIR__ . '/../../views/tipos-documento/index.php';
     }
 
-    public function store() {
+    public function store(): void {
         $this->initSession();
         header('Content-Type: application/json');
 
@@ -42,7 +43,7 @@ class TipoDocumentoController {
         echo json_encode($this->service->create($data, $_SESSION['usuario_id']));
     }
 
-    public function show($id) {
+    public function show(int|string $id): void {
         $this->initSession();
         header('Content-Type: application/json');
         $item = $this->service->find($id);
@@ -54,7 +55,7 @@ class TipoDocumentoController {
         }
     }
 
-    public function update($id) {
+    public function update(int|string $id): void {
         $this->initSession();
         header('Content-Type: application/json');
 
@@ -68,14 +69,14 @@ class TipoDocumentoController {
         echo json_encode($this->service->update($id, $data, $_SESSION['usuario_id']));
     }
 
-    public function toggleState($id) {
+    public function toggleState(int|string $id): void {
         $this->initSession();
         header('Content-Type: application/json');
         $estado = isset($_POST['estado']) ? (int)$_POST['estado'] : 0;
         echo json_encode($this->service->toggleState($id, $estado, $_SESSION['usuario_id']));
     }
 
-    public function delete($id) {
+    public function delete(int|string $id): void {
         $this->initSession();
         header('Content-Type: application/json');
         echo json_encode($this->service->deleteOrDisable($id, $_SESSION['usuario_id']));

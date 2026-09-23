@@ -5,13 +5,13 @@ use PDO;
 use PDOException;
 
 class Database {
-    private static $host = 'localhost';
-    private static $db_name = 'mesa_partes_db'; // Nombre de tu base de datos en Laragon
-    private static $username = 'root';
-    private static $password = '';
-    private static $conn = null;
+    private static string $host = 'localhost';
+    private static string $db_name = 'mesa_partes_db';
+    private static string $username = 'root';
+    private static string $password = '';
+    private static ?PDO $conn = null;
 
-    public static function getConnection() {
+    public static function getConnection(): PDO {
         if (self::$conn === null) {
             try {
                 self::$conn = new PDO(

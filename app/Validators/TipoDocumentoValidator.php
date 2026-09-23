@@ -4,12 +4,22 @@ namespace App\Validators;
 use PDO;
 
 class TipoDocumentoValidator {
+    /**
+     * @var PDO
+     */
     private $db;
 
+    /**
+     * @param PDO $db
+     */
     public function __construct(PDO $db) {
         $this->db =$db;
     }
 
+    /**
+     * @param int|string|null $currentId
+     * @return array
+     */
     public function getRules($currentId = null) {
         $codigoRule =$currentId 
             ? ['uniqueExcept' => ['tipos_documento', 'codigo', $currentId]]
@@ -47,7 +57,12 @@ class TipoDocumentoValidator {
         ];
     }
 
-    public function validate($data,$currentId = null) {
+    /**
+     * @param array $data
+     * @param int|string|null $currentId
+     * @return array
+     */
+    public function validate(array $data,$currentId = null) {
         $rules =$this->getRules($currentId);$errors = [];
 
         foreach ($rules as$field => $fieldRules) {$value = $data[$field] ?? null;
@@ -77,13 +92,13 @@ class TipoDocumentoValidator {
                 if ($rule === 'unique' && is_array($param)) {
                     [$tabla, $columna] =$param;
                     if ($this->checkExists($tabla, $columna,$value)) {
-                        $errors[$field] = "El valor ingresado ya está registrado.";
+                        $errors[$field] = "El valor ingresado ya esta registrado.";
                     }
                 }
                 if ($rule === 'uniqueExcept' && is_array($param)) {
                     [$tabla,$columna, $exceptId] =$param;
                     if ($this->checkExists($tabla,$columna, $value,$exceptId)) {
-                        $errors[$field] = "El valor ingresado ya está registrado en otro tipo.";
+                        $errors[$field] = "El valor ingresado ya esta registrado en otro tipo.";
                     }
                 }
             }
@@ -92,6 +107,13 @@ class TipoDocumentoValidator {
         return $errors;
     }
 
+    /**
+     * @param string $table
+     * @param string $column
+     * @param mixed $value
+     * @param int|string|null $exceptId
+     * @return bool
+     */
     private function checkExists($table, $column,$value, $exceptId = null) {$sql = "SELECT COUNT(*) FROM `{$table}` WHERE `{$column}` = :val AND deleted_at IS NULL";
         $params = [':val' =>$value];
         if ($exceptId) {$sql .= " AND id != :exceptId";
@@ -99,6 +121,6 @@ class TipoDocumentoValidator {
         }
         $stmt = $this->db->prepare($sql);
         $stmt->execute($params);
-        return $stmt->fetchColumn() > 0;
+        return (int)$stmt->fetchColumn() > 0;
     }
 }

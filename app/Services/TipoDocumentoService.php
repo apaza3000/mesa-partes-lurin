@@ -6,9 +6,9 @@ use App\Validators\TipoDocumentoValidator;
 use PDO;
 
 class TipoDocumentoService {
-    private $model;
-    private $validator;
-    private $db;
+    private TipoDocumento $model;
+    private TipoDocumentoValidator $validator;
+    private PDO $db;
 
     public function __construct(PDO $db) {
         $this->db = $db;
@@ -16,15 +16,15 @@ class TipoDocumentoService {
         $this->validator = new TipoDocumentoValidator($db);
     }
 
-    public function listAll() {
+    public function listAll(): array {
         return $this->model->getAll();
     }
 
-    public function find($id) {
+    public function find(int|string $id): array|false {
         return $this->model->getById($id);
     }
 
-    public function create($data, $usuarioId) {
+    public function create(array $data, int $usuarioId): array {
         $errors = $this->validator->validate($data);
         if (!empty($errors)) {
             return ['success' => false, 'errors' => $errors];
@@ -42,7 +42,7 @@ class TipoDocumentoService {
         }
     }
 
-    public function update($id, $data, $usuarioId) {
+    public function update(int|string $id, array $data, int $usuarioId): array {
         if (!$this->model->getById($id)) {
             return ['success' => false, 'message' => 'El registro no existe.'];
         }
@@ -64,7 +64,7 @@ class TipoDocumentoService {
         }
     }
 
-    public function toggleState($id, $estado, $usuarioId) {
+    public function toggleState(int|string $id, int $estado, int $usuarioId): array {
         $this->db->beginTransaction();
         try {
             $this->model->changeState($id, $estado);
@@ -77,7 +77,7 @@ class TipoDocumentoService {
         }
     }
 
-    public function deleteOrDisable($id, $usuarioId) {
+    public function deleteOrDisable(int|string $id, int $usuarioId): array {
         $this->db->beginTransaction();
         try {
             if ($this->model->isUsedInDocuments($id)) {
@@ -97,7 +97,7 @@ class TipoDocumentoService {
         }
     }
 
-    private function audit($usuarioId, $tabla, $registroId, $accion, $detalles) {
+    private function audit(int $usuarioId, string $tabla, int|string $registroId, string $accion, string $detalles): void {
         $sql = "INSERT INTO auditoria (usuario_id, tabla, registro_id, accion, detalles) 
                 VALUES (:usuario_id, :tabla, :registro_id, :accion, :detalles)";
         $stmt = $this->db->prepare($sql);
