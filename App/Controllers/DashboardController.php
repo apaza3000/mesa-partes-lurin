@@ -9,6 +9,6 @@ class DashboardController extends Controller
 
     public function index()
     {
-        return $this->view("inicio", [], "plantilla");
+        return $this->view("inicio", [], "app");
     }
 }
