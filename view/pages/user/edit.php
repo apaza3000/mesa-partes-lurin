@@ -1,5 +1,3 @@
-
-
 <!--end::Sidebar-->
 <!--begin::App Main-->
 <main class="app-main">
