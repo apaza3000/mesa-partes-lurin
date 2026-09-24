@@ -8,6 +8,7 @@ use src\Core\Router;
 
 require_once __DIR__ . "/areas.php";
 require_once __DIR__ . "/roles.php";
+require_once __DIR__ . "/personas.php";
 require_once __DIR__ . "/error.php";
 
 Router::get("/",[DashboardController::class,"index"]);

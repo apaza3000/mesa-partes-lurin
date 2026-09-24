@@ -46,6 +46,13 @@ $navigation = [
       ],
 
       [
+        'title' => 'Personas remitentes',
+        'icon' => 'bi bi-person-vcard-fill',
+        'url' => '/personas',
+        'roles' => ['admin']
+      ],
+
+      [
         'title' => 'Roles y permisos',
         'icon' => 'bi bi-shield-lock-fill',
         'url' => '/roles',
