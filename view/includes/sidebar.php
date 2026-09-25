@@ -41,7 +41,7 @@ $navigation = [
       [
         'title' => 'Usuarios',
         'icon' => 'bi bi-person-fill',
-        'url' => '/view/pages/users.php',
+        'url' => '/usuarios',
         'roles' => ['admin']
       ],
 

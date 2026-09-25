@@ -13,6 +13,7 @@
 
 <div class="app-content">
     <div class="container-fluid">
+
         <?php if (!empty($_SESSION['rol_mensaje']) || !empty($_SESSION['rol_error'])): ?>
             <div class="alert alert-<?= !empty($_SESSION['rol_error']) ? 'danger' : 'success' ?>">
                 <?= htmlspecialchars($_SESSION['rol_error'] ?? $_SESSION['rol_mensaje'], ENT_QUOTES, 'UTF-8') ?>
@@ -24,6 +25,7 @@
             <div class="card-header"><h3 class="card-title">Listado de Roles</h3></div>
             <div class="card-body p-0">
                 <div class="table-responsive">
+                    
                     <table class="table table-striped align-middle mb-0">
                         <thead>
                             <tr>

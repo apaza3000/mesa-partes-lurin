@@ -1,6 +1,40 @@
 <?php
 namespace App\Controllers;
 
+use App\Services\UsuarioServices;
+use Src\Core\Controller;
+
+class UsuarioController extends Controller
+{
+    private UsuarioServices $UsuarioServices;
+
+    public function __construct()
+    {
+        $this->UsuarioServices = new UsuarioServices();
+    }
+
+    public function index()
+    {
+        $usuarios = $this->UsuarioServices->listarUsuarios();
+        $this->view('usuarios.index', ['usuarios' => $usuarios], 'app');
+    }
+
+    public function create()
+    {
+        $this->view('usuarios.crear', [], 'app');
+    }
+
+    public function edit(int $id)
+    {
+        $usuario = $this->UsuarioServices->obtenerPorId($id);
+        $this->view('usuarios.editar', ['usuario' => $usuario], 'app');
+    }
+
+    // Aquí irían store(), update(), toggleEstado(), etc.
+}
+/*
+namespace App\Controllers;
+
 use App\Models\Usuario;
 use App\Validators\UsuarioValidator;
 
@@ -164,4 +198,4 @@ class UsuarioController {
             exit;
         }
     }
-}
+}*/
