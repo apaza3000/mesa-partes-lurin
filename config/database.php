@@ -1,7 +1,7 @@
 <?php
 return [
     'host' => env('DB_HOST', "localhost"),
-    'database' => env('DB_NAME', 'db_intranet'),
+    'database' => env('DB_NAME', 'mesa_partes_lurin'),
     'username' => env('DB_USER', 'root'),
     'password' => env('DB_PASS', ''),
     'port' => env('DB_PORT', '3306'),

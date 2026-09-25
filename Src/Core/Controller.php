@@ -11,7 +11,10 @@ class Controller
      */
     protected function render(string $vista, array $datos = [], ?string $layout = null): string
     {
-        $archivo = Path::base('view/pages/') . str_replace('.', '/', $vista) . '.php';
+        $archivo = rtrim(Path::base('view/pages/'), DIRECTORY_SEPARATOR)
+            . DIRECTORY_SEPARATOR
+            . str_replace('.', DIRECTORY_SEPARATOR, $vista)
+            . '.php';
 
         if (!file_exists($archivo)) {
             throw new \Exception("Vista no encontrada: $vista $archivo");
@@ -27,7 +30,10 @@ class Controller
 
         // Si se pidió un layout, lo envolvemos
         if ($layout !== null) {
-            $archivoLayout = Path::base('view/includes/') . str_replace('.', '/', $layout) . '.php';
+            $archivoLayout = rtrim(Path::base('view/includes/'), DIRECTORY_SEPARATOR)
+                . DIRECTORY_SEPARATOR
+                . str_replace('.', DIRECTORY_SEPARATOR, $layout)
+                . '.php';
 
             if (!file_exists($archivoLayout)) {
                 throw new \Exception("Layout no encontrado: $layout");

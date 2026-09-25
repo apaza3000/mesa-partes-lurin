@@ -73,9 +73,14 @@ class Path
      */
     protected static function getFullPath(string $subPath): string
     {
+        $base = rtrim(self::$basePath, DIRECTORY_SEPARATOR);
+        $relative = $subPath === '' ? '' : ltrim($subPath, DIRECTORY_SEPARATOR);
+        $fullPath = $relative === '' ? $base : $base . DIRECTORY_SEPARATOR . $relative;
 
-        $fullPath = self::$basePath . DIRECTORY_SEPARATOR . trim($subPath, DIRECTORY_SEPARATOR);
-        self::makeDir($fullPath);
+        if ($relative !== '') {
+            self::makeDir($fullPath);
+        }
+
         return $fullPath;
     }
 
