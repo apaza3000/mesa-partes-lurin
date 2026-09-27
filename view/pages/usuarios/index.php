@@ -76,9 +76,8 @@
                                         <tr>
                                             <th>N°</th>
                                             <th>User</th>
-                                            <th>Email</th>
-                                            <th>Role</th>
-                                            <th>Status</th>
+                                            <th>Rol</th>
+                                            <th>Estado</th>
                                             <th>Created</th>
                                             <th class="text-end">Actions</th>
                                         </tr>
@@ -101,10 +100,9 @@
                                                             </span>
                                                         </div>
                                                     </td>
-                                                    <td><?= htmlspecialchars($user['email'] ?? '', ENT_QUOTES, 'UTF-8') ?></td>
                                                     <td>
                                                         <span class="badge bg-info text-dark">
-                                                            <?= htmlspecialchars($user['role'] ?? $user['nombre_rol'] ?? '', ENT_QUOTES, 'UTF-8') ?>
+                                                            <?= htmlspecialchars($user['rol'] ?? $user['rol_nombre'] ?? 'sin rol', ENT_QUOTES, 'UTF-8') ?>
                                                         </span>
                                                     </td>
                                                     <td>
@@ -113,7 +111,7 @@
                                                             <?= htmlspecialchars($user['status'] ?? $user['estado'] ?? '', ENT_QUOTES, 'UTF-8') ?>
                                                         </span>
                                                     </td>
-                                                    <td><?= htmlspecialchars($user['created'] ?? $user['creado'] ?? '', ENT_QUOTES, 'UTF-8') ?>
+                                                    <td><?= htmlspecialchars($user['created'] ?? $user['creado_en'] ?? '', ENT_QUOTES, 'UTF-8') ?>
                                                     </td>
                                                     <td class="text-center">
                                                         <a href="/usuarios/<?= (int) ($user['id_usuario'] ?? $user['id'] ?? 0) ?>/editar"
