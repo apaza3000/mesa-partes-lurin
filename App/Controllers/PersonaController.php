@@ -67,7 +67,18 @@ class PersonaController extends Controller
         if ($numero === '') {
             $this->json(['encontrado' => false, 'mensaje' => 'Ingrese un DNI o RUC.'], 422);
         }
+
         $persona = $this->persona->buscarPorDocumento($numero);
+        $encontrada = $persona !== null;
+        $this->persona->registrarAuditoria(
+            $_SESSION['usuario_id'] ?? null,
+            'personas',
+            'buscar',
+            'personas',
+            $encontrada ? (int) $persona['id_persona'] : null,
+            'Búsqueda de persona por DNI/RUC: ' . ($encontrada ? 'encontrada.' : 'sin resultados.')
+        );
+
         $this->json(['encontrado' => (bool) $persona, 'persona' => $persona]);
     }
 

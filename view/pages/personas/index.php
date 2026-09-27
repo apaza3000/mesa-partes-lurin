@@ -57,13 +57,6 @@ $e = fn($v) => htmlspecialchars((string) ($v ?? ''), ENT_QUOTES, 'UTF-8');
 <link rel="stylesheet" href="https://cdn.datatables.net/2.0.8/css/dataTables.bootstrap5.min.css">
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    new DataTable('#tabla-personas', {
-        language: {
-            search: 'Filtrar:',
-            emptyTable: 'No hay personas registradas',
-            zeroRecords: 'No se encontraron coincidencias'
-        }
-    });
     const input = document.querySelector('#buscar-documento');
     const resultado = document.querySelector('#resultado-busqueda');
     const buscar = async () => {
@@ -97,6 +90,17 @@ document.addEventListener('DOMContentLoaded', () => {
             buscar();
         }
     });
+
+    if (typeof DataTable !== 'undefined') {
+        new DataTable('#tabla-personas', {
+            language: {
+                search: 'Filtrar:',
+                emptyTable: 'No hay personas registradas',
+                zeroRecords: 'No se encontraron coincidencias'
+            }
+        });
+    }
+
     <?php if (!empty($_SESSION['flash'])): ?>
     Swal.fire({
         icon: 'success',
