@@ -57,7 +57,7 @@ class UsuarioServices
 
             // 4. Asignar Rol en la tabla pivote 'usuario_roles'
             if (!empty($datos['id_rol'])) {
-                $this->asignarRol($idUsuario, (int)$datos['id_rol']);
+                $this->asignarRol($idUsuario, (int) $datos['id_rol']);
             }
 
             // 5. Registrar acción en la tabla 'auditoria'
@@ -98,7 +98,7 @@ class UsuarioServices
 
             // 3. Reasignar o actualizar Rol si cambió
             if (isset($datos['id_rol'])) {
-                $this->sincronizarRol($id, (int)$datos['id_rol']);
+                $this->sincronizarRol($id, (int) $datos['id_rol']);
             }
 
             // 4. Registrar acción en auditoría
@@ -173,9 +173,9 @@ class UsuarioServices
             );
 
             $stmt->execute([
-                ':usuario'  => $idUsuarioSesion,
-                ':accion'   => $accion,
-                ':tabla'    => $tabla,
+                ':usuario' => $idUsuarioSesion,
+                ':accion' => $accion,
+                ':tabla' => $tabla,
                 ':registro' => $registroId
             ]);
         } catch (PDOException $e) {

@@ -1,16 +1,8 @@
 <?php
-/*
 namespace App\Models;
 
 use PDO;
 use PDOException;
-use Exception;
-use Src\Core\Conexion;
-*/
-
-namespace App\Models;
-
-use PDO;
 use Src\Core\Conexion;
 
 class Usuario
@@ -27,15 +19,22 @@ class Usuario
      */
     public function getAll(): array
     {
-        $sql = "SELECT u.id_usuario, u.username, u.estado, r.nombre AS rol_nombre
-            FROM usuarios u
+        try {
+            $stmt = $this->db->query(
+                'SELECT 
+                    u.id_usuario, 
+                    u.username, 
+                    u.estado, 
+                    r.nombre AS rol_nombre
+            FROM usuarios AS u
             LEFT JOIN usuario_roles ur ON u.id_usuario = ur.id_usuario
             LEFT JOIN roles r ON ur.id_rol = r.id_rol
-            ORDER BY u.id_usuario DESC";
-
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute();
-
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            ORDER BY u.id_usuario DESC LIMIT 10'
+            );
+            return $stmt->fetchAll();
+        } catch (PDOException $e) {
+            return [];
+        }
     }
+
 }

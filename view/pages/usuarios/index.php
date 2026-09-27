@@ -68,17 +68,75 @@
                                 </div>
                             </div>
                         </div>
-
-                        <table>
-                            <tr>
-                                <th scope="col">Usuario</th>
-                                <th scope="col">Correo electronico</th>
-                                <th scope="col">Rol</th>
-                                <th scope="col">Estado</th>
-                                <th scope="col">Creado</th>
-                                <th scope="col">Comportamiento</th>
-                            </tr>
-                        </table>
+                        <!--tabla-->
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle m-0">
+                                    <thead>
+                                        <tr>
+                                            <th>N°</th>
+                                            <th>User</th>
+                                            <th>Email</th>
+                                            <th>Role</th>
+                                            <th>Status</th>
+                                            <th>Created</th>
+                                            <th class="text-end">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php if (!$usuarios): ?>
+                                            <tr>
+                                                <td colspan="7" class="text-center py-4">No hay usuarios registrados.</td>
+                                            </tr>
+                                        <?php else: ?>
+                                            <?php foreach ($usuarios as $indice => $user): ?>
+                                                <tr>
+                                                    <td><?= $indice + 1 ?></td>
+                                                    <td>
+                                                        <div class="d-flex align-items-center">
+                                                            <img src="<?= htmlspecialchars( $user['avatar'] ?? '/view/assets/img/default-user.png', ENT_QUOTES, 'UTF-8') ?>"
+                                                                alt="Avatar" class="rounded-circle me-2" width="32" height="32">
+                                                            <span class="fw-medium">
+                                                                <?= htmlspecialchars($user['name'] ?? $user['username'] ?? '', ENT_QUOTES, 'UTF-8') ?>
+                                                            </span>
+                                                        </div>
+                                                    </td>
+                                                    <td><?= htmlspecialchars($user['email'] ?? '', ENT_QUOTES, 'UTF-8') ?></td>
+                                                    <td>
+                                                        <span class="badge bg-info text-dark">
+                                                            <?= htmlspecialchars($user['role'] ?? $user['nombre_rol'] ?? '', ENT_QUOTES, 'UTF-8') ?>
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <span
+                                                            class="badge bg-<?= ($user['status'] ?? $user['estado'] ?? '') === 'Activo' ? 'success' : 'secondary' ?>">
+                                                            <?= htmlspecialchars($user['status'] ?? $user['estado'] ?? '', ENT_QUOTES, 'UTF-8') ?>
+                                                        </span>
+                                                    </td>
+                                                    <td><?= htmlspecialchars($user['created'] ?? $user['creado'] ?? '', ENT_QUOTES, 'UTF-8') ?>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <a href="/usuarios/<?= (int) ($user['id_usuario'] ?? $user['id'] ?? 0) ?>/editar"
+                                                            class="btn btn-sm btn-warning text-white" title="Editar">
+                                                            <i class="bi bi-pencil-square"></i>
+                                                        </a>
+                                                        <form
+                                                            action="/usuarios/<?= (int) ($user['id_usuario'] ?? $user['id'] ?? 0) ?>/delete"
+                                                            method="POST" class="d-inline"
+                                                            onsubmit="return confirm('¿Está seguro de eliminar este usuario?');">
+                                                            <button type="submit" class="btn btn-sm btn-danger"
+                                                                title="Eliminar">
+                                                                <i class="bi bi-trash"></i>
+                                                            </button>
+                                                        </form>
+                                                    </td>
+                                                </tr>
+                                            <?php endforeach; ?>
+                                        <?php endif; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                         <!--modificar en un futuro la barra de muestra para funcionar con SQL👇-->
                         <!--barra de muestra👇-->
                         <div class="card-footer clearfix">

@@ -1,63 +1,24 @@
 <?php
-// En el futuro, esta variable se llenara con la consulta SQL
-// simulacion de datos
-$users = [
-    [
-        'id' => 1,
-        'name' => 'Alexander Pierce',
-        'avatar' => '../assets/img/user1-128x128.jpg',
-        'email' => 'alexander.pierce@example.com',
-        'role' => 'Administrator',
-        'status' => 'Active',
-        'created' => 'Mar 12, 2025'
-    ],
-    [
-        'id' => 2,
-        'name' => 'Sarah Bullock',
-        'avatar' => '../assets/img/user3-128x128.jpg',
-        'email' => 'sarah.bullock@example.com',
-        'role' => 'Editor',
-        'status' => 'Active',
-        'created' => 'Apr 3, 2025'
-    ],
-    [
-        'id' => 3,
-        'name' => 'Daniel Cooper',
-        'avatar' => '../assets/img/user6-128x128.jpg',
-        'email' => 'daniel.cooper@example.com',
-        'role' => 'Author',
-        'status' => 'Pending',
-        'created' => 'Apr 28, 2025'
-    ]
-];
-
-// Funciones helper para asignar el color del badge en Bootstrap
-function getRoleBadgeClass($role)
+// Helper para asignar color del badge según el rol de la BD
+function getRoleBadgeClass(?string $role): string
 {
-    switch ($role) {
-        case 'Administrator':
-            return 'text-bg-danger';
-        case 'Editor':
-            return 'text-bg-primary';
-        case 'Author':
-            return 'text-bg-info';
-        default:
-            return 'text-bg-secondary';
-    }
+    return match ($role) {
+        'Administrador', 'Administrator', 'admin' => 'text-bg-danger',
+        'Editor' => 'text-bg-primary',
+        'Autor', 'Author' => 'text-bg-info',
+        default => 'text-bg-secondary',
+    };
 }
 
-function getStatusBadgeClass($status)
+// Helper para asignar color del badge según el estado
+function getStatusBadgeClass(?string $status): string
 {
-    switch ($status) {
-        case 'Active':
-            return 'text-bg-success';
-        case 'Pending':
-            return 'text-bg-warning';
-        case 'Suspended':
-            return 'text-bg-danger';
-        default:
-            return 'text-bg-secondary';
-    }
+    return match ($status) {
+        'Activo', 'Active' => 'text-bg-success',
+        'Pendiente', 'Pending' => 'text-bg-warning',
+        'Inactivo', 'Suspendido' => 'text-bg-danger',
+        default => 'text-bg-secondary',
+    };
 }
 ?>
 <div class="card-body p-0">

@@ -1,24 +1,39 @@
 <?php
-namespace App\Controllers;
 
-use App\Services\UsuarioServices;
+namespace App\Controllers;
+//use App\Services\UsuarioServices;
+use App\Models\Usuario;
 use Src\Core\Controller;
+use Src\Core\Request;
+use Src\Core\Validator;
 
 class UsuarioController extends Controller
 {
-    private UsuarioServices $UsuarioServices;
-
+    private Usuario $user;
+    //private UsuarioServices $UsuarioServices;
     public function __construct()
     {
-        $this->UsuarioServices = new UsuarioServices();
+        $this->user = new Usuario();
     }
 
-    public function index()
+    public function index(): void
     {
-        $usuarios = $this->UsuarioServices->listarUsuarios();
-        $this->view('usuarios.index', ['usuarios' => $usuarios], 'app');
+        //$usuarios = $this->UsuarioServices->listarUsuarios();
+        $this->view('usuarios.index', ['usuarios' => $this->user->getAll()], 'app');
     }
+    /*
+    // Renderiza la vista de un usuario específico o la lista para respuesta parcial/AJAX
 
+    public function renderizarUsuario(int $id): void
+    {
+        // 1. Consulta el usuario o los datos requeridos al servicio
+        $usuario = $this->UsuarioServices->obtenerPorId($id);
+
+        // 2. Renderiza la vista 'usuarios.renderizarUsuario' pasando los datos
+        $this->view('usuarios.renderizarUsuario', [
+            'usuario' => $usuario
+        ], 'app');
+    }
     public function create()
     {
         $this->view('usuarios.crear', [], 'app');
@@ -29,9 +44,12 @@ class UsuarioController extends Controller
         $usuario = $this->UsuarioServices->obtenerPorId($id);
         $this->view('usuarios.editar', ['usuario' => $usuario], 'app');
     }
-
+*/
     // Aquí irían store(), update(), toggleEstado(), etc.
 }
+
+
+
 /*
 namespace App\Controllers;
 
