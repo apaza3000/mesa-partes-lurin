@@ -49,14 +49,21 @@
                                                 placeholder="Search users" aria-label="Search users"
                                                 style="width: 180px" />
                                         </div>
-                                        <!--combo box de ROLES 👇-->
-                                        <select id="user-role-filter" class="form-select form-select-sm w-auto"
-                                            aria-label="Filter by role">
-                                            <option value="all" selected>All roles</option>
-                                            <option value="administrator">Administrator</option>
-                                            <option value="editor">Editor</option>
-                                            <option value="author">Author</option>
-                                            <option value="subscriber">Subscriber</option>
+                                        <!-- Combo box de ROLES 👇 -->
+                                        <!-- En tu vista usuarios.index.php -->
+                                        <select id="user-role-filter" name="role_id"
+                                            class="form-select form-select-sm w-auto">
+                                            <option value="all">TODOS LOS ROLES</option>
+
+                                            <?php if (empty($roles)): ?>
+                                                <option value="" disabled>No hay roles registrados</option>
+                                            <?php else: ?>
+                                                <?php foreach ($roles as $rol): ?>
+                                                    <option value="<?= (int) $rol['id_rol'] ?>">
+                                                        <?= htmlspecialchars($rol['nombre'], ENT_QUOTES, 'UTF-8') ?>
+                                                    </option>
+                                                <?php endforeach; ?>
+                                            <?php endif; ?>
                                         </select>
                                         <!--Boton nuevo usuario 👇-->
                                         <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal"
@@ -93,22 +100,45 @@
                                                     <td><?= $indice + 1 ?></td>
                                                     <td>
                                                         <div class="d-flex align-items-center">
-                                                            <img src="<?= htmlspecialchars( $user['avatar'] ?? '/view/assets/img/default-user.png', ENT_QUOTES, 'UTF-8') ?>"
+                                                            <img src="<?= htmlspecialchars($user['avatar'] ?? '/view/assets/img/default-user.png', ENT_QUOTES, 'UTF-8') ?>"
                                                                 alt="Avatar" class="rounded-circle me-2" width="32" height="32">
                                                             <span class="fw-medium">
-                                                                <?= htmlspecialchars($user['name'] ?? $user['username'] ?? '', ENT_QUOTES, 'UTF-8') ?>
+                                                                <?= htmlspecialchars($user['username'] ?? '*username_null*', ENT_QUOTES, 'UTF-8') ?>
                                                             </span>
                                                         </div>
                                                     </td>
                                                     <td>
-                                                        <span class="badge bg-info text-dark">
-                                                            <?= htmlspecialchars($user['rol'] ?? $user['rol_nombre'] ?? 'sin rol', ENT_QUOTES, 'UTF-8') ?>
+                                                        <?php
+                                                        // Obtenemos el nombre o ID del rol
+                                                        $rolUsuario = $user['rol'] ?? $user['rol_nombre'] ?? '*sin_rol*';
+                                                        // Asignamos la clase de AdminLTE según el rol
+                                                        $badgeClass = match ($rolUsuario) {
+                                                            'ADMINISTRADOR' => 'bg-danger text-dark',
+                                                            'MESA_DE_PARTES' => 'bg-warning text-dark',
+                                                            'RESPONSABLE_AREA' => 'bg-primary text-dark',
+                                                            'USUARIO_AREA' => 'bg-info text-dark',
+                                                            'CONSULTA' => 'bg-success text-dark',
+                                                            default => 'bg-secondary', // Si el rol no coincide con ningún caso
+                                                        };
+                                                        ?>
+                                                        <span class="badge <?= $badgeClass ?>">
+                                                            <?= htmlspecialchars($rolUsuario, ENT_QUOTES, 'UTF-8') ?>
                                                         </span>
                                                     </td>
                                                     <td>
-                                                        <span
-                                                            class="badge bg-<?= ($user['status'] ?? $user['estado'] ?? '') === 'Activo' ? 'success' : 'secondary' ?>">
-                                                            <?= htmlspecialchars($user['status'] ?? $user['estado'] ?? '', ENT_QUOTES, 'UTF-8') ?>
+                                                        <?php
+                                                        // 1. Obtenemos el estado actual
+                                                        $estado = $user['status'] ?? $user['estado'] ?? '*sin_estado*';
+                                                        // 2. Evaluamos el color según el texto del estado
+                                                        $bgClass = match ($estado) {
+                                                            'Activo' => 'success',   // Verde
+                                                            'Inactivo' => 'warning',   // Amarillo
+                                                            'Suspendido' => 'danger',    // Rojo
+                                                            default => 'secondary', // Gris para cualquier otro caso (*sin_estado*, etc.)
+                                                        };
+                                                        ?>
+                                                        <span class="badge bg-<?= $bgClass ?>">
+                                                            <?= htmlspecialchars($estado, ENT_QUOTES, 'UTF-8') ?>
                                                         </span>
                                                     </td>
                                                     <td><?= htmlspecialchars($user['created'] ?? $user['creado_en'] ?? '', ENT_QUOTES, 'UTF-8') ?>
@@ -137,40 +167,33 @@
                         </div>
                         <!--modificar en un futuro la barra de muestra para funcionar con SQL👇-->
                         <!--barra de muestra👇-->
+
                         <div class="card-footer clearfix">
-                            <div class="float-start pt-1 fs-7 text-body-secondary">
-                                Showing 1 to 9 of 42 users
-                            </div>
-                            <!--divicion de registros << 1,2,3,4,5 >>👇📋 -->
-                            <ul class="pagination pagination-sm m-0 float-end">
-                                <li class="page-item disabled">
-                                    <a class="page-link" href="#" aria-label="Previous"> &laquo; </a>
-                                </li>
-                                <li class="page-item active">
-                                    <a class="page-link" href="#">1</a>
-                                </li>
-                                <li class="page-item">
-                                    <a class="page-link" href="#">2</a>
-                                </li>
-                                <li class="page-item">
-                                    <a class="page-link" href="#">3</a>
-                                </li>
-                                <li class="page-item">
-                                    <a class="page-link" href="#">4</a>
-                                </li>
-                                <li class="page-item">
-                                    <a class="page-link" href="#">5</a>
-                                </li>
-                                <li class="page-item">
-                                    <a class="page-link" href="#" aria-label="Next"> &raquo; </a>
-                                </li>
-                            </ul>
+                            <nav aria-label="Navegación de usuarios">
+                                <ul class="pagination pagination-sm m-0 float-end">
+
+                                    <!-- Botón Anterior («) -->
+                                    <li class="page-item <?= ($paginaActual <= 1) ? 'disabled' : '' ?>">
+                                        <a class="page-link" href="?page=<?= $paginaActual - 1 ?>">&laquo;</a>
+                                    </li>
+                                    <!-- Botones Numéricos de Páginas -->
+                                    <?php for ($i = 1; $i <= $totalPaginas; $i++): ?>
+                                        <li class="page-item <?= ($i === $paginaActual) ? 'active' : '' ?>">
+                                            <a class="page-link" href="?page=<?= $i ?>">
+                                                <?= $i ?>
+                                            </a>
+                                        </li>
+                                    <?php endfor; ?>
+                                    <!-- Botón Siguiente (») -->
+                                    <li class="page-item <?= ($paginaActual >= $totalPaginas) ? 'disabled' : '' ?>">
+                                        <a class="page-link" href="?page=<?= $paginaActual + 1 ?>">&raquo;</a>
+                                    </li>
+                                </ul>
+                            </nav>
                         </div>
                     </div>
                 </div>
             </div>
-
-
             <!--ventana emergente de [👤New user]👇-->
             <div class="modal fade" id="modal-add-user" tabindex="-1" aria-labelledby="modal-add-user-label"
                 aria-hidden="true">
@@ -220,7 +243,6 @@
                     </div>
                 </div>
             </div>
-
             <!--ventana emergente de [🗑️eliminar usuario]👇-->
             <div class="modal fade" id="modal-delete-user" tabindex="-1" aria-labelledby="modal-delete-user-label"
                 aria-hidden="true">
