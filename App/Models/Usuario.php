@@ -16,6 +16,43 @@ class Usuario
         $this->db = Conexion::getConexion();
     }
 
+    /**
+     * Autentica un usuario activo mediante username o correo electrónico.
+     *
+     * @return array|null Datos del usuario autenticado, o null si las credenciales no son válidas.
+     */
+    public function login(string $identificador, string $password): ?array
+    {
+        $sql = "SELECT u.id_usuario, u.id_persona, u.id_area, u.username,
+                       u.password, u.avatar, u.estado,
+                       p.nombres, p.apellido_paterno, p.apellido_materno, p.email,
+                       GROUP_CONCAT(DISTINCT r.nombre ORDER BY r.nombre SEPARATOR ', ') AS roles
+                FROM usuarios u
+                INNER JOIN personas p ON p.id_persona = u.id_persona
+                LEFT JOIN usuario_roles ur ON ur.id_usuario = u.id_usuario
+                LEFT JOIN roles r ON r.id_rol = ur.id_rol AND r.estado = 'Activo'
+                WHERE u.estado = 'Activo'
+                  AND (u.username = :identificador OR p.email = :identificador)
+                GROUP BY u.id_usuario, u.id_persona, u.id_area, u.username,
+                         u.password, u.avatar, u.estado,
+                         p.nombres, p.apellido_paterno, p.apellido_materno, p.email";
+
+        try {
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([':identificador' => trim($identificador)]);
+            $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$usuario || !password_verify($password, $usuario['password'])) {
+                return null;
+            }
+
+            unset($usuario['password']);
+            return $usuario;
+        } catch (PDOException $e) {
+            return null;
+        }
+    }
+
     // 1. Obtener usuario por email para el Login
     public function obtenerPorEmail(string $email): ?array
     {
