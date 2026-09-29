@@ -14,10 +14,14 @@ $e = fn($v) => htmlspecialchars((string) ($v ?? ''), ENT_QUOTES, 'UTF-8');
                 <h3 class="card-title">Registro de remitentes</h3>
             </div>
             <div class="card-body">
-                <div class="input-group mb-3" style="max-width: 520px"><span class="input-group-text"><i
-                            class="bi bi-search"></i></span><input id="buscar-documento" type="search"
-                        class="form-control" placeholder="Buscar por DNI o RUC" inputmode="numeric"><button
-                        id="btn-buscar-persona" class="btn btn-outline-primary" type="button">Buscar</button></div>
+                <div class="input-group mb-3" style="max-width: 620px"><span class="input-group-text"><i
+                            class="bi bi-search"></i></span><select id="tipo-documento-busqueda" class="form-select"
+                        aria-label="Tipo de documento">
+                        <option value="DNI">DNI</option>
+                        <option value="RUC">RUC</option>
+                    </select><input id="buscar-documento" type="search" class="form-control"
+                        placeholder="Número de documento" inputmode="numeric"><button id="btn-buscar-persona"
+                        class="btn btn-outline-primary" type="button">Buscar</button></div>
                 <div id="resultado-busqueda" class="mb-3"></div>
                 <div class="table-responsive">
                     <table id="tabla-personas" class="table table-striped align-middle">
@@ -58,16 +62,23 @@ $e = fn($v) => htmlspecialchars((string) ($v ?? ''), ENT_QUOTES, 'UTF-8');
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     const input = document.querySelector('#buscar-documento');
+    const tipoDocumento = document.querySelector('#tipo-documento-busqueda');
     const resultado = document.querySelector('#resultado-busqueda');
     const buscar = async () => {
         const numero = input.value.trim();
+        const tipo = tipoDocumento.value;
+        const longitud = tipo === 'DNI' ? 8 : 11;
         if (!numero) {
-            resultado.innerHTML = '<div class="alert alert-warning">Ingrese un DNI o RUC.</div>';
+            resultado.innerHTML = '<div class="alert alert-warning">Ingrese el número de ' + tipo + '.</div>';
+            return;
+        }
+        if (!new RegExp('^[0-9]{' + longitud + '}$').test(numero)) {
+            resultado.innerHTML = '<div class="alert alert-warning">El ' + tipo + ' debe contener exactamente ' + longitud + ' dígitos.</div>';
             return;
         }
         try {
-            const response = await fetch('/personas/buscar?numero_documento=' + encodeURIComponent(
-                numero), {
+            const parametros = new URLSearchParams({ tipo_documento: tipo, numero_documento: numero });
+            const response = await fetch('/personas/buscar?' + parametros.toString(), {
                 headers: {
                     Accept: 'application/json'
                 }

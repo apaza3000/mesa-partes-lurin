@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Models\Persona;
+use App\Services\DocumentoLookupService;
 use App\Validators\PersonaValidator;
 use Src\Core\Controller;
 use Src\Core\Request;
@@ -63,12 +64,21 @@ class PersonaController extends Controller
 
     public function buscar(): void
     {
-        $numero = trim((new Request())->get('numero_documento', ''));
-        if ($numero === '') {
-            $this->json(['encontrado' => false, 'mensaje' => 'Ingrese un DNI o RUC.'], 422);
+        $request = new Request();
+        $tipoDocumento = $request->get('tipo_documento', '');
+        $numero = $request->get('numero_documento', '');
+        $tipoDocumento = is_string($tipoDocumento) ? trim($tipoDocumento) : '';
+        $numero = is_string($numero) ? trim($numero) : '';
+
+        if (!in_array($tipoDocumento, ['DNI', 'RUC'], true)) {
+            $this->json(['encontrado' => false, 'mensaje' => 'Seleccione DNI o RUC.'], 422);
+        }
+        $longitud = $tipoDocumento === 'DNI' ? 8 : 11;
+        if (!preg_match('/^[0-9]{' . $longitud . '}$/D', $numero)) {
+            $this->json(['encontrado' => false, 'mensaje' => 'Ingrese un ' . $tipoDocumento . ' válido de ' . $longitud . ' dígitos.'], 422);
         }
 
-        $persona = $this->persona->buscarPorDocumento($numero);
+        $persona = $this->persona->buscarPorDocumento($tipoDocumento, $numero);
         $encontrada = $persona !== null;
         $this->persona->registrarAuditoria(
             $_SESSION['usuario_id'] ?? null,
@@ -76,10 +86,27 @@ class PersonaController extends Controller
             'buscar',
             'personas',
             $encontrada ? (int) $persona['id_persona'] : null,
-            'Búsqueda de persona por DNI/RUC: ' . ($encontrada ? 'encontrada.' : 'sin resultados.')
+            'Búsqueda de persona por ' . $tipoDocumento . ': ' . ($encontrada ? 'encontrada.' : 'sin resultados.')
         );
 
         $this->json(['encontrado' => (bool) $persona, 'persona' => $persona]);
+    }
+
+    public function consultarDocumento(): void
+    {
+        $request = new Request();
+        $tipoDocumento = $request->get('tipo_documento', '');
+        $numero = $request->get('numero_documento', '');
+        $tipoDocumento = is_string($tipoDocumento) ? trim($tipoDocumento) : '';
+        $numero = is_string($numero) ? trim($numero) : '';
+        $resultado = (new DocumentoLookupService())->consultar($tipoDocumento, $numero);
+        $estado = isset($resultado['persona']) ? 200 : 422;
+
+        if (str_contains($resultado['mensaje'] ?? '', 'no está disponible') || str_contains($resultado['mensaje'] ?? '', 'no está configurada')) {
+            $estado = 503;
+        }
+
+        $this->json($resultado, $estado);
     }
 
     private function save(?int $id): void

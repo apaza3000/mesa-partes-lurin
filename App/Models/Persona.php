@@ -142,13 +142,13 @@ class Persona
         }
     }
 
-    public function buscarPorDocumento(string $numero): ?array
+    public function buscarPorDocumento(string $tipoDocumento, string $numero): ?array
     {
         try {
             $stmt = $this->db->prepare(
-                'SELECT * FROM personas WHERE numero_documento = :numero_documento LIMIT 1'
+                'SELECT * FROM personas WHERE tipo_documento = :tipo_documento AND numero_documento = :numero_documento LIMIT 1'
             );
-            $stmt->execute([':numero_documento' => $numero]);
+            $stmt->execute([':tipo_documento' => $tipoDocumento, ':numero_documento' => $numero]);
             $persona = $stmt->fetch(PDO::FETCH_ASSOC);
             return $persona ?: null;
         } catch (PDOException $e) {

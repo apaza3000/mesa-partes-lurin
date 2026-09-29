@@ -27,6 +27,7 @@ $tipoDocumento = $persona['tipo_documento'] ?? 'DNI';
         </select>
         <?php if (isset($errors['tipo_documento'])): ?><div class="invalid-feedback d-block">
             <?= $e($errors['tipo_documento']) ?></div><?php endif; ?>
+        <div class="form-text">La búsqueda externa está disponible para DNI y RUC.</div>
     </div>
 
     <div class="col-md-4">
@@ -36,7 +37,12 @@ $tipoDocumento = $persona['tipo_documento'] ?? 'DNI';
             maxlength="20" required>
         <?php if (isset($errors['numero_documento'])): ?><div class="invalid-feedback d-block">
             <?= $e($errors['numero_documento']) ?></div><?php endif; ?>
+        <button class="btn btn-outline-primary mt-2" id="buscar-datos-documento" type="button">
+            <i class="bi bi-search me-1"></i>Buscar
+        </button>
     </div>
+
+    <div class="col-12" id="mensaje-consulta-documento" aria-live="polite"></div>
 
     <div class="col-md-6 natural-field" <?= $tipoPersona === 'Juridica' ? 'style="display:none;"' : '' ?>>
         <label for="nombres" class="form-label">Nombres <span class="text-danger">*</span></label>
@@ -118,6 +124,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const tipoPersona = document.getElementById('tipo_persona');
     const naturalFields = document.querySelectorAll('.natural-field');
     const juridicaFields = document.querySelectorAll('.juridica-field');
+    const tipoDocumento = document.getElementById('tipo_documento');
+    const numeroDocumento = document.getElementById('numero_documento');
+    const buscarDocumento = document.getElementById('buscar-datos-documento');
+    const mensajeConsulta = document.getElementById('mensaje-consulta-documento');
 
     const toggleTipoPersona = () => {
         const isNatural = tipoPersona.value === 'Natural';
@@ -139,5 +149,70 @@ document.addEventListener('DOMContentLoaded', function() {
         tipoPersona.addEventListener('change', toggleTipoPersona);
         toggleTipoPersona();
     }
+
+    const consultarDocumento = async () => {
+        const tipo = tipoDocumento.value;
+        const numero = numeroDocumento.value.trim();
+        const longitud = tipo === 'DNI' ? 8 : tipo === 'RUC' ? 11 : 0;
+
+        mensajeConsulta.replaceChildren();
+        if (!longitud) {
+            mostrarMensaje('warning', 'Seleccione DNI o RUC para realizar la búsqueda.');
+            return;
+        }
+        if (!new RegExp('^[0-9]{' + longitud + '}$').test(numero)) {
+            mostrarMensaje('warning', 'Ingrese un ' + tipo + ' válido de ' + longitud + ' dígitos.');
+            return;
+        }
+
+        buscarDocumento.disabled = true;
+        buscarDocumento.innerHTML = '<span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span>Buscando';
+        try {
+            const parametros = new URLSearchParams({ tipo_documento: tipo, numero_documento: numero });
+            const response = await fetch('/personas/consultar-documento?' + parametros.toString(), {
+                headers: { Accept: 'application/json' }
+            });
+            const resultado = await response.json();
+            if (!response.ok || !resultado.encontrado) {
+                mostrarMensaje('danger', resultado.mensaje || 'No se pudo consultar el documento.');
+                return;
+            }
+
+            const persona = resultado.persona;
+            tipoPersona.value = persona.tipo_persona;
+            tipoPersona.dispatchEvent(new Event('change'));
+            if (tipo === 'DNI') {
+                document.getElementById('nombres').value = persona.nombres || '';
+                document.getElementById('apellido_paterno').value = persona.apellido_paterno || '';
+                document.getElementById('apellido_materno').value = persona.apellido_materno || '';
+            } else {
+                document.getElementById('razon_social').value = persona.razon_social || '';
+                if (persona.direccion) {
+                    document.getElementById('direccion').value = persona.direccion;
+                }
+            }
+            mostrarMensaje('success', 'Datos encontrados. Revise la información y complete los campos restantes.');
+        } catch {
+            mostrarMensaje('danger', 'El servicio de consulta no está disponible. Intente más tarde.');
+        } finally {
+            buscarDocumento.disabled = false;
+            buscarDocumento.innerHTML = '<i class="bi bi-search me-1"></i>Buscar';
+        }
+    };
+
+    const mostrarMensaje = (tipo, texto) => {
+        const alerta = document.createElement('div');
+        alerta.className = 'alert alert-' + tipo + ' mb-0';
+        alerta.textContent = texto;
+        mensajeConsulta.replaceChildren(alerta);
+    };
+
+    buscarDocumento.addEventListener('click', consultarDocumento);
+    numeroDocumento.addEventListener('keydown', event => {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            consultarDocumento();
+        }
+    });
 });
 </script>
