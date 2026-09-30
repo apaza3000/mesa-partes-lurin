@@ -32,14 +32,17 @@ class Usuario
                 LEFT JOIN usuario_roles ur ON ur.id_usuario = u.id_usuario
                 LEFT JOIN roles r ON r.id_rol = ur.id_rol AND r.estado = 'Activo'
                 WHERE u.estado = 'Activo'
-                  AND (u.username = :identificador OR p.email = :identificador)
+                  AND (u.username = :username OR p.email = :email)
                 GROUP BY u.id_usuario, u.id_persona, u.id_area, u.username,
                          u.password, u.avatar, u.estado,
                          p.nombres, p.apellido_paterno, p.apellido_materno, p.email";
 
         try {
             $stmt = $this->db->prepare($sql);
-            $stmt->execute([':identificador' => trim($identificador)]);
+            $stmt->execute([
+                ':username' => trim($identificador),
+                ':email' => trim($identificador),
+            ]);
             $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if (!$usuario || !password_verify($password, $usuario['password'])) {
@@ -51,6 +54,22 @@ class Usuario
         } catch (PDOException $e) {
             return null;
         }
+    }
+
+    public function registrarLogin(int $idUsuario): void
+    {
+        $stmt = $this->db->prepare(
+            "INSERT INTO auditoria
+                (id_usuario, modulo, accion, tabla_afectada, id_registro, descripcion, ip)
+             VALUES
+                (:id_usuario, 'AUTH', 'LOGIN', 'usuarios', :id_registro, :descripcion, :ip)"
+        );
+        $stmt->execute([
+            ':id_usuario' => $idUsuario,
+            ':id_registro' => $idUsuario,
+            ':descripcion' => 'Inicio de sesión exitoso.',
+            ':ip' => $_SERVER['REMOTE_ADDR'] ?? null,
+        ]);
     }
 
     // 1. Obtener usuario por email para el Login
