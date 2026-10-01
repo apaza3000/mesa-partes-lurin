@@ -6,7 +6,7 @@ use Src\Core\Router;
 Router::get('/personas', [PersonaController::class, 'index']);
 Router::get('/personas/crear', [PersonaController::class, 'create']);
 Router::get('/personas/buscar', [PersonaController::class, 'buscar']);
-Router::get('/personas/consultar-documento', [PersonaController::class, 'consultarDocumento']);
+Router::get('/personas/consultar-documento', [PersonaController::class, 'consultarDecolectaApi']);
 Router::get('/personas/{id}', [PersonaController::class, 'show']);
 Router::get('/personas/{id}/editar', [PersonaController::class, 'edit']);
 

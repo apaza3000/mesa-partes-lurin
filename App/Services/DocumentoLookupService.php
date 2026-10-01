@@ -4,6 +4,12 @@ namespace App\Services;
 
 class DocumentoLookupService
 {
+
+    public function getByDni(string $dni) {
+
+
+    
+    }
     public function consultar(string $tipoDocumento, string $numero): array
     {
         $tipoDocumento = strtoupper(trim($tipoDocumento));

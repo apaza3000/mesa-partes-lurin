@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Models\Persona;
+use App\Services\ApiDecolectaService;
 use App\Services\DocumentoLookupService;
 use App\Validators\PersonaValidator;
 use Src\Core\Controller;
@@ -73,6 +74,8 @@ class PersonaController extends Controller
         if (!in_array($tipoDocumento, ['DNI', 'RUC'], true)) {
             $this->json(['encontrado' => false, 'mensaje' => 'Seleccione DNI o RUC.'], 422);
         }
+
+
         $longitud = $tipoDocumento === 'DNI' ? 8 : 11;
         if (!preg_match('/^[0-9]{' . $longitud . '}$/D', $numero)) {
             $this->json(['encontrado' => false, 'mensaje' => 'Ingrese un ' . $tipoDocumento . ' válido de ' . $longitud . ' dígitos.'], 422);
@@ -97,12 +100,48 @@ class PersonaController extends Controller
         $request = new Request();
         $tipoDocumento = $request->get('tipo_documento', '');
         $numero = $request->get('numero_documento', '');
+
+        if (!in_array($tipoDocumento, ['DNI', 'RUC'], true)) {
+            $this->json(['encontrado' => false, 'mensaje' => 'Seleccione DNI o RUC.'], 422);
+        }
+
         $tipoDocumento = is_string($tipoDocumento) ? trim($tipoDocumento) : '';
         $numero = is_string($numero) ? trim($numero) : '';
         $resultado = (new DocumentoLookupService())->consultar($tipoDocumento, $numero);
         $estado = isset($resultado['persona']) ? 200 : 422;
 
         if (str_contains($resultado['mensaje'] ?? '', 'no está disponible') || str_contains($resultado['mensaje'] ?? '', 'no está configurada')) {
+            $estado = 503;
+        }
+
+        $this->json($resultado, $estado);
+    }
+    public function consultarDecolectaApi(): void
+    {
+        $apiDeco = new ApiDecolectaService();
+        $request = new Request();
+        $tipoDocumento = $request->get('tipo_documento', '');
+        $numero = $request->get('numero_documento', '');
+
+        if (!in_array($tipoDocumento, ['DNI', 'RUC'], true)) {
+            $this->json(['encontrado' => false, 'mensaje' => 'Seleccione DNI o RUC.'], 422);
+        }
+
+        $tipoDocumento = is_string($tipoDocumento) ? trim($tipoDocumento) : '';
+        $numero = is_string($numero) ? trim($numero) : '';
+
+        $resultado = [];
+
+        if ($tipoDocumento == "DNI" && strlen($numero) == 8) {
+            $resultado = $apiDeco->getByDNI($numero);
+        }
+        if ($tipoDocumento == "RUC" && strlen($numero) == 11) {
+            $resultado = $apiDeco->getByRUC($numero);
+        }
+
+        $estado = 200;
+
+        if (!$resultado["encontrado"]) {
             $estado = 503;
         }
 

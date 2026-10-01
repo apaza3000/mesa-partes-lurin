@@ -58,7 +58,6 @@ $e = fn($v) => htmlspecialchars((string) ($v ?? ''), ENT_QUOTES, 'UTF-8');
 </div>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://cdn.datatables.net/2.0.8/js/dataTables.min.js"></script>
-<link rel="stylesheet" href="https://cdn.datatables.net/2.0.8/css/dataTables.bootstrap5.min.css">
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     const input = document.querySelector('#buscar-documento');
@@ -108,7 +107,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 search: 'Filtrar:',
                 emptyTable: 'No hay personas registradas',
                 zeroRecords: 'No se encontraron coincidencias'
-            }
+            },
+         
         });
     }
 
