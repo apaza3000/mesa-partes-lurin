@@ -4,123 +4,93 @@ namespace App\Controllers;
 
 use App\Models\Usuario;
 use PDOException;
+use Src\Core\Controller;
+use Src\Core\Request;
+use Src\Core\Session;
+use Src\Core\Validator;
 
-class AuthController
+class AuthController extends Controller
 {
-    public function showLogin(): void
+    public function showLogin()
     {
-        if (!empty($_SESSION['usuario_id'])) {
-            header('Location: /');
-            exit;
+        if (Session::isAuthenticated()) {
+            $this->redirect("/");
         }
-
-        require __DIR__ . '/../../view/pages/login.php';
+        return $this->view("login");
     }
 
-    public function login(): void
+    public function login()
     {
-        if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
-            http_response_code(405);
-            header('Allow: POST');
-            return;
+        $requst = new Request();
+
+        $data = $requst->all();
+
+        $rules = [
+            "username" => ["required"],
+            "password" => ["required"]
+        ];
+
+        $validator = new Validator();
+
+        if (!$validator->validate($rules, $data)) {
+
+            return $this->view('login', [
+                'errors' => $validator->getErrors(),
+                'datos_viejos' => $data,
+            ]);
         }
 
-        $identificador = $_POST['identificador']
-            ?? $_POST['email']
-            ?? $_POST['username']
-            ?? '';
-        $password = $_POST['password'] ?? '';
-
-        if (!is_string($identificador) || !is_string($password)) {
-            http_response_code(400);
-            return;
-        }
-
-        $identificador = trim($identificador);
-
-        if ($identificador === '' || $password === '') {
-            $_SESSION['email_value'] = $identificador;
-            $_SESSION['error_email'] = $identificador === ''
-                ? 'Ingrese su usuario o correo electrónico.'
-                : '';
-            $_SESSION['error_password'] = $password === ''
-                ? 'Ingrese su contraseña.'
-                : '';
-            header('Location: /login');
-            exit;
-        }
+        $username = $data["username"];
+        $password = $data['password'];
 
         $usuarioModel = new Usuario();
-        $usuario = $usuarioModel->login($identificador, $password);
 
-        if ($usuario === null) {
-            $_SESSION['email_value'] = $identificador;
-            $_SESSION['error_password'] = 'Usuario o contraseña incorrectos.';
-            header('Location: /login');
-            exit;
+        $usuario = $usuarioModel->login($username, $password);
+
+      
+
+        if ($usuario) {
+            if (password_verify($password, $usuario['password'])) {
+                unset($usuario['password']);
+
+
+
+                try {
+                    $usuarioModel->registrarLogin((int) $usuario['id_usuario']);
+                } catch (PDOException $e) {
+                }
+
+                $nombre = trim(implode(' ', array_filter([
+                    $usuario['nombres'] ?? '',
+                    $usuario['apellido_paterno'] ?? '',
+                    $usuario['apellido_materno'] ?? '',
+                ])));
+                $roles = array_values(array_filter(array_map(
+                    'trim',
+                    explode(',', $usuario['roles'] ?? '')
+                )));
+
+                Session::set("usuario_id", (int) $usuario['id_usuario']);
+                Session::set("usuario_nombre", $nombre !== '' ? $nombre : $usuario['username']);
+                Session::set("usuario_rol", $roles[0] ?? null);
+                Session::set("usuario_roles", $roles);
+                Session::set("usuario_area", $usuario['id_area'] ?? null);
+
+                Session::login($usuario);
+                return   $this->redirect("/");
+            }
         }
-
-        try {
-            $usuarioModel->registrarLogin((int) $usuario['id_usuario']);
-        } catch (PDOException $e) {
-            error_log('No se pudo registrar el inicio de sesión en auditoria: ' . $e->getMessage());
-            $_SESSION['email_value'] = $identificador;
-            $_SESSION['error_password'] = 'No se pudo registrar el acceso. Intente nuevamente.';
-            header('Location: /login');
-            exit;
-        }
-
-        session_regenerate_id(true);
-
-        $nombre = trim(implode(' ', array_filter([
-            $usuario['nombres'] ?? '',
-            $usuario['apellido_paterno'] ?? '',
-            $usuario['apellido_materno'] ?? '',
-        ])));
-        $roles = array_values(array_filter(array_map(
-            'trim',
-            explode(',', $usuario['roles'] ?? '')
-        )));
-
-        $_SESSION['usuario_id'] = (int) $usuario['id_usuario'];
-        $_SESSION['usuario_nombre'] = $nombre !== '' ? $nombre : $usuario['username'];
-        $_SESSION['usuario_rol'] = $roles[0] ?? null;
-        $_SESSION['usuario_roles'] = $roles;
-        $_SESSION['usuario_area'] = $usuario['id_area'] ?? null;
-
-        unset($_SESSION['email_value'], $_SESSION['error_email'], $_SESSION['error_password']);
-
-        header('Location: /');
-        exit;
+        return $this->view('login', [
+            'error_message' => "Usuario o contraseña incorrectos",
+            'datos_viejos' => $data,
+        ]);
     }
 
     public function logout(): void
     {
-        if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
-            http_response_code(405);
-            header('Allow: POST');
-            return;
-        }
+        Session::logout();
 
-        $_SESSION = [];
-
-        if (ini_get('session.use_cookies')) {
-            $cookie = session_get_cookie_params();
-            setcookie(
-                session_name(),
-                '',
-                time() - 42000,
-                $cookie['path'],
-                $cookie['domain'],
-                $cookie['secure'],
-                $cookie['httponly']
-            );
-        }
-
-        session_destroy();
-
-        header('Location: /login');
-        exit;
+        $this->redirect("/login");
     }
 
     public function roles(): void
