@@ -66,11 +66,10 @@
                                             <?php endif; ?>
                                         </select>
                                         <!--Boton nuevo usuario 👇-->
-                                        <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal"
-                                            data-bs-target="#modal-add-user">
+                                        <a href="/usuarios/crear" class="btn btn-primary">
                                             <i class="bi bi-person-plus-fill me-1" aria-hidden="true"> </i>
                                             New user
-                                        </button>
+                                        </a>
                                     </div>
                                 </div>
                             </div>
@@ -90,17 +89,30 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <?php if (!$usuarios): ?>
+                                        <?php if (empty($usuarios)): ?>
                                             <tr>
                                                 <td colspan="7" class="text-center py-4">No hay usuarios registrados.</td>
                                             </tr>
                                         <?php else: ?>
+                                            <?php
+                                            // 1. Definir los registros mostrados por página (debe coincidir con el controlador)
+                                            $porPagina = 10;
+
+                                            // 2. Calcular el offset base según la página actual enviada por el controlador
+                                            $pagina = $paginaActual ?? 1;
+                                            $offsetBase = ($pagina - 1) * $porPagina;
+                                            ?>
+
                                             <?php foreach ($usuarios as $indice => $user): ?>
+
                                                 <tr>
-                                                    <td><?= $indice + 1 ?></td>
+                                                    <td>
+                                                        <?= $offsetBase + $indice + 1 ?>
+                                                    </td>
                                                     <td>
                                                         <div class="d-flex align-items-center">
-                                                            <img src="<?= htmlspecialchars($user['avatar'] ?? '/view/assets/img/default-user.png', ENT_QUOTES, 'UTF-8') ?>"
+                                                            <img src="/view/<?= htmlspecialchars(!empty($user['avatar']) ? $user['avatar'] : 'assets/img/default-user.png', ENT_QUOTES, 'UTF-8') ?>"
+                                                                onerror="this.onerror=null; this.src='/view/assets/img/default-user.png';"
                                                                 alt="Avatar" class="rounded-circle me-2" width="32" height="32">
                                                             <span class="fw-medium">
                                                                 <?= htmlspecialchars($user['username'] ?? '*username_null*', ENT_QUOTES, 'UTF-8') ?>
@@ -165,84 +177,37 @@
                                 </table>
                             </div>
                         </div>
-                        <!--modificar en un futuro la barra de muestra para funcionar con SQL👇-->
-                        <!--barra de muestra👇-->
 
-                        <div class="card-footer clearfix">
-                            <nav aria-label="Navegación de usuarios">
-                                <ul class="pagination pagination-sm m-0 float-end">
+                        <!--barra de paginacion dinamica segun query👇-->
 
-                                    <!-- Botón Anterior («) -->
-                                    <li class="page-item <?= ($paginaActual <= 1) ? 'disabled' : '' ?>">
-                                        <a class="page-link" href="?page=<?= $paginaActual - 1 ?>">&laquo;</a>
+                        <nav aria-label="Navegación de páginas" style="margin: 10px;">
+                            <ul class="pagination pagination-sm m-0 float-end">
+
+                                <!-- Botón « (Anterior) -->
+                                <li class="page-item <?= ($paginaActual <= 1) ? 'disabled' : '' ?>">
+                                    <a class="page-link" href="?page=<?= $paginaActual - 1 ?>">&laquo;</a>
+                                </li>
+
+                                <!-- Generación automática de botones según $totalPaginas -->
+                                <?php for ($i = 1; $i <= $totalPaginas; $i++): ?>
+                                    <li class="page-item <?= ($i === $paginaActual) ? 'active' : '' ?>">
+                                        <a class="page-link" href="?page=<?= $i ?>"><?= $i ?></a>
                                     </li>
-                                    <!-- Botones Numéricos de Páginas -->
-                                    <?php for ($i = 1; $i <= $totalPaginas; $i++): ?>
-                                        <li class="page-item <?= ($i === $paginaActual) ? 'active' : '' ?>">
-                                            <a class="page-link" href="?page=<?= $i ?>">
-                                                <?= $i ?>
-                                            </a>
-                                        </li>
-                                    <?php endfor; ?>
-                                    <!-- Botón Siguiente (») -->
-                                    <li class="page-item <?= ($paginaActual >= $totalPaginas) ? 'disabled' : '' ?>">
-                                        <a class="page-link" href="?page=<?= $paginaActual + 1 ?>">&raquo;</a>
-                                    </li>
-                                </ul>
-                            </nav>
-                        </div>
+                                <?php endfor; ?>
+
+                                <!-- Botón » (Siguiente) -->
+                                <li class="page-item <?= ($paginaActual >= $totalPaginas) ? 'disabled' : '' ?>">
+                                    <a class="page-link" href="?page=<?= $paginaActual + 1 ?>">&raquo;</a>
+                                </li>
+
+                            </ul>
+                        </nav>
+
+                        <!--Fin de (barra de paginacion)-->
                     </div>
                 </div>
             </div>
-            <!--ventana emergente de [👤New user]👇-->
-            <div class="modal fade" id="modal-add-user" tabindex="-1" aria-labelledby="modal-add-user-label"
-                aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <form>
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="modal-add-user-label">Add new user</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                    aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body">
-                                <div class="mb-3">
-                                    <label for="new-user-name" class="form-label"> Full name </label>
-                                    <input type="text" class="form-control" id="new-user-name"
-                                        placeholder="e.g. Jane Doe" required />
-                                </div>
-                                <div class="mb-3">
-                                    <label for="new-user-email" class="form-label"> Email address </label>
-                                    <input type="email" class="form-control" id="new-user-email"
-                                        placeholder="name@example.com" required />
-                                    <div class="form-text">The invitation will be sent to this address.</div>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="new-user-role" class="form-label"> Role </label>
-                                    <select id="new-user-role" class="form-select">
-                                        <option selected>Subscriber</option>
-                                        <option>Author</option>
-                                        <option>Editor</option>
-                                        <option>Administrator</option>
-                                    </select>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="new-user-welcome" checked />
-                                    <label class="form-check-label" for="new-user-welcome">
-                                        Send a welcome email with login details
-                                    </label>
-                                </div>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                                    Cancel
-                                </button>
-                                <button type="submit" class="btn btn-primary">Create user</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
+            <!--ventana emergente de [👤New user]-->
             <!--ventana emergente de [🗑️eliminar usuario]👇-->
             <div class="modal fade" id="modal-delete-user" tabindex="-1" aria-labelledby="modal-delete-user-label"
                 aria-hidden="true">
@@ -265,6 +230,12 @@
                             <button type="button" class="btn btn-danger" data-bs-dismiss="modal">
                                 Delete user
                             </button>
+
+                            <?php if (isset($errors['username'])): ?>
+                                <div class="text-danger small mt-1">
+                                    <?= $errors['username'] ?>
+                                </div>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>

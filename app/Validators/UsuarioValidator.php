@@ -1,11 +1,13 @@
 <?php
-//codigo sacado de rol temporalmente. adaptarlo a USUARIOS
+
 namespace App\Validators;
 
-class RolValidator {
+class RolValidator
+{
 
     // Validar datos de entrada para el rol
-    public static function validar(array $datos): array {
+    public static function validar(array $datos): array
+    {
         $errores = [];
 
         // Validar que el nombre del rol no esté vacío
@@ -20,7 +22,7 @@ class RolValidator {
 
         return [
             'esValido' => count($errores) === 0,
-            'errores'  => $errores
+            'errores' => $errores
         ];
     }
 }

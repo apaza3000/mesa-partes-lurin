@@ -3,13 +3,14 @@
 use App\Controllers\UsuarioController;
 use Src\Core\Router;
 
-// Rutas actualizadas a /usuarios
-Router::get('/usuarios', [UsuarioController::class, 'index']);
-Router::get('/usuarios/nuevo', [UsuarioController::class, 'create']);
-Router::get('/usuarios/{id}/editar', [UsuarioController::class, 'edit']);
-Router::get('/usuarios/{id}/ver', [UsuarioController::class, 'show']);
+// VISTAS / MUESTRA DE DATOS (GET) 
+Router::get('/usuarios', [UsuarioController::class, 'index']);           // Listado principal
+Router::get('/usuarios/crear', [UsuarioController::class, 'create']);      // Formulario de alta
+Router::get('/usuarios/{id}', [UsuarioController::class, 'show']);       // Ver detalle
+Router::get('/usuarios/{id}/editar', [UsuarioController::class, 'editar']); // Formulario de edición
 
-Router::post('/usuarios/store', [UsuarioController::class, 'store']);
-Router::post('/usuarios/{id}/update', [UsuarioController::class, 'update']);
-Router::post('/usuarios/{id}/estado', [UsuarioController::class, 'toggleEstado']);
-Router::post('/usuarios/{id}/delete', [UsuarioController::class, 'delete']);
+// ACCIONES Y PROCESAMIENTO (POST)
+Router::post('/usuarios/store', [UsuarioController::class, 'store']);     // Procesar nuevo usuario     |    
+Router::post('/usuarios/{id}', [UsuarioController::class, 'actualizar']);  // Procesar edición (o PUT)
+Router::post('/usuarios/{id}/estado', [UsuarioController::class, 'estado']);// Activar/Desactivar
+Router::post('/usuarios/{id}/delete', [UsuarioController::class, 'delete']);// Borrado lógico
