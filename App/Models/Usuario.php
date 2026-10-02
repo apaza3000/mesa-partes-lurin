@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use PDO;
@@ -13,6 +14,60 @@ class Usuario
     {
         $this->db = Conexion::getConexion();
     }
+
+
+    /**
+     * Autentica un usuario activo mediante username o correo electrónico.
+     *
+     * @return array|null Datos del usuario autenticado, o null si las credenciales no son válidas.
+     */
+    public function login(string $identificador, string $password)
+    {
+        $sql = "SELECT u.id_usuario, u.id_persona, u.id_area, u.username,
+                    u.password, u.avatar, u.estado,
+                    p.nombres, p.apellido_paterno, p.apellido_materno, p.email,
+                    GROUP_CONCAT(DISTINCT r.nombre ORDER BY r.nombre SEPARATOR ', ') AS roles
+                FROM usuarios u
+                INNER JOIN personas p ON p.id_persona = u.id_persona
+                LEFT JOIN usuario_roles ur ON ur.id_usuario = u.id_usuario
+                LEFT JOIN roles r ON r.id_rol = ur.id_rol AND r.estado = 'Activo'
+                WHERE u.estado = 'Activo'
+                    AND (u.username = :username OR p.email = :email)
+                GROUP BY u.id_usuario, u.id_persona, u.id_area, u.username,
+                    u.password, u.avatar, u.estado,
+                    p.nombres, p.apellido_paterno, p.apellido_materno, p.email";
+
+        try {
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([
+                ':username' => trim($identificador),
+                ':email' => trim($identificador),
+            ]);
+            $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $usuario;
+        } catch (PDOException $e) {
+            return null;
+        }
+    }
+
+    public function registrarLogin(int $idUsuario): void
+    {
+        $stmt = $this->db->prepare(
+            "INSERT INTO auditoria
+                (id_usuario, modulo, accion, tabla_afectada, id_registro, descripcion, ip)
+             VALUES
+                (:id_usuario, 'AUTH', 'LOGIN', 'usuarios', :id_registro, :descripcion, :ip)"
+        );
+        $stmt->execute([
+            ':id_usuario' => $idUsuario,
+            ':id_registro' => $idUsuario,
+            ':descripcion' => 'Inicio de sesión exitoso.',
+            ':ip' => $_SERVER['REMOTE_ADDR'] ?? null,
+        ]);
+    }
+
+    // 1. Obtener usuario por email para el Login
+    public function obtenerPorEmail(string $email): ?array {}
 
     public function getAllRol(): array
     {
@@ -127,11 +182,107 @@ class Usuario
 
             $this->db->commit();
             return true;
-
         } catch (PDOException $e) {
             $this->db->rollBack();
             error_log("Error al crear usuario: " . $e->getMessage());
             return false;
+        }
+    }
+
+
+    // 8. Cambiar Estado (Activo / Inactivo / Suspendido)
+    public function cambiarEstado(int $idUsuario, string $nuevoEstado): bool
+    {
+        $sql = "UPDATE usuarios SET estado = :estado, update_at = NOW() WHERE id_usuario = :id";
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute([
+            ':estado' => $nuevoEstado,
+            ':id' => $idUsuario
+        ]);
+    }
+
+
+
+
+
+
+
+
+
+    public function registrarInvitado($data)
+    {
+        try {
+            $this->db->beginTransaction();
+
+            // 1. Insertar persona
+            $sqlPersona = "INSERT INTO personas 
+                (tipo_persona, tipo_documento, numero_documento, nombres,
+                 apellido_paterno, apellido_materno, email, telefono, direccion, estado)
+                VALUES 
+                ('Natural', :tipo_documento, :numero_documento, :nombres,
+                 :apellido_paterno, :apellido_materno, :email, :telefono, :direccion, 'Activo')";
+            $stmt = $this->db->prepare($sqlPersona);
+            $stmt->execute([
+                ':tipo_documento'    => $data['tipo_documento'],
+                ':numero_documento'  => $data['numero_documento'],
+                ':nombres'           => $data['nombres'],
+                ':apellido_paterno'  => $data['apellido_paterno'],
+                ':apellido_materno'  => $data['apellido_materno'],
+                ':email'             => $data['email'],
+                ':telefono'          => $data['telefono'],
+                ':direccion'         => $data['direccion'],
+            ]);
+            $idPersona = $this->db->lastInsertId();
+
+            // 2. Insertar usuario (password hasheado)
+            $sqlUsuario = "INSERT INTO usuarios 
+                (id_persona, id_area, username, password, avatar, estado)
+                VALUES (:id_persona, NULL, :username, :password, :imagen , 'Activo')";
+            $stmt = $this->db->prepare($sqlUsuario);
+            $stmt->execute([
+                ':id_persona' => $idPersona,
+                ':username'   => $data['username'],
+                ':password'   => $data['password'],
+                ":imagen" => $data["imagen_uri"] ?? 'assets/img/default-user.png'
+            ]);
+            $idUsuario = $this->db->lastInsertId();
+
+            // 3. Obtener o crear rol INVITADO
+            $stmt = $this->db->prepare("SELECT id_rol FROM roles WHERE nombre = 'CONSULTA' LIMIT 1");
+            $stmt->execute();
+            $rol = $stmt->fetch();
+
+            if ($rol) {
+                $idRol = $rol['id_rol'];
+            } else {
+                $stmt = $this->db->prepare(
+                    "INSERT INTO roles (nombre, descripcion, estado) 
+                     VALUES ('INVITADO', 'Usuario externo con acceso limitado', 'Activo')"
+                );
+                $stmt->execute();
+                $idRol = $this->db->lastInsertId();
+            }
+
+            // 4. Asignar rol al usuario
+            $stmt = $this->db->prepare(
+                "INSERT INTO usuario_roles (id_usuario, id_rol) VALUES (?, ?)"
+            );
+            $stmt->execute([$idUsuario, $idRol]);
+
+            $this->db->commit();
+
+            return [
+                'ok'         => true,
+                'id_persona' => $idPersona,
+                'id_usuario' => $idUsuario,
+            ];
+        } catch (Exception $e) {
+            $this->db->rollBack();
+            return [
+                'ok'      => false,
+                'mensaje' => $e->getMessage(),
+                'trace' => $e->getTrace(),
+            ];
         }
     }
 }

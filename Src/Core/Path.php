@@ -73,7 +73,6 @@ class Path
      */
     protected static function getFullPath(string $subPath): string
     {
-
         $fullPath = self::$basePath . DIRECTORY_SEPARATOR . trim($subPath, DIRECTORY_SEPARATOR);
         self::makeDir($fullPath);
         return $fullPath;

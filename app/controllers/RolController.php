@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Models\Rol;
 use Src\Core\Controller;
 use Src\Core\Request;
+use Src\Core\Session;
 use Src\Core\Validator;
 
 class RolController extends Controller
@@ -16,23 +17,35 @@ class RolController extends Controller
         $this->rol = new Rol();
     }
 
-    public function index(): void
+    public function index()
     {
+        if (!Session::isAuthenticated()) {
+            return $this->redirect("/login");
+        }
         $this->view('roles.index', ['roles' => $this->rol->getAll()], 'app');
     }
 
-    public function create(): void
+    public function create()
     {
+        if (!Session::isAuthenticated()) {
+            return $this->redirect("/login");
+        }
         $this->view('roles.crear', [], 'app');
     }
 
-    public function edit(int|string $id): void
+    public function edit(int|string $id)
     {
+        if (!Session::isAuthenticated()) {
+            return $this->redirect("/login");
+        }
         $this->view('roles.editar', ['rol' => $this->rol->getById($id)], 'app');
     }
 
-    public function store(): void
+    public function store()
     {
+        if (!Session::isAuthenticated()) {
+            return $this->redirect("/login");
+        }
         $data = (new Request())->all();
         $validator = new Validator();
 
@@ -56,8 +69,11 @@ class RolController extends Controller
         $this->redirect('/roles');
     }
 
-    public function update(int|string $id): void
+    public function update(int|string $id)
     {
+        if (!Session::isAuthenticated()) {
+            return $this->redirect("/login");
+        }
         $id = (int) $id;
         $rolActual = $this->rol->getById($id);
 
@@ -89,8 +105,11 @@ class RolController extends Controller
         $this->redirect('/roles');
     }
 
-    public function delete(int|string $id): void
+    public function delete(int|string $id)
     {
+        if (!Session::isAuthenticated()) {
+            return $this->redirect("/login");
+        }
         if (!$this->rol->getById($id)) {
             $_SESSION['rol_error'] = 'El rol no existe.';
         } elseif ($this->rol->delete($id)) {

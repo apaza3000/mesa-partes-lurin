@@ -9,9 +9,12 @@ use src\Core\Router;
 require_once __DIR__ . "/areas.php";
 require_once __DIR__ . "/roles.php";
 require_once __DIR__ . "/usuarios.php";
+require_once __DIR__ . "/personas.php";
+require_once __DIR__ . "/auth.php";
 require_once __DIR__ . "/error.php";
 
-Router::get("/",[DashboardController::class,"index"]);
+Router::get("/", [DashboardController::class, "index"]);
+Router::get("/home", [DashboardController::class, "home"]);
 
 
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
@@ -28,7 +31,7 @@ if (strpos($requestUri, '/backend') === 0) {
 
 function error404()
 {
-    
+
     header("Location: /error/404");
 };
 

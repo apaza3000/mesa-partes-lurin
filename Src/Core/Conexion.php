@@ -16,7 +16,7 @@ class Conexion
     // Método para obtener la instancia de PDO
     public static function getConexion(): ?PDO
     {
-        $config = require Path::base() . 'config/database.php';
+        $config = require Path::base('config') . DIRECTORY_SEPARATOR . 'database.php';
 
         if (self::$pdo === null) {
             try {
