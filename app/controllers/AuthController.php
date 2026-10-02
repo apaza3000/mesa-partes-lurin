@@ -47,7 +47,7 @@ class AuthController extends Controller
 
         $usuario = $usuarioModel->login($username, $password);
 
-      
+
 
         if ($usuario) {
             if (password_verify($password, $usuario['password'])) {
@@ -86,6 +86,13 @@ class AuthController extends Controller
         ]);
     }
 
+
+    public function register()
+    {
+        return $this->view("register");
+    }
+
+
     public function logout(): void
     {
         Session::logout();
@@ -107,5 +114,69 @@ class AuthController extends Controller
             ['roles' => $_SESSION['usuario_roles'] ?? []],
             JSON_UNESCAPED_UNICODE
         );
+    }
+
+
+    public function postRegister()
+    {
+        $request   = new Request();
+        $validator = new Validator();
+
+
+        $datos = $request->all();
+
+        $rules = [
+            'tipo_documento' => ['required', 'in' => ['DNI', 'CE', 'Pasaporte', 'Otro'],],
+            'numero_documento' => ['required', 'string', 'minLength' => 6, 'maxLength' => 20, 'unique' => ['personas', 'numero_documento']],
+            'nombres' => ['required', 'string', 'minLength' => 3, 'maxLength' => 100,],
+            'apellido_paterno' => ['required', 'string', 'minLength' => 3, 'maxLength' => 100,],
+            'apellido_materno' => ['nullable', 'string', 'maxLength' => 100,],
+            'email' => ['required', 'email', 'maxLength' => 150, 'unique' => ['personas', 'email'],],
+            'telefono' => ['nullable', 'string', 'maxLength' => 30,],
+            'direccion' => ['nullable', 'string', 'maxLength' => 255,],
+            'username' => ['required', 'string', 'minLength' => 4, 'maxLength' => 50, 'unique' => ['usuarios', 'username'],],
+            'password' => ['required', 'string', 'minLength' => 6, 'maxLength' => 100,],
+            'password_confirm' => ['required', 'string', 'minLength' => 6, 'maxLength' => 100,],
+        ];
+
+        if (!$validator->validate($rules, $datos)) {
+            return $this->view("register", [
+                'errors' => $validator->getErrors(),
+                'datos_viejos'   => $datos,
+            ]);
+        }
+
+        if ($datos['password'] !== $datos['password_confirm']) {
+            return $this->view("register", [
+                'errors' => ['Las contraseñas no coinciden.'],
+                'datos_viejos'   => $datos,
+            ]);
+        }
+
+        $datos['password'] = password_hash($datos['password'], PASSWORD_DEFAULT);
+
+        $usuarioModel = new Usuario();
+        $resultado = $usuarioModel->registrarInvitado($datos);
+
+        if (!$resultado['ok']) {
+            return $this->view("register", [
+                'errors' => ['Error al registrar: ' . $resultado['mensaje']],
+                'datos_viejos'   => $datos,
+                'trace' => $resultado['trace']
+            ]);
+        }
+
+        // Guardar en sesión al usuario recién registrado
+        $_SESSION['usuario'] = [
+            'id_usuario' => $resultado['id_usuario'],
+            'id_persona' => $resultado['id_persona'],
+            'username'   => $datos['username'],
+            'nombres'    => $datos['nombres'],
+            'email'      => $datos['email'],
+            'rol'        => 'INVITADO',
+        ];
+
+        $this->redirect("/home");
+        exit;
     }
 }

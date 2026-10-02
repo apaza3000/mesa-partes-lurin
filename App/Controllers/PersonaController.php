@@ -22,6 +22,7 @@ class PersonaController extends Controller
 
     public function index(): void
     {
+
         $this->view('personas.index', ['personas' => $this->persona->getAll()], 'app');
     }
 

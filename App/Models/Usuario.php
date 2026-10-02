@@ -46,7 +46,7 @@ class Usuario
             $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
             return $usuario;
         } catch (PDOException $e) {
-           return null;
+            return null;
         }
     }
 
@@ -245,5 +245,90 @@ class Usuario
             ':estado' => $nuevoEstado,
             ':id' => $idUsuario
         ]);
+    }
+
+
+
+
+
+
+
+
+
+    public function registrarInvitado($data)
+    {
+        try {
+            $this->db->beginTransaction();
+
+            // 1. Insertar persona
+            $sqlPersona = "INSERT INTO personas 
+                (tipo_persona, tipo_documento, numero_documento, nombres,
+                 apellido_paterno, apellido_materno, email, telefono, direccion, estado)
+                VALUES 
+                ('Natural', :tipo_documento, :numero_documento, :nombres,
+                 :apellido_paterno, :apellido_materno, :email, :telefono, :direccion, 'Activo')";
+            $stmt = $this->db->prepare($sqlPersona);
+            $stmt->execute([
+                ':tipo_documento'    => $data['tipo_documento'],
+                ':numero_documento'  => $data['numero_documento'],
+                ':nombres'           => $data['nombres'],
+                ':apellido_paterno'  => $data['apellido_paterno'],
+                ':apellido_materno'  => $data['apellido_materno'],
+                ':email'             => $data['email'],
+                ':telefono'          => $data['telefono'],
+                ':direccion'         => $data['direccion'],
+            ]);
+            $idPersona = $this->db->lastInsertId();
+
+            // 2. Insertar usuario (password hasheado)
+            $sqlUsuario = "INSERT INTO usuarios 
+                (id_persona, id_area, username, password, avatar, estado)
+                VALUES (:id_persona, NULL, :username, :password, :imagen , 'Activo')";
+            $stmt = $this->db->prepare($sqlUsuario);
+            $stmt->execute([
+                ':id_persona' => $idPersona,
+                ':username'   => $data['username'],
+                ':password'   => $data['password'],
+                ":imagen" => $data["imagen_uri"] ?? 'assets/img/default-user.png'
+            ]);
+            $idUsuario = $this->db->lastInsertId();
+
+            // 3. Obtener o crear rol INVITADO
+            $stmt = $this->db->prepare("SELECT id_rol FROM roles WHERE nombre = 'CONSULTA' LIMIT 1");
+            $stmt->execute();
+            $rol = $stmt->fetch();
+
+            if ($rol) {
+                $idRol = $rol['id_rol'];
+            } else {
+                $stmt = $this->db->prepare(
+                    "INSERT INTO roles (nombre, descripcion, estado) 
+                     VALUES ('INVITADO', 'Usuario externo con acceso limitado', 'Activo')"
+                );
+                $stmt->execute();
+                $idRol = $this->db->lastInsertId();
+            }
+
+            // 4. Asignar rol al usuario
+            $stmt = $this->db->prepare(
+                "INSERT INTO usuario_roles (id_usuario, id_rol) VALUES (?, ?)"
+            );
+            $stmt->execute([$idUsuario, $idRol]);
+
+            $this->db->commit();
+
+            return [
+                'ok'         => true,
+                'id_persona' => $idPersona,
+                'id_usuario' => $idUsuario,
+            ];
+        } catch (Exception $e) {
+            $this->db->rollBack();
+            return [
+                'ok'      => false,
+                'mensaje' => $e->getMessage(),
+                'trace' => $e->getTrace(),
+            ];
+        }
     }
 }

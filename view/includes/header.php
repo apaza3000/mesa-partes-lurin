@@ -1,3 +1,11 @@
+<?php
+
+use Src\Core\Session;
+
+$user = Session::user();
+
+?>
+
 <nav class="app-header navbar navbar-expand bg-body">
     <!--begin::Container-->
     <div class="container-fluid">
@@ -171,7 +179,7 @@
                 <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
                     <img src="/view/assets/img/user2-160x160.jpg" class="user-image rounded-circle shadow"
                         alt="Alexander Pierce" />
-                    <span class="d-none d-md-inline">Alexander Pierce</span>
+                    <span class="d-none d-md-inline"><?= $user['nombres'] . ' ' . $user['apellido_paterno'] ?></span>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
                     <!--begin::User Image-->
@@ -179,8 +187,9 @@
                         <img src="/view/assets/img/user2-160x160.jpg" class="rounded-circle shadow"
                             alt="Alexander Pierce" />
                         <p>
-                            Alexander Pierce - Web Developer
-                            <small>Member since Nov. 2023</small>
+                            <?= $user['nombres'] . ' ' . $user['apellido_paterno'] ?>
+
+                            <small><?= $user['roles'] ?></small>
                         </p>
                     </li>
 
@@ -188,7 +197,7 @@
                     <!--begin::Menu Footer-->
                     <li class="user-footer">
                         <a href="#" class="btn btn-outline-secondary">Profile</a>
-                        <a href="#" class="btn btn-outline-danger float-end">Sign out</a>
+                        <a href="/logout" class="btn btn-outline-danger float-end">Sign out</a>
                     </li>
                     <!--end::Menu Footer-->
                 </ul>

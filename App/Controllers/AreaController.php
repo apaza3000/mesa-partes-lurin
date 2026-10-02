@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Models\Area;
 use Src\Core\Controller;
 use Src\Core\Request;
+use Src\Core\Session;
 use Src\Core\Validator;
 
 class AreaController extends Controller
@@ -17,12 +18,18 @@ class AreaController extends Controller
 
     public function index()
     {
+        if (!Session::isAuthenticated()) {
+            return $this->redirect("/login");
+        }
         $areas = $this->area->getAll();
         return $this->view("areas.index", ['areas' => $areas], "app");
     }
 
     public function edit($id)
     {
+        if (!Session::isAuthenticated()) {
+            return $this->redirect("/login");
+        }
 
         $area = $this->area->getById($id);
         $areas = $this->area->getAll();
@@ -31,12 +38,21 @@ class AreaController extends Controller
 
     public function create()
     {
+        if (!Session::isAuthenticated()) {
+            return $this->redirect("/login");
+        }
+
         $areas = $this->area->getAll();
         return $this->view("areas.crear", ["areasPadre" => $areas], "app");
     }
 
     public function store()
     {
+
+        if (!Session::isAuthenticated()) {
+            return $this->redirect("/login");
+        }
+
         $req  = new Request();
         $data = $req->all();
 
@@ -99,6 +115,11 @@ class AreaController extends Controller
 
     public function update($id)
     {
+
+
+        if (!Session::isAuthenticated()) {
+            return $this->redirect("/login");
+        }
         $id = (int) $id;
 
         // 1. Verificar que exista
@@ -175,6 +196,11 @@ class AreaController extends Controller
 
     public function delete($id)
     {
+
+        if (!Session::isAuthenticated()) {
+            return $this->redirect("/login");
+        }
+
         $id = (int) $id;
 
         // 1. Verificar que exista

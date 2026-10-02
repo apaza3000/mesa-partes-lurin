@@ -1,6 +1,8 @@
 <?php
+
 namespace App\Models;
 
+use Exception;
 use PDO;
 use PDOException;
 use Src\Core\Conexion;
@@ -193,4 +195,8 @@ class Persona
             return false;
         }
     }
+
+
+
+   
 }
