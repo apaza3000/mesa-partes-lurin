@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Models\Usuario;
 use Src\Core\Controller;
 use Src\Core\Request;
+use Src\Core\Session;
 use Src\Core\Validator;
 
 class UsuarioController extends Controller
@@ -16,8 +17,14 @@ class UsuarioController extends Controller
         $this->user = new Usuario();
     }
 
-    public function index(): void
+    public function index()
     {
+
+
+        if (!Session::isAuthenticated()) {
+            return $this->redirect("/login");
+        }
+
         // 1. Paginación
         $porPagina = 10;
         $paginaActual = isset($_GET['page']) ? (int) $_GET['page'] : 1;
