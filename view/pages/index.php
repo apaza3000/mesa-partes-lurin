@@ -537,7 +537,7 @@ $auth = Session::isAuthenticated();
 
                 <!-- Entrega de Expedientes -->
                 <div class="col-lg-4 col-md-6 mb-4">
-                    <a href="index.php?c=registro&a=index" class="card-atajo">
+                    <a href="/entregas" class="card-atajo">
                         <div class="icon-box bg-grad-1">
                             <i class="fas fa-file-upload"></i>
                         </div>
@@ -549,7 +549,7 @@ $auth = Session::isAuthenticated();
 
                 <!-- Consulta de Expedientes -->
                 <div class="col-lg-4 col-md-6 mb-4">
-                    <a href="index.php?c=consulta&a=index" class="card-atajo">
+                    <a href="/consulta" class="card-atajo">
                         <div class="icon-box bg-grad-2">
                             <i class="fas fa-search"></i>
                         </div>

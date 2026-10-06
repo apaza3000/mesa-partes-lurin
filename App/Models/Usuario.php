@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Exception;
 use PDO;
 use PDOException;
 use Src\Core\Conexion;
@@ -67,7 +68,7 @@ class Usuario
     }
 
     // 1. Obtener usuario por email para el Login
-    public function obtenerPorEmail(string $email): ?array {}
+    public function obtenerPorEmail(string $email) {}
 
     public function getAllRol(): array
     {
