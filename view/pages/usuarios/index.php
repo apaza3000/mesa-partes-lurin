@@ -156,6 +156,7 @@
                                                     <td><?= htmlspecialchars($user['created'] ?? $user['creado_en'] ?? '', ENT_QUOTES, 'UTF-8') ?>
                                                     </td>
                                                     <td class="text-center">
+                                            <!--EDITAR-->
                                                         <a href="/usuarios/<?= (int) ($user['id_usuario'] ?? $user['id'] ?? 0) ?>/editar"
                                                             class="btn btn-sm btn-warning text-white" title="Editar">
                                                             <i class="bi bi-pencil-square"></i>
