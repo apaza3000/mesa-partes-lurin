@@ -46,7 +46,47 @@ body {
 }
 
 .login-body {
+    position: relative;
     padding: 38px 34px 34px;
+}
+
+.back-home {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 22px;
+    padding: 6px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    color: var(--text-muted);
+    background: rgba(52, 58, 64, 0.4);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.back-home span {
+    font-size: 1.1rem;
+    line-height: 1;
+    transition: transform 0.2s ease;
+}
+
+.back-home:hover {
+    border-color: rgba(13, 110, 253, 0.4);
+    color: #9ec5fe;
+    background: rgba(13, 110, 253, 0.08);
+    text-decoration: none;
+}
+
+.back-home:hover span {
+    transform: translateX(-3px); /* Pequeño efecto de movimiento hacia la izquierda al pasar el cursor */
+}
+
+.back-home:focus-visible {
+    outline: 2px solid #3d8bfd;
+    outline-offset: 3px;
+    border-radius: 20px;
 }
 
 .brand-header {
