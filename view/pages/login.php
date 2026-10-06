@@ -20,6 +20,10 @@ $errors = $errors ?? [];
     <main class="login-card">
         <div class="top-bar"></div>
         <section class="login-body" aria-labelledby="login-title">
+            <a class="back-home" href="/" aria-label="Regresar al inicio principal">
+                <span class="back-arrow" aria-hidden="true">&larr;</span>
+                Regresar al inicio
+            </a>
             <header class="brand-header">
                 <h1 class="brand-title" id="login-title">Mesa de Partes</h1>
                 <p class="brand-subtitle">IESTP Lurín</p>

@@ -1,0 +1,215 @@
+/* ==========================================
+   ESTILOS GENERALES DE REGISTRO
+   ========================================== */
+body.register-page {
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start; /* Evita que la parte superior se corte en pantallas pequeñas */
+    align-items: center;
+    padding: 20px 15px;
+    box-sizing: border-box;
+}
+
+.register-box {
+    width: 100%;
+    max-width: 680px;
+    margin: auto 0; /* Centra verticalmente en PC cuando cabe; en móvil se apoya desde arriba */
+}
+
+.card {
+    border-radius: 12px;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.28);
+    border: none;
+    background: #ffffff;
+    overflow: hidden;
+}
+
+.card-header {
+    background: #fff;
+    border-bottom: 1px solid #eee;
+    text-align: center;
+    padding: 14px 20px 10px;
+}
+
+/* --- Botón de regresar --- */
+.register-back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0 0 10px;
+    padding: 4px 12px;
+    border: 1px solid #d0d7de;
+    border-radius: 20px;
+    color: #57606a;
+    background: rgba(243, 246, 251, 0.8);
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    float: left;
+}
+
+.register-back-link .back-arrow {
+    font-size: 1rem;
+    line-height: 1;
+    transition: transform 0.2s ease;
+}
+
+.register-back-link:hover {
+    border-color: rgba(13, 110, 253, 0.4);
+    color: #0d6efd;
+    background: rgba(13, 110, 253, 0.08);
+    text-decoration: none;
+}
+
+.register-back-link:hover .back-arrow {
+    transform: translateX(-3px);
+}
+
+.card-header i.fa-user-shield {
+    clear: both;
+    display: block;
+    font-size: 1.8rem;
+    color: #1e3c72;
+    margin: 0 auto 4px;
+}
+
+.card-header .logo-title {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #1e3c72;
+    margin-bottom: 2px;
+    line-height: 1.2;
+}
+
+.card-header .logo-subtitle {
+    color: #666;
+    font-size: 0.83rem;
+}
+
+/* --- Formulario --- */
+.card-body {
+    padding: 12px 22px 10px;
+}
+
+.section-title {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #1e3c72;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin: 8px 0 8px;
+}
+
+.section-title:first-child {
+    margin-top: 0;
+}
+
+.card-body .form-group {
+    margin-bottom: 8px;
+}
+
+.card-body label {
+    font-size: 0.82rem;
+    margin-bottom: 3px;
+    font-weight: 600;
+}
+
+.form-control {
+    border-radius: 5px;
+    border: 1px solid #ced4da;
+    padding: 5px 10px;
+    height: 36px;
+    font-size: 0.88rem;
+}
+
+.form-control:focus {
+    border-color: #2a5298;
+    box-shadow: 0 0 0 0.18rem rgba(42, 82, 152, 0.2);
+}
+
+.form-check {
+    margin-top: 6px !important;
+    margin-bottom: 0;
+}
+
+.form-check-label {
+    font-size: 0.82rem;
+}
+
+.card-footer {
+    padding: 10px 22px;
+    background: #fff;
+}
+
+.btn-primary {
+    background: #1e3c72;
+    border-color: #1e3c72;
+    font-weight: 700;
+    padding: 8px 12px;
+    font-size: 0.9rem;
+    border-radius: 6px;
+    transition: background-color 0.2s ease;
+}
+
+.btn-primary:hover {
+    background: #2a5298;
+    border-color: #2a5298;
+}
+
+.login-link {
+    text-align: center;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    color: #fff;
+    font-size: 0.85rem;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.login-link a {
+    color: #ffd54f;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.invalid-feedback {
+    display: block;
+    font-size: 0.78rem;
+}
+
+/* ==========================================
+   CORRECCIÓN ESPECÍFICA PARA MÓVILES
+   ========================================== */
+@media (max-width: 768px) {
+    body.register-page {
+        justify-content: flex-start;
+        padding: 10px 8px 25px;
+    }
+
+    .register-box {
+        margin-top: 0;
+        margin-bottom: 0;
+    }
+
+    .card-header {
+        padding: 10px 12px 6px;
+    }
+
+    .card-body {
+        padding: 10px 12px;
+    }
+
+    .card-footer {
+        padding: 8px 12px;
+    }
+
+    .card-header .logo-title {
+        font-size: 1.15rem;
+    }
+
+    .card-header i.fa-user-shield {
+        font-size: 1.4rem;
+    }
+}
