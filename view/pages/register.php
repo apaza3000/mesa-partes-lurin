@@ -17,7 +17,6 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="/view/assets/css/register.css">
-    <script src="/view/assets/js/auth/register.js" defer></script>
 </head>
 
 <body class="register-page">
@@ -31,8 +30,12 @@
                         <i class="fas fa-arrow-left"></i>
                     </span>
                     <span>Regresar al inicio</span>
-                </a>
+                </a><br>
                 <i class="fas fa-user-shield"></i>
+                <div class="register-brand">
+                    <i class="fas fa-landmark" aria-hidden="true"></i>
+                    <span>Mesa de Partes Virtual</span>
+                </div>
                 <div class="logo-title">Crear Cuenta de Invitado</div>
                 <div class="logo-subtitle">Regístrate para consultar y hacer seguimiento a tus expedientes</div>
             </div>
@@ -232,6 +235,8 @@
 
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script src="/view/assets/js/register/register.js"></script>
 
 </body>
 
