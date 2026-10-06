@@ -16,98 +16,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        body.register-page {
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 30px 15px;
-        }
-
-        .register-box {
-            width: 100%;
-            max-width: 720px;
-        }
-
-        .card {
-            border-radius: 12px;
-            box-shadow: 0 12px 40px rgba(0, 0, 0, .3);
-            border: none;
-            overflow: hidden;
-        }
-
-        .card-header {
-            background: #fff;
-            border-bottom: 1px solid #eee;
-            text-align: center;
-            padding: 25px;
-        }
-
-        .card-header .logo-title {
-            font-size: 1.6rem;
-            font-weight: 700;
-            color: #1e3c72;
-            margin-bottom: 5px;
-        }
-
-        .card-header .logo-subtitle {
-            color: #777;
-            font-size: .95rem;
-        }
-
-        .card-header i.fa-user-shield {
-            font-size: 2.4rem;
-            color: #1e3c72;
-            margin-bottom: 8px;
-        }
-
-        .form-control:focus {
-            border-color: #2a5298;
-            box-shadow: 0 0 0 .2rem rgba(42, 82, 152, .25);
-        }
-
-        .btn-primary {
-            background: #1e3c72;
-            border-color: #1e3c72;
-        }
-
-        .btn-primary:hover {
-            background: #2a5298;
-            border-color: #2a5298;
-        }
-
-        .section-title {
-            font-size: .95rem;
-            font-weight: 600;
-            color: #1e3c72;
-            text-transform: uppercase;
-            letter-spacing: .5px;
-            margin: 20px 0 10px;
-        }
-
-        .section-title:first-child {
-            margin-top: 0;
-        }
-
-        .login-link {
-            text-align: center;
-            margin-top: 15px;
-            color: #fff;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, .3);
-        }
-
-        .login-link a {
-            color: #ffd54f;
-            font-weight: 600;
-        }
-
-        /* Feedback de validación */
-        .invalid-feedback {
-            display: block;
-        }
-    </style>
+    <link rel="stylesheet" href="css/register.css">
 </head>
 
 <body class="register-page">
@@ -116,7 +25,10 @@
         <div class="card">
 
             <div class="card-header">
-                <i class="fas fa-user-shield"></i>
+                <div class="register-brand">
+                    <i class="fas fa-landmark" aria-hidden="true"></i>
+                    <span>Mesa de Partes Virtual</span>
+                </div>
                 <div class="logo-title">Crear Cuenta de Invitado</div>
                 <div class="logo-subtitle">Regístrate para consultar y hacer seguimiento a tus expedientes</div>
             </div>
@@ -317,17 +229,7 @@
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
 
-    <script>
-        // Validación de coincidencia de contraseñas en cliente
-        document.getElementById('formRegistro').addEventListener('submit', function(e) {
-            const p1 = document.querySelector('input[name="password"]').value;
-            const p2 = document.querySelector('input[name="password_confirm"]').value;
-            if (p1 !== p2) {
-                e.preventDefault();
-                alert('Las contraseñas no coinciden.');
-            }
-        });
-    </script>
+    <script src="js/register.js"></script>
 
 </body>
 
