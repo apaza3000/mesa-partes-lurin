@@ -17,7 +17,7 @@
         <?php endif; ?>
 
         <div class="row">
-            <div class="col-md-10 col-lg-8">
+            <div class="col-md-10 col-lg-10">
                 <div class="card card-primary card-outline mb-4">
 
                     <form id="form-crear-usuario" action="/usuarios/store" method="POST" class="needs-validation" novalidate>
@@ -62,7 +62,7 @@
 
                                 <!-- Correo Electrónico -->
                                 <div class="col-md-4 mb-3">
-                                    <label for="email" class="form-label">Correo Electrónico</label>
+                                    <label for="email" class="form-label">Email</label>
                                     <input type="email" name="email" id="email" 
                                            class="form-control <?= isset($errors['email']) ? 'is-invalid' : '' ?>"
                                            value="<?= htmlspecialchars($datos_viejos['email'] ?? '', ENT_QUOTES, 'UTF-8') ?>"

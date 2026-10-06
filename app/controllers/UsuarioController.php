@@ -7,6 +7,7 @@ use Src\Core\Controller;
 use Src\Core\Request;
 use Src\Core\Session;
 use Src\Core\Validator;
+use App\Models\UsuarioModel;
 
 class UsuarioController extends Controller
 {
@@ -19,8 +20,6 @@ class UsuarioController extends Controller
 
     public function index()
     {
-
-
         if (!Session::isAuthenticated()) {
             return $this->redirect("/login");
         }
@@ -72,19 +71,18 @@ class UsuarioController extends Controller
             'roles' => $roles
         ], 'app');
     }
-    //store
     //guardar datos de formulario (New User)
     public function store(): void
     {
         $data = (new Request())->all();
         $validator = new Validator();
 
-        // 1. Validar inputs del formulario
+        //Validar inputs del formulario
         if (!$this->validate($validator, $data)) {
             $this->view('usuarios.crear', [
                 'errors' => $validator->getErrors(),
                 'datos_viejos' => $data,
-                'areas' => $this->user->getAllArea(), // Corregido: se usa $this->user
+                'areas' => $this->user->getAllArea(),
                 'roles' => $this->user->getAllRol()
             ], 'app');
             return;
@@ -92,7 +90,6 @@ class UsuarioController extends Controller
 
         $normalized = $this->normalize($data);
 
-        // 2. Intentar guardar pasando los 3 arreglos esperados por el Modelo
         if (!$this->user->crearUsuarioCompleto($normalized['persona'], $normalized['usuario'], $normalized['id_rol'])) {
             $this->view('usuarios.crear', [
                 'errors' => ['db' => 'No se pudo guardar el usuario en la base de datos.'],
@@ -107,6 +104,99 @@ class UsuarioController extends Controller
         $this->redirect('/usuarios');
     }
 
+
+
+    /*
+    ==================================================
+    EDITAR Y ACTUALIZAR USUARIO
+    ==================================================
+    */
+    public function editar(int $id)
+    {
+        $usuario = $this->user->obtenerPorId($id);
+
+        if (!$usuario) {
+            $_SESSION['error'] = 'Usuario no encontrado';
+            return $this->redirect('/usuarios');
+        }
+
+        $areas = $this->user->getAllArea();
+        $roles = $this->user->getAllRol();
+
+        // Renderizar usando el método del framework
+        $this->view('usuarios.editar', [
+            'usuario' => $usuario,
+            'areas' => $areas,
+            'roles' => $roles
+        ], 'app');
+    }
+
+    public function actualizar(int $id)
+    {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+            if ($id <= 0) {
+                $_SESSION['error'] = 'ID de usuario no válido';
+                return $this->redirect('/usuarios');
+            }
+
+            $datosPersona = [
+                'tipo_documento' => trim($_POST['tipo_documento'] ?? ''),
+                'numero_documento' => trim($_POST['numero_documento'] ?? ''),
+                'nombres' => trim($_POST['nombres'] ?? ''),
+                'apellido_paterno' => trim($_POST['apellido_paterno'] ?? ''),
+                'apellido_materno' => trim($_POST['apellido_materno'] ?? ''),
+                'email' => trim($_POST['email'] ?? ''),
+            ];
+
+            $datosUsuario = [
+                'username' => trim($_POST['username'] ?? ''),
+                'id_area' => !empty($_POST['id_area']) ? (int) $_POST['id_area'] : null,
+                'estado' => $_POST['estado'] ?? 'Activo',
+            ];
+
+            $idRol = isset($_POST['id_rol']) ? (int) $_POST['id_rol'] : 0;
+
+            $exito = $this->user->actualizarCompleto($id, $datosPersona, $datosUsuario, $idRol);
+
+            if ($exito) {
+                $_SESSION['usuario_mensaje'] = 'Usuario actualizado correctamente.';
+                return $this->redirect('/usuarios');
+            } else {
+                $this->view('usuarios.editar', [
+                    'errors' => ['db' => 'Ocurrió un error al intentar actualizar el usuario.'],
+                    'usuario' => array_merge(['id_usuario' => $id], $datosPersona, $datosUsuario, ['id_rol' => $idRol]),
+                    'roles' => $this->user->getAllRol(),
+                    'areas' => $this->user->getAllArea()
+                ], 'app');
+            }
+        }
+    }
+
+    /*
+    ==================================================
+    ELIMINAR USUARIO
+    ==================================================
+    */
+    public function delete(int $id)
+    {
+        if ($id > 0) {
+            $eliminado = $this->user->eliminar($id);
+
+            if ($eliminado) {
+                $_SESSION['usuario_mensaje'] = 'Usuario eliminado correctamente.';
+                return $this->redirect('/usuarios');
+            }
+        }
+
+        $_SESSION['error'] = 'No se pudo eliminar el usuario.';
+        return $this->redirect('/usuarios');
+    }
+    /*
+    ==================================================
+    METODOS PRIVADOS VALIDATE
+    ==================================================
+    */
     private function validate(Validator $validator, array $data): bool
     {
         $rules = [
@@ -144,4 +234,18 @@ class UsuarioController extends Controller
             'id_rol' => (int) ($data['id_rol'] ?? 0)
         ];
     }
+    public function show(int $id)
+    {
+        $usuario = $this->user->obtenerPorId($id);
+
+        if (!$usuario) {
+            $_SESSION['error'] = 'Usuario no encontrado';
+            return $this->redirect('/usuarios');
+        }
+
+        $this->view('usuarios.ver', [
+            'usuario' => $usuario
+        ], 'app');
+    }
+
 }
