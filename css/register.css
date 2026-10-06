@@ -1,0 +1,353 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap');
+
+body.register-page {
+    --register-ink: #1e3c72;
+    --register-muted: #777;
+    --register-primary: #1e3c72;
+    --register-primary-hover: #2a5298;
+    --register-accent: #ffd54f;
+    --register-border: #d6deeb;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 1rem .75rem;
+    color: var(--register-ink);
+    font-family: 'DM Sans', 'Segoe UI', sans-serif;
+    background-color: #1e3c72;
+    background-image:
+        linear-gradient(135deg, rgba(42, 82, 152, .12), transparent 48%),
+        linear-gradient(315deg, rgba(255, 213, 79, .07), transparent 48%),
+        linear-gradient(rgba(255, 255, 255, .035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, .035) 1px, transparent 1px),
+        linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    background-size: auto, auto, 28px 28px, 28px 28px;
+}
+
+.register-page *,
+.register-page *::before,
+.register-page *::after {
+    box-sizing: border-box;
+}
+
+.register-box {
+    width: 100%;
+    max-width: 840px;
+    animation: register-enter .45s ease-out both;
+}
+
+.register-page .card {
+    overflow: hidden;
+    border: 1px solid rgba(30, 60, 114, .08);
+    border-top: 4px solid var(--register-primary);
+    border-radius: 13px;
+    background: #fff;
+    box-shadow: 0 22px 60px rgba(16, 39, 82, .18), 0 3px 10px rgba(16, 39, 82, .07);
+}
+
+.register-page .card-header {
+    padding: 1.6rem 1.1rem 1.35rem;
+    text-align: center;
+    background: linear-gradient(160deg, #f1f4fa, #fff 76%);
+    border-bottom: 1px solid #e5eaf2;
+}
+
+.register-page .register-brand {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .55rem;
+    margin-bottom: 1.1rem;
+    color: var(--register-primary);
+    font-family: 'Manrope', 'DM Sans', 'Segoe UI', sans-serif;
+    font-size: .86rem;
+    font-weight: 700;
+}
+
+.register-page .register-brand i {
+    display: inline-flex;
+    width: 2.5rem;
+    height: 2.5rem;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #d4def0;
+    border-radius: 11px;
+    color: var(--register-primary);
+    background: #e6edf8;
+    font-size: 1.2rem;
+}
+
+.register-page .card-header .logo-title {
+    margin-bottom: .45rem;
+    color: var(--register-ink);
+    font-family: 'Manrope', 'DM Sans', 'Segoe UI', sans-serif;
+    font-size: 1.35rem;
+    font-weight: 800;
+    line-height: 1.25;
+}
+
+.register-page .card-header .logo-subtitle {
+    max-width: 34rem;
+    margin: 0 auto;
+    color: var(--register-muted);
+    font-size: .98rem;
+    line-height: 1.55;
+}
+
+.register-page .card-body {
+    padding: 1.25rem 1rem .9rem;
+}
+
+.register-page .section-title {
+    display: flex;
+    align-items: center;
+    gap: .65rem;
+    margin: 1.25rem 0 1rem;
+    color: var(--register-primary);
+    font-size: .82rem;
+    font-weight: 700;
+    line-height: 1.4;
+    text-transform: uppercase;
+}
+
+.register-page .section-title:first-child {
+    margin-top: 0;
+}
+
+.register-page .section-title::after {
+    height: 1px;
+    flex: 1;
+    content: '';
+    background: #e2e8f1;
+}
+
+.register-page .section-title i {
+    color: var(--register-primary);
+    font-size: .95rem;
+}
+
+.register-page .form-group {
+    margin-bottom: 1.15rem;
+}
+
+.register-page .form-group label {
+    display: inline-block;
+    margin-bottom: .45rem;
+    color: #334562;
+    font-size: .88rem;
+    font-weight: 600;
+}
+
+.register-page .form-control {
+    min-height: 46px;
+    padding: .62rem .85rem;
+    border: 1px solid var(--register-border);
+    border-radius: 9px;
+    color: var(--register-ink);
+    background-color: #fbfcff;
+    font-family: inherit;
+    font-size: .96rem;
+    transition: border-color .18s ease, box-shadow .18s ease, background-color .18s ease;
+}
+
+.register-page .form-control:hover:not(:focus) {
+    border-color: #aab9d4;
+    background-color: #fff;
+}
+
+.register-page .form-control:focus {
+    border-color: var(--register-primary);
+    outline: 0;
+    background-color: #fff;
+    box-shadow: 0 0 0 3px rgba(42, 82, 152, .16);
+}
+
+.register-page .form-control.is-invalid {
+    border-color: #c74d4d;
+}
+
+.register-page .form-control.is-invalid:focus {
+    box-shadow: 0 0 0 3px rgba(199, 77, 77, .13);
+}
+
+.register-page .invalid-feedback {
+    display: block;
+    margin-top: .4rem;
+    color: #b33b3b;
+    font-size: .82rem;
+    line-height: 1.45;
+}
+
+.register-page .alert-danger {
+    padding: 1rem 1.1rem;
+    border: 1px solid #f0cccc;
+    border-radius: 10px;
+    color: #843c3c;
+    background: #fff6f4;
+}
+
+.register-page .form-check {
+    display: grid;
+    grid-template-columns: 1.1rem minmax(0, 1fr);
+    align-items: start;
+    column-gap: .55rem;
+    margin: .45rem 0 .25rem;
+    padding-left: 0;
+}
+
+.register-page .form-check-input {
+    position: static;
+    grid-column: 1;
+    width: 1.1rem;
+    height: 1.1rem;
+    flex: 0 0 auto;
+    margin: .15rem 0 0;
+    border-color: #a9b7cd;
+    accent-color: var(--register-primary);
+    cursor: pointer;
+}
+
+.register-page .form-check-input:focus {
+    border-color: var(--register-primary);
+    box-shadow: 0 0 0 3px rgba(42, 82, 152, .16);
+}
+
+.register-page .form-check-label {
+    display: block;
+    grid-column: 2;
+    color: #596579;
+    font-size: .9rem;
+    line-height: 1.5;
+    cursor: pointer;
+}
+
+.register-page .form-check .invalid-feedback {
+    grid-column: 2;
+}
+
+.register-page .card-footer {
+    padding: 1rem;
+    border-top: 1px solid #e5eaf2;
+    background: #fbfcff;
+}
+
+.register-page .btn-primary {
+    min-height: 48px;
+    border: 1px solid var(--register-primary);
+    border-radius: 9px;
+    color: #fff;
+    background: var(--register-primary);
+    font-family: 'DM Sans', 'Segoe UI', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    box-shadow: 0 5px 12px rgba(30, 60, 114, .18);
+    transition: transform .18s ease, background-color .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+
+.register-page .btn-primary:hover {
+    transform: translateY(-1px);
+    border-color: var(--register-primary-hover);
+    background: var(--register-primary-hover);
+    box-shadow: 0 8px 17px rgba(30, 60, 114, .24);
+}
+
+.register-page .btn-primary:focus,
+.register-page .btn-primary:focus-visible {
+    border-color: var(--register-primary-hover);
+    outline: 0;
+    background: var(--register-primary-hover);
+    box-shadow: 0 0 0 3px rgba(42, 82, 152, .22), 0 5px 12px rgba(30, 60, 114, .18);
+}
+
+.register-page .btn-primary:active {
+    transform: translateY(0);
+    background: #1a3260;
+}
+
+.register-page .login-link {
+    margin-top: 1.1rem;
+    color: #fff;
+    font-size: .92rem;
+    text-shadow: none;
+}
+
+.register-page .login-link a {
+    color: var(--register-accent);
+    font-weight: 700;
+    text-decoration: none;
+    text-underline-offset: 3px;
+    transition: color .18s ease, text-decoration-color .18s ease;
+}
+
+.register-page .login-link a:hover {
+    color: #ffe38b;
+    text-decoration: underline;
+}
+
+.register-page .login-link a:focus-visible {
+    border-radius: 3px;
+    outline: 2px solid #fff;
+    outline-offset: 3px;
+}
+
+@keyframes register-enter {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (min-width: 576px) {
+    body.register-page {
+        justify-content: center;
+        padding: 2rem 1.25rem;
+    }
+
+    .register-page .card {
+        border-radius: 16px;
+    }
+
+    .register-page .card-header {
+        padding: 2.25rem 2rem 1.8rem;
+    }
+
+    .register-page .card-header .logo-title {
+        font-size: 1.55rem;
+    }
+
+    .register-page .card-body {
+        padding: 1.75rem 2rem 1.4rem;
+    }
+
+    .register-page .card-footer {
+        padding: 1.2rem 2rem;
+    }
+
+    .register-page .section-title {
+        margin-top: 1.5rem;
+        margin-bottom: 1.2rem;
+    }
+}
+
+@media (max-height: 1000px) {
+    body.register-page {
+        justify-content: flex-start;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .register-box {
+        animation: none;
+    }
+
+    .register-page .form-control,
+    .register-page .btn-primary,
+    .register-page .login-link a {
+        transition: none;
+    }
+}
