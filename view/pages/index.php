@@ -130,19 +130,20 @@ $auth = Session::isAuthenticated();
                         <h5>Consulta de Expedientes</h5>
                         <p>Verifica el estado y ubicación de tu expediente en tiempo real.</p>
                         <span class="link-more">Próximamente</span>
-                    </div>
+                    </a>
                 </div>
+
 
                 <!-- Seguimiento -->
                 <div class="col-lg-4 col-md-6 mb-4">
-                    <div class="card-atajo is-unavailable" aria-disabled="true">
+                    <a href="#" class="card-atajo">
                         <div class="icon-box bg-grad-3">
                             <i class="fas fa-route"></i>
                         </div>
                         <h5>Seguimiento de Trámite</h5>
                         <p>Conoce el recorrido de tu expediente por cada área de la institución.</p>
                         <span class="link-more">Próximamente</span>
-                    </div>
+                    </a>
                 </div>
 
                 <!-- Notificaciones -->
@@ -217,7 +218,7 @@ $auth = Session::isAuthenticated();
         <div class="container">
             <h3>¿Listo para empezar?</h3>
             <p>Crea tu cuenta y presenta tu primer expediente en minutos.</p>
-            <a href="/register" class="btn btn-hero-primary btn-lg">
+            <a href="/register" class="btn btn-hero-primary btn-lg text-light   ">
                 <i class="fas fa-user-plus"></i> Registrarme ahora
             </a>
         </div>
