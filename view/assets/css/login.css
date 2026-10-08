@@ -1,288 +1,197 @@
-:root {
-    --app-background: #22272b;
-    --card-background: #2b3035;
-    --field-background: #343a40;
-    --border-color: #454d55;
-    --text-primary: #f4f6f9;
-    --text-muted: #adb5bd;
-    --adminlte-blue: #0d6efd;
-    --adminlte-blue-hover: #0b5ed7;
-    --error-color: #ff737d;
-}
+/* =========================================
+   DISEÑO FINAL: CORRECCIÓN DE POSICIONES Y ESCALA
+   ========================================= */
 
-* {
-    box-sizing: border-box;
+/* 1. FONDO AZUL CON EFECTO DE DOS CÍRCULOS LUMINOSOS */
+body {
     margin: 0;
-    padding: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
-* {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-        }
-
-        body {
-            min-height: 100vh;
-            background-color: #f1f5f9;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow-x: hidden;
-        }
-
-.login-card {
-    width: 100%;
-    max-width: 420px;
-    overflow: hidden;
-    border: 1px solid var(--border-color);
-    border-radius: 10px;
-    background: var(--card-background);
-    box-shadow: 0 18px 48px rgba(0, 0, 0, 0.38);
-}
-
-.top-bar {
-    width: 100%;
-    height: 5px;
-    background: linear-gradient(90deg, #0d6efd, #58a6ff);
-}
-
-.login-body {
-    position: relative;
-    padding: 38px 34px 34px;
-}
-
-.back-home {
-    display: inline-flex;
+    min-height: 100vh;
+    font-family: 'Roboto', 'Segoe UI', Arial, sans-serif;
+    background-color: #1b3668;
+    background-image: 
+        radial-gradient(circle at 15% 25%, rgba(59, 130, 246, 0.4) 0%, transparent 40%),
+        radial-gradient(circle at 85% 75%, rgba(59, 130, 246, 0.35) 0%, transparent 45%);
+    display: flex;
+    justify-content: center;
     align-items: center;
-    gap: 8px;
-    margin: 0 0 22px;
-    padding: 6px 12px;
-    border: 1px solid var(--border-color);
-    border-radius: 20px;
-    color: var(--text-muted);
-    background: rgba(52, 58, 64, 0.4);
-    font-size: 0.85rem;
-    font-weight: 600;
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* 2. LOGO INSTITUCIONAL (Más grande y bien proporcionado en el centro) */
+body::before {
+    content: "";
+    position: absolute;
+    top: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 300px; /* LOGO MUCHO MÁS GRANDE */
+    height: 90px;
+    /* Recuerda poner el nombre real de tu archivo de imagen aquí */
+    background: url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT_pQVNBgODMZHDSi9sxdXozbB7_2SS8gYnii4WjR5rzQ&s=10') no-repeat center;
+    background-size: contain;
+    z-index: 101; 
+}
+
+/* 3. BOTÓN REGRESAR (¡Arreglado! Fijo en la esquina superior izquierda) */
+.back-home {
+    position: fixed; /* La clave: Fixed lo ancla a la pantalla, no al contenido */
+    top: 40px;
+    left: 40px; 
+    margin: 0; 
+    color: rgba(255, 255, 255, 0.8) !important; 
     text-decoration: none;
-    transition: all 0.2s ease;
+    font-size: 1rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: color 0.2s;
+    z-index: 1000; /* Lo mantiene siempre encima de todo */
 }
 
-.back-home span {
-    font-size: 1.1rem;
-    line-height: 1;
-    transition: transform 0.2s ease;
+.back-home:hover { 
+    color: #ffffff !important; 
+    text-decoration: underline; 
 }
 
-.back-home:hover {
-    border-color: rgba(13, 110, 253, 0.4);
-    color: #9ec5fe;
-    background: rgba(13, 110, 253, 0.08);
-    text-decoration: none;
+/* 4. CONTENEDOR PRINCIPAL */
+.login-card {
+    background: transparent !important;
+    box-shadow: none !important;
+    width: 100%;
+    max-width: 450px;
+    padding: 0 !important;
+    border: none !important;
+    margin: 0 !important;
+    position: relative;
+    z-index: 10;
 }
 
-.back-home:hover span {
-    transform: translateX(-3px); /* Pequeño efecto de movimiento hacia la izquierda al pasar el cursor */
+.top-bar { display: none; }
+
+/* 5. DISTRIBUCIÓN VERTICAL DEL BLOQUE CENTRAL */
+.login-body {
+    position: relative; 
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px; 
+    margin-top: 130px; /* MÁS ESPACIO ARRIBA para que no choque con el logo gigante */
 }
 
-.back-home:focus-visible {
-    outline: 2px solid #3d8bfd;
-    outline-offset: 3px;
-    border-radius: 20px;
-}
-
+/* 6. TEXTOS Y TÍTULOS */
 .brand-header {
-    margin-bottom: 32px;
+    width: 100%;
     text-align: center;
+    background: transparent;
+    padding: 0;
 }
 
-.brand-title {
-    color: var(--text-primary);
-    font-size: 1.8rem;
-    font-weight: 750;
-    letter-spacing: 0.2px;
+#login-title {
+    font-size: 2.8rem;
+    font-weight: 800;
+    margin: 0 0 5px 0;
+    color: #ffffff;
+    line-height: 1.1;
+    letter-spacing: -0.5px;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.2);
 }
 
 .brand-subtitle {
-    margin-top: 5px;
-    color: var(--text-muted);
-    font-size: 0.9rem;
+    font-size: 1.2rem;
+    color: #facc15; /* Amarillo institucional */
+    margin: 0 0 5px 0;
     font-weight: 600;
-    letter-spacing: 1.4px;
     text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 .badge {
-    display: inline-block;
-    margin-top: 15px;
-    padding: 6px 12px;
-    border: 1px solid rgba(13, 110, 253, 0.32);
-    border-radius: 20px;
-    color: #a9ccff;
-    background: rgba(13, 110, 253, 0.12);
-    font-size: 0.76rem;
-    font-weight: 600;
-}
-
-.form-group {
-    margin-bottom: 21px;
-}
-
-.form-label {
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.7); 
+    background: transparent !important;
+    padding: 0;
     display: block;
-    margin-bottom: 8px;
-    color: #dee2e6;
-    font-size: 0.9rem;
-    font-weight: 600;
 }
 
-.form-input {
-    width: 100%;
-    padding: 12px 14px;
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    outline: none;
-    color: var(--text-primary);
-    background: var(--field-background);
-    font-size: 0.95rem;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.form-input::placeholder {
-    color: #9aa0a6;
-}
-
-.form-input:focus {
-    border-color: #3d8bfd;
-    box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.2);
-}
-
-.password-field {
+/* 7. FORMULARIO (Tarjeta impecable) */
+#login-form {
+    width: 100%; 
+    background: #ffffff;
+    padding: 40px 35px;
+    border-radius: 12px; 
+    border: none;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
+    box-sizing: border-box;
     position: relative;
 }
 
-.password-field .form-input {
-    padding-right: 82px;
-}
-
-.password-toggle {
+#login-form::after {
+    content: "";
     position: absolute;
-    top: 50%;
-    right: 12px;
-    transform: translateY(-50%);
-    border: 0;
-    color: #9ec5fe;
-    background: transparent;
-    font-size: 0.8rem;
-    font-weight: 700;
-    cursor: pointer;
-}
-
-.password-toggle:hover {
-    color: #fff;
-}
-
-.password-toggle:focus-visible {
-    outline: 2px solid #3d8bfd;
-    outline-offset: 3px;
-}
-
-.form-input.input-error {
-    border-color: var(--error-color);
-}
-
-.error-text {
-    margin-top: 6px;
-    color: var(--error-color);
-    font-size: 0.82rem;
-    font-weight: 500;
-}
-
-.form-group .error-text {
-    margin-bottom: 0;
-}
-
-.btn-submit {
-    display: flex;
+    top: 0;
+    left: 0;
     width: 100%;
-    min-height: 48px;
-    justify-content: center;
-    align-items: center;
-    padding: 12px 16px;
-    border: 1px solid var(--adminlte-blue);
+    height: 5px;
+    background: linear-gradient(to right, #244b8c 50%, #facc15 50%);
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+}
+
+#login-form::before {
+    content: "Inicio de Sesión";
+    display: block;
+    text-align: center;
+    font-size: 1.6rem;
+    color: #244b8c; 
+    font-weight: 800;
+    margin-bottom: 25px;
+}
+
+/* 8. CAMPOS DEL FORMULARIO */
+.form-group { margin-bottom: 22px; text-align: left; }
+.form-label { display: block; font-size: 0.85rem; color: #4a5568; margin-bottom: 8px; font-weight: 700; text-transform: uppercase; }
+.form-input { 
+    width: 100%; padding: 13px 15px; border: 1.5px solid #cbd5e1; 
+    border-radius: 6px; box-sizing: border-box; font-size: 1rem; 
+    color: #0f172a; background-color: #f8fafc; transition: all 0.2s;
+}
+.form-input:focus { outline: none; border-color: #244b8c; background-color:#ffffff; box-shadow: 0 0 0 3px rgba(36, 75, 140, 0.15); }
+
+/* Mostrar contraseña */
+.password-field { position: relative; display: flex; }
+.password-toggle { 
+    position: absolute; right: 14px; top: 50%; transform: translateY(-50%); 
+    background: transparent; border: none; cursor: pointer; color: #244b8c; 
+    font-size: 0.85rem; font-weight: 700; 
+}
+
+/* 9. BOTÓN PRINCIPAL */
+.btn-submit {
+    width: 100%;
+    background-color: #244b8c !important; 
+    color: #ffffff !important;
+    padding: 15px;
+    border: none;
     border-radius: 6px;
-    color: #fff;
-    background: var(--adminlte-blue);
-    font-size: 0.95rem;
-    font-weight: 700;
-    text-transform: uppercase;
+    font-size: 1.05rem;
+    font-weight: 800;
     cursor: pointer;
-    transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+    margin-top: 15px;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.btn-submit:hover {
-    transform: translateY(-1px);
-    border-color: var(--adminlte-blue-hover);
-    background: var(--adminlte-blue-hover);
-    box-shadow: 0 6px 16px rgba(13, 110, 253, 0.22);
-}
+.btn-submit:hover { background-color: #1a386b !important; transform: translateY(-1px); }
+.btn-submit:active { transform: translateY(1px); box-shadow: none; }
 
-.btn-submit:focus-visible {
-    outline: 3px solid rgba(110, 168, 254, 0.65);
-    outline-offset: 3px;
-}
-
-.btn-submit:disabled {
-    transform: none;
-    border-color: #495057;
-    background: #495057;
-    cursor: not-allowed;
-    box-shadow: none;
-}
-
-.spinner {
-    width: 19px;
-    height: 19px;
-    margin-left: 10px;
-    border: 3px solid rgba(255, 255, 255, 0.35);
-    border-top-color: #fff;
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-}
-
-.hidden {
-    display: none;
-}
-
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
-}
-
-@media (max-width: 480px) {
-    body {
-        padding: 16px;
-    }
-
-    .login-body {
-        padding: 32px 24px 26px;
-    }
-
-    .brand-title {
-        font-size: 1.6rem;
-    }
-}
-
-@media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
-        scroll-behavior: auto !important;
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-    }
+/* 10. RESPONSIVO PARA CELULARES */
+@media (max-width: 600px) {
+    body { padding-top: 0; }
+    .login-body { margin-top: 150px; padding: 0 20px; box-sizing: border-box; }
+    #login-title { font-size: 2.2rem; }
+    body::before { top: 20px; width: 220px; height: 70px; } /* Logo ajustado a móvil */
+    .back-home { top: 20px; left: 20px; font-size: 0.85rem; } /* Botón regresar ajustado a móvil */
 }
