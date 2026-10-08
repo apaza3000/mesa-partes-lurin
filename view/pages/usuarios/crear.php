@@ -19,9 +19,9 @@
         <div class="row">
             <div class="col-md-10 col-lg-10">
                 <div class="card card-primary card-outline mb-4">
-
-                    <form id="form-crear-usuario" action="/usuarios/store" method="POST" class="needs-validation" novalidate>
-                        <!-- CSRF Token de seguridad -->
+                    
+                    <form id="form-crear-usuario" action="/usuarios/store" method="POST" class="needs-validation" novalidate>    
+                    <!-- CSRF Token de seguridad -->
                         <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
 
                         <!-- SECCIÓN 1: DATOS PERSONALES -->
@@ -49,7 +49,7 @@
                                 <!-- N° Documento -->
                                 <div class="col-md-4 mb-3">
                                     <label for="numero_documento" class="form-label">N° Documento</label>
-                                    <input type="text" name="numero_documento" id="numero_documento"
+                                    <input type="number" name="numero_documento" id="numero_documento"
                                            class="form-control <?= isset($errors['numero_documento']) ? 'is-invalid' : '' ?>"
                                            value="<?= htmlspecialchars($datos_viejos['numero_documento'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
                                            required maxlength="20">
@@ -114,6 +114,35 @@
                                         </div>
                                     <?php endif; ?>
                                 </div>
+
+
+                                <!-- Teléfono -->
+<div class="col-md-4 mb-3">
+    <label for="telefono" class="form-label">Teléfono celular</label>
+
+    <input
+        type="tel"
+        name="telefono"
+        id="telefono"
+        class="form-control <?= isset($errors['telefono']) ? 'is-invalid' : '' ?>"
+        value="<?= htmlspecialchars($datos_viejos['telefono'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+        inputmode="numeric"
+        pattern="9[0-9]{8}"
+        minlength="9"
+        maxlength="9"
+        placeholder="Ej. 987654321"
+        title="Ingresa un celular peruano de 9 dígitos que comience con 9."
+        required
+    >
+
+    <?php if (isset($errors['telefono'])): ?>
+        <div class="invalid-feedback">
+            <?= is_array($errors['telefono'])
+                ? implode('<br>', $errors['telefono'])
+                : htmlspecialchars($errors['telefono'], ENT_QUOTES, 'UTF-8') ?>
+        </div>
+    <?php endif; ?>
+</div>
                             </div>
                         </div>
 

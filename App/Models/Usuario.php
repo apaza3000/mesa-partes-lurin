@@ -279,7 +279,7 @@ class Usuario
         }
     }
 
-    // Obtener un usuario por ID
+    // Obtener un USUARIO por ID
     public function obtenerPorId(int $id)
     {
         $sql = "SELECT u.id_usuario, u.id_persona, u.id_area, u.username, u.estado,
@@ -295,8 +295,60 @@ class Usuario
         $stmt->execute([':id' => $id]);
         return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
     }
+    // Obtener un MAS DETALLES DE USUARIO por ID
+    public function obtenerAllPorId(int $id)
+    {
+        $sql =
+            "SELECT 
+            u.id_usuario,
+            u.username,
+            u.avatar,
+            u.estado AS estado_usuario,
+            u.ultimo_acceso,
+            u.creado_en AS usuario_creado_en,
+            u.actualizado_en AS usuario_actualizado_en,
 
-    //ACTUALIZAR
+            -- Datos de la persona
+            p.id_persona,
+            p.tipo_persona,
+            p.tipo_documento,
+            p.numero_documento,
+            p.nombres,
+            p.apellido_paterno,
+            p.apellido_materno,
+            p.razon_social,
+            p.email,
+            p.telefono,
+            p.direccion,
+            p.estado AS estado_persona,
+
+            -- Datos del área
+            a.id_area,
+            a.nombre AS area_nombre,
+            a.siglas AS area_siglas,
+
+            -- Datos del rol
+            r.id_rol,
+            r.nombre AS rol_nombre,
+            r.descripcion AS rol_descripcion
+
+        FROM usuarios u
+        INNER JOIN personas p ON u.id_persona = p.id_persona
+
+        LEFT JOIN areas a ON u.id_area = a.id_area
+
+        LEFT JOIN usuario_roles ur ON u.id_usuario = ur.id_usuario
+
+        LEFT JOIN roles r ON ur.id_rol = r.id_rol
+
+        WHERE u.id_usuario = :id_usuario; LIMIT 1";
+
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([':id_usuario' => $id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
     public function actualizarCompleto(int $idUsuario, array $datosPersona, array $datosUsuario, int $idRol): bool
     {
         try {

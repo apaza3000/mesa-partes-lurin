@@ -7,7 +7,6 @@ use Src\Core\Controller;
 use Src\Core\Request;
 use Src\Core\Session;
 use Src\Core\Validator;
-use App\Models\UsuarioModel;
 
 class UsuarioController extends Controller
 {
@@ -194,6 +193,25 @@ class UsuarioController extends Controller
     }
     /*
     ==================================================
+    VISTA (VER MAS DETALLES DE USUARIO)
+    ==================================================
+    */
+    public function show(int $id)
+    {
+        $usuario = $this->user->obtenerAllPorId($id);
+
+        if (!$usuario) {
+            $_SESSION['error'] = 'Usuario no encontrado';
+            return $this->redirect('/usuarios');
+        }
+
+        // Renderizar usando el método del framework
+        $this->view('usuarios.show', [
+            'usuario' => $usuario,
+        ], 'app');
+    }
+    /*
+    ==================================================
     METODOS PRIVADOS VALIDATE
     ==================================================
     */
@@ -234,18 +252,6 @@ class UsuarioController extends Controller
             'id_rol' => (int) ($data['id_rol'] ?? 0)
         ];
     }
-    public function show(int $id)
-    {
-        $usuario = $this->user->obtenerPorId($id);
 
-        if (!$usuario) {
-            $_SESSION['error'] = 'Usuario no encontrado';
-            return $this->redirect('/usuarios');
-        }
-
-        $this->view('usuarios.ver', [
-            'usuario' => $usuario
-        ], 'app');
-    }
 
 }

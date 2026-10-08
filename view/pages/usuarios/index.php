@@ -156,11 +156,17 @@
                                                     <td><?= htmlspecialchars($user['created'] ?? $user['creado_en'] ?? '', ENT_QUOTES, 'UTF-8') ?>
                                                     </td>
                                                     <td class="text-center">
-                                            <!--EDITAR-->
+                                                        <!--VER-->
+                                                        <a href="/usuarios/<?= (int) ($user['id_usuario'] ?? $user['id'] ?? 0) ?>"
+                                                            class="btn btn-sm btn-info" title="Editar">
+                                                            <i class="bi bi-eye"></i>
+                                                        </a>
+                                                        <!--EDITAR-->
                                                         <a href="/usuarios/<?= (int) ($user['id_usuario'] ?? $user['id'] ?? 0) ?>/editar"
                                                             class="btn btn-sm btn-warning text-white" title="Editar">
                                                             <i class="bi bi-pencil-square"></i>
                                                         </a>
+                                                        <!--ELIMNAR-->
                                                         <form
                                                             action="/usuarios/<?= (int) ($user['id_usuario'] ?? $user['id'] ?? 0) ?>/delete"
                                                             method="POST" class="d-inline"
@@ -170,6 +176,8 @@
                                                                 <i class="bi bi-trash"></i>
                                                             </button>
                                                         </form>
+
+
                                                     </td>
                                                 </tr>
                                             <?php endforeach; ?>
