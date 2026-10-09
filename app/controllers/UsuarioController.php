@@ -2,6 +2,8 @@
 
 namespace App\Controllers;
 //use App\Services\UsuarioServices;
+
+use App\Models\Auditoria;
 use App\Models\Usuario;
 use Src\Core\Controller;
 use Src\Core\Request;
@@ -71,13 +73,33 @@ class UsuarioController extends Controller
         ], 'app');
     }
     //guardar datos de formulario (New User)
-    public function store(): void
+    public function store()
     {
+        if (!Session::isAuthenticated()) {
+            return $this->redirect("/login");
+        }
         $data = (new Request())->all();
         $validator = new Validator();
 
+        $rules = [
+            //datos de personas
+            'tipo_documento' => ['required', 'in' => ['DNI', 'CE', 'RUC', 'Pasaporte', 'Otro']],
+            'numero_documento' => ['required', 'unique' => ['personas', 'numero_documento'], 'maxLength' => 20],
+            'nombres' => ['required', 'maxLength' => 100],
+            'apellido_paterno' => ['required', 'maxLength' => 100],
+            'apellido_materno' => ['required', 'maxLength' => 100],
+            'email' => ['nullable', 'email'],
+            'telefono' => ['nullable', 'maxLength' => 30],
+            'direccion' => ['nullable', 'string', 'maxLength' => 255],
+            //datos de usuarios
+            'id_area' => ['nullable', 'exists' => ['areas', 'id_area']],
+            'username' => ['required', 'unique' => ['usuarios', 'username'], 'maxlength' => 50],
+            'password' => ['required', 'minLength' => 6],
+            //datos de rol
+            'id_rol' => ['required', 'exists' => ['roles', 'id_rol']]
+        ];
         //Validar inputs del formulario
-        if (!$this->validate($validator, $data)) {
+        if (!$validator->validate($rules, $data)) {
             $this->view('usuarios.crear', [
                 'errors' => $validator->getErrors(),
                 'datos_viejos' => $data,
@@ -88,16 +110,24 @@ class UsuarioController extends Controller
         }
 
         $normalized = $this->normalize($data);
-
-        if (!$this->user->crearUsuarioCompleto($normalized['persona'], $normalized['usuario'], $normalized['id_rol'])) {
+        $res = $this->user->crearUsuarioCompleto($normalized['persona'], $normalized['usuario'], $normalized['id_rol']);
+        if (!$res['estatus']) {
+            echo '<pre>';
+            print_r($normalized);
+            print_r($res);
+            return;
             $this->view('usuarios.crear', [
-                'errors' => ['db' => 'No se pudo guardar el usuario en la base de datos.'],
+                'errors' => ['db' => 'No se pudo guardar el usuario en la base de datos con mensaje: ' . $res['error']],
                 'datos_viejos' => $data,
-                'areas' => $this->user->getAllArea(), // Corregido: se usa $this->user
+                'areas' => $this->user->getAllArea(),
                 'roles' => $this->user->getAllRol()
             ], 'app');
             return;
         }
+
+        $user = Session::user();
+        $auditoria = new Auditoria();
+        $auditoria->insertar($user['id_usuario'], 'usuarios', 'crear', 'usuarios', $res['id'], 'registro completo de usuarios', $_SERVER['REMOTE_ADDR'] ?? null);
 
         $_SESSION['usuario_mensaje'] = 'Usuario creado correctamente.';
         $this->redirect('/usuarios');
@@ -215,23 +245,7 @@ class UsuarioController extends Controller
     METODOS PRIVADOS VALIDATE
     ==================================================
     */
-    private function validate(Validator $validator, array $data): bool
-    {
-        $rules = [
-            'tipo_documento' => ['required', 'string', 'in' => ['DNI', 'CE', 'Pasaporte']],
-            'numero_documento' => ['required', 'string', 'maxLength' => 20],
-            'nombres' => ['required', 'string', 'maxLength' => 100],
-            'apellido_paterno' => ['required', 'string', 'maxLength' => 100],
-            'apellido_materno' => ['nullable', 'string', 'maxLength' => 100],
-            'email' => ['required', 'email', 'maxLength' => 150],
-            'username' => ['required', 'string', 'maxLength' => 50],
-            'password' => ['required', 'string', 'minLength' => 8],
-            'id_area' => ['required'],
-            'id_rol' => ['required'],
-        ];
 
-        return $validator->validate($rules, $data);
-    }
 
     private function normalize(array $data): array
     {
@@ -245,13 +259,11 @@ class UsuarioController extends Controller
                 'email' => trim($data['email'] ?? '')
             ],
             'usuario' => [
-                'id_area' => (int) ($data['id_area'] ?? 0),
+                'id_area' => (isset($data['id_area']) && $data['id_area'] != '') ? $data['id_area'] : null,
                 'username' => trim($data['username'] ?? ''),
-                'password' => $data['password'] ?? '' // Se deja texto plano aquí, el modelo hace el hash
+                'password' => $data['password'] ?? ''
             ],
             'id_rol' => (int) ($data['id_rol'] ?? 0)
         ];
     }
-
-
 }

@@ -66,9 +66,7 @@ class Usuario
     }
 
     // 1. Obtener usuario por email para el Login
-    public function obtenerPorEmail(string $email)
-    {
-    }
+    public function obtenerPorEmail(string $email) {}
 
     public function getAllRol(): array
     {
@@ -137,7 +135,7 @@ class Usuario
     }
 
     //nuevo ususario
-    public function crearUsuarioCompleto(array $datosPersona, array $datosUsuario, int $idRol): bool
+    public function crearUsuarioCompleto(array $datosPersona, array $datosUsuario, int $idRol)
     {
         try {
             $this->db->beginTransaction();
@@ -182,11 +180,11 @@ class Usuario
             ]);
 
             $this->db->commit();
-            return true;
+            return ['estatus' => true, 'id' => $idUsuario];
         } catch (PDOException $e) {
             $this->db->rollBack();
             error_log("Error al crear usuario: " . $e->getMessage());
-            return false;
+            return ['estatus' => false, 'id' => null, 'error' =>  $e->getMessage()];
         }
     }
 
@@ -414,7 +412,6 @@ class Usuario
 
             $this->db->commit();
             return true;
-
         } catch (PDOException $e) {
             $this->db->rollBack();
             error_log("Error al actualizar usuario: " . $e->getMessage());
