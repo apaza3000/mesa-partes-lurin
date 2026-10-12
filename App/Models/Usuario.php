@@ -113,10 +113,16 @@ class Usuario
                     u.id_usuario, 
                     u.avatar,
                     u.username, 
+                    p.nombres,
+                    p.apellido_paterno,
+                    p.apellido_materno,
+                    a.nombre AS area_nombre,
                     u.estado, 
                     u.creado_en,
                     r.nombre AS rol_nombre
             FROM usuarios AS u
+            INNER JOIN personas p ON p.id_persona = u.id_persona
+            INNER JOIN areas a on a.id_area = u.id_area 
             LEFT JOIN usuario_roles ur ON u.id_usuario = ur.id_usuario
             LEFT JOIN roles r ON ur.id_rol = r.id_rol
             ORDER BY u.id_usuario DESC 

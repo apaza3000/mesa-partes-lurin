@@ -1,7 +1,9 @@
-<!--end::Sidebar-->
-<!--begin::App Main-->
+<?php
+$paginaActual = $paginaActual ?? 0;
+$totalPaginas = $totalPaginas ?? 0;
+?>
 <main class="app-main">
-    <!--Header (Users    Home/Users)-->
+
     <div class="app-content-header">
         <!--begin::Container-->
         <div class="container-fluid">
@@ -78,14 +80,15 @@
                         <div class="card-body p-0">
                             <div class="table-responsive">
                                 <table class="table table-hover align-middle m-0">
-                                    <thead>
-                                        <tr>
+                                    <thead class="table table-hover align-middle m-0">
+                                        <tr class="table-dark text-center" >
                                             <th>N°</th>
                                             <th>User</th>
+                                            <th>Area</th>
                                             <th>Rol</th>
                                             <th>Estado</th>
                                             <th>Created</th>
-                                            <th class="text-end">Actions</th>
+                                            <th>Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -97,31 +100,57 @@
                                             <?php
                                             // 1. Definir los registros mostrados por página (debe coincidir con el controlador)
                                             $porPagina = 10;
-
                                             // 2. Calcular el offset base según la página actual enviada por el controlador
                                             $pagina = $paginaActual ?? 1;
                                             $offsetBase = ($pagina - 1) * $porPagina;
                                             ?>
 
-                                            <?php foreach ($usuarios as $indice => $user): ?>
+                                            <?php foreach ($usuarios as $indice => $user):
+                                                $nombreCompleto = $user['nombres'] . ' ' . $user['apellido_paterno'] . ' ' . $user['apellido_materno']
+                                            ?>
 
                                                 <tr>
+                                                    <!--N°-->
                                                     <td>
                                                         <?= $offsetBase + $indice + 1 ?>
                                                     </td>
+                                                    <!--USER-->
                                                     <td>
                                                         <div class="d-flex align-items-center">
                                                             <img src="/view/<?= htmlspecialchars(!empty($user['avatar']) ? $user['avatar'] : 'assets/img/default-user.png', ENT_QUOTES, 'UTF-8') ?>"
                                                                 onerror="this.onerror=null; this.src='/view/assets/img/default-user.png';"
                                                                 alt="Avatar" class="rounded-circle me-2" width="32" height="32">
                                                             <span class="fw-medium">
-                                                                <?= htmlspecialchars($user['username'] ?? '*username_null*', ENT_QUOTES, 'UTF-8') ?>
+                                                                <?= htmlspecialchars($nombreCompleto ?? '*username_null*', ENT_QUOTES, 'UTF-8') ?>
                                                             </span>
                                                         </div>
                                                     </td>
+                                                    <!--ESTADO-->
                                                     <td>
                                                         <?php
-                                                        // Obtenemos el nombre o ID del rol
+                                                        // Obtenemos el nombre AREA
+                                                        $rolUsuario = $user['area_nombre'] ?? $user['area_nombre'] ?? '*sin_rol*';
+                                                        // Asignamos la clase de AdminLTE según AREA
+                                                        $badgeClass = match ($rolUsuario) {
+                                                            'Mesa de Partes' => 'bg-danger text-dark',
+                                                            'Dirección' => 'bg-warning text-dark',
+                                                            'Secretaría Académica' => 'bg-primary text-dark',
+                                                            'Administración' => 'bg-info text-dark',
+                                                            'Jefatura de Unidad Académica' => 'bg-info text-dark',
+                                                            'Coordinaciones de Área Académica' => 'bg-info text-dark',
+                                                            'Bienestar Estudiantil' => 'bg-info text-dark',
+                                                            'Archivo' => 'bg-success text-dark',
+                                                            default => 'bg-secondary', // Si el rol no coincide con ningún caso
+                                                        };
+                                                        ?>
+                                                        <span class="badge <?= $badgeClass ?>">
+                                                            <?= htmlspecialchars($rolUsuario, ENT_QUOTES, 'UTF-8') ?>
+                                                        </span>
+                                                    </td>
+                                                    <!--ROL-->
+                                                    <td>
+                                                        <?php
+                                                        // Obtenemos el nombre ROL
                                                         $rolUsuario = $user['rol'] ?? $user['rol_nombre'] ?? '*sin_rol*';
                                                         // Asignamos la clase de AdminLTE según el rol
                                                         $badgeClass = match ($rolUsuario) {
@@ -137,6 +166,8 @@
                                                             <?= htmlspecialchars($rolUsuario, ENT_QUOTES, 'UTF-8') ?>
                                                         </span>
                                                     </td>
+
+                                                    <!--ESTADO-->
                                                     <td>
                                                         <?php
                                                         // 1. Obtenemos el estado actual
