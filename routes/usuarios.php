@@ -5,6 +5,7 @@ use Src\Core\Router;
 
 // VISTAS / MUESTRA DE DATOS (GET) 
 Router::get('/usuarios', [UsuarioController::class, 'index']);             // Listado principal
+Router::get('/api/personas/buscar', [UsuarioController::class, 'buscarPersonaAjax']);
 Router::get('/usuarios/crear', [UsuarioController::class, 'create']);        // Formulario de alta
 Router::get('/usuarios/{id}', [UsuarioController::class, 'show']);         // Ver detalle
 Router::get('/usuarios/{id}/editar', [UsuarioController::class, 'editar']);  // Formulario de edición

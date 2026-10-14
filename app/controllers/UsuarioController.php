@@ -9,6 +9,7 @@ use Src\Core\Controller;
 use Src\Core\Request;
 use Src\Core\Session;
 use Src\Core\Validator;
+use App\Validators\UsuarioValidator;
 
 class UsuarioController extends Controller
 {
@@ -54,6 +55,37 @@ class UsuarioController extends Controller
             'totalPaginas' => $totalPaginas
         ], 'app');
     }
+
+    public function buscarPersonaAjax()
+    {
+        header('Content-Type: application/json');
+        $tipo = $_GET['tipo'] ?? '';
+        $numero = $_GET['numero'] ?? '';
+
+        if (empty($tipo) || empty($numero)) {
+            echo json_encode(['encontrado' => false]);
+            return;
+        }
+
+        // Buscar en el modelo
+        $persona = $this->user->obtenerPersonaPorDocumento($tipo, $numero);
+
+        if ($persona) {
+            // Verificar si ya tiene usuario
+            $tieneUsuario = $this->user->tieneUsuarioAsignado($persona['id_persona']);
+            echo json_encode([
+                'encontrado' => true,
+                'tiene_usuario' => $tieneUsuario,
+                'persona' => $persona
+            ]);
+        } else {
+            echo json_encode(['encontrado' => false]);
+        }
+        exit;
+
+
+    }
+
     /*
     ==================================================
     FORMULARIO CREAR USUARIO
@@ -80,11 +112,13 @@ class UsuarioController extends Controller
         }
         $data = (new Request())->all();
         $validator = new Validator();
+        // Usando la clase de forma limpia gracias al 'use'
+        $resultadoValidacion = UsuarioValidator::validar($data);
 
         $rules = [
             //datos de personas
             'tipo_documento' => ['required', 'in' => ['DNI', 'CE', 'RUC', 'Pasaporte', 'Otro']],
-            'numero_documento' => ['required', 'unique' => ['personas', 'numero_documento'], 'maxLength' => 20],
+            'numero_documento' => ['required', /*'unique' => ['personas', 'numero_documento'], */ 'maxLength' => 20],
             'nombres' => ['required', 'maxLength' => 100],
             'apellido_paterno' => ['required', 'maxLength' => 100],
             'apellido_materno' => ['required', 'maxLength' => 100],
@@ -99,25 +133,12 @@ class UsuarioController extends Controller
             'id_rol' => ['required', 'exists' => ['roles', 'id_rol']]
         ];
         //Validar inputs del formulario
-        if (!$validator->validate($rules, $data)) {
-            $this->view('usuarios.crear', [
-                'errors' => $validator->getErrors(),
-                'datos_viejos' => $data,
-                'areas' => $this->user->getAllArea(),
-                'roles' => $this->user->getAllRol()
-            ], 'app');
-            return;
-        }
-
         $normalized = $this->normalize($data);
         $res = $this->user->crearUsuarioCompleto($normalized['persona'], $normalized['usuario'], $normalized['id_rol']);
+
         if (!$res['estatus']) {
-            echo '<pre>';
-            print_r($normalized);
-            print_r($res);
-            return;
             $this->view('usuarios.crear', [
-                'errors' => ['db' => 'No se pudo guardar el usuario en la base de datos con mensaje: ' . $res['error']],
+                'errors' => ['db' => 'No se pudo guardar el usuario en la base de datos: ' . $res['error']],
                 'datos_viejos' => $data,
                 'areas' => $this->user->getAllArea(),
                 'roles' => $this->user->getAllRol()
@@ -125,6 +146,7 @@ class UsuarioController extends Controller
             return;
         }
 
+        // 4. Auditoría y redirección exitosa
         $user = Session::user();
         $auditoria = new Auditoria();
         $auditoria->insertar($user['id_usuario'], 'usuarios', 'crear', 'usuarios', $res['id'], 'registro completo de usuarios', $_SERVER['REMOTE_ADDR'] ?? null);

@@ -66,7 +66,10 @@ class Usuario
     }
 
     // 1. Obtener usuario por email para el Login
-    public function obtenerPorEmail(string $email) {}
+    public function obtenerPorEmail(string $email)
+    {
+    }
+
 
     public function getAllRol(): array
     {
@@ -139,34 +142,87 @@ class Usuario
             return [];
         }
     }
+    /**
+     * Buscar una persona por su tipo y número de documento
+     */
+    public function obtenerPersonaPorDocumento(string $tipo, string $numero): ?array
+    {
+        $sql = "SELECT * FROM personas WHERE tipo_documento = :tipo AND numero_documento = :numero LIMIT 1";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([
+            ':tipo' => $tipo,
+            ':numero' => $numero
+        ]);
 
+        $persona = $stmt->fetch(\PDO::FETCH_ASSOC);
+        return $persona ? $persona : null;
+    }
+
+    /**
+     * Verificar si una persona ya cuenta con un usuario registrado en el sistema
+     */
+    public function tieneUsuarioAsignado(int $idPersona): bool
+    {
+        $sql = "SELECT COUNT(*) FROM usuarios WHERE id_persona = :id_persona";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([':id_persona' => $idPersona]);
+
+        return (int) $stmt->fetchColumn() > 0;
+    }
     //nuevo ususario
-    public function crearUsuarioCompleto(array $datosPersona, array $datosUsuario, int $idRol)
+    public function crearUsuarioCompleto(array $datosPersona, array $datosUsuario, int $idRol): array
     {
         try {
             $this->db->beginTransaction();
 
-            // 1. Insertar en tabla personas
-            $sqlPersona = "INSERT INTO personas 
-            (tipo_persona, tipo_documento, numero_documento, nombres, apellido_paterno, apellido_materno, email) 
-            VALUES ('Natural', :tipo_doc, :num_doc, :nombres, :paterno, :materno, :email)";
-
-            $stmtPersona = $this->db->prepare($sqlPersona);
-            $stmtPersona->execute([
+            // 1. Verificar si la persona ya existe
+            $stmtCheck = $this->db->prepare("SELECT id_persona FROM personas WHERE tipo_documento = :tipo_doc AND numero_documento = :num_doc LIMIT 1");
+            $stmtCheck->execute([
                 ':tipo_doc' => $datosPersona['tipo_documento'],
-                ':num_doc' => $datosPersona['numero_documento'],
-                ':nombres' => $datosPersona['nombres'],
-                ':paterno' => $datosPersona['apellido_paterno'],
-                ':materno' => $datosPersona['apellido_materno'],
-                ':email' => $datosPersona['email'],
+                ':num_doc' => $datosPersona['numero_documento']
             ]);
+            $idPersona = $stmtCheck->fetchColumn();
 
-            $idPersona = (int) $this->db->lastInsertId();
+            if (!$idPersona) {
+                // Insertar persona si no existe
+                $sqlPersona = "INSERT INTO personas (tipo_documento, numero_documento, nombres, apellido_paterno, apellido_materno, email, telefono, direccion) 
+                           VALUES (:tipo_doc, :num_doc, :nombres, :paterno, :materno, :email, :telefono, :direccion)";
+                $stmtPersona = $this->db->prepare($sqlPersona);
+                $stmtPersona->execute([
+                    ':tipo_doc' => $datosPersona['tipo_documento'],
+                    ':num_doc' => $datosPersona['numero_documento'],
+                    ':nombres' => $datosPersona['nombres'],
+                    ':paterno' => $datosPersona['apellido_paterno'],
+                    ':materno' => $datosPersona['apellido_materno'],
+                    ':email' => $datosPersona['email'],
+                    ':telefono' => $datosPersona['telefono'] ?? null,
+                    ':direccion' => $datosPersona['direccion'] ?? null,
+                ]);
+                $idPersona = (int) $this->db->lastInsertId();
+            } else {
+                // Actualizar datos de persona existente
+                $sqlUpPersona = "UPDATE personas SET nombres = :nombres, apellido_paterno = :paterno, apellido_materno = :materno, email = :email, telefono = :telefono, direccion = :direccion WHERE id_persona = :id_persona";
+                $stmtUp = $this->db->prepare($sqlUpPersona);
+                $stmtUp->execute([
+                    ':nombres' => $datosPersona['nombres'],
+                    ':paterno' => $datosPersona['apellido_paterno'],
+                    ':materno' => $datosPersona['apellido_materno'],
+                    ':email' => $datosPersona['email'],
+                    ':telefono' => $datosPersona['telefono'] ?? null,
+                    ':direccion' => $datosPersona['direccion'] ?? null,
+                    ':id_persona' => $idPersona
+                ]);
+            }
 
-            // 2. Insertar en tabla usuarios
-            $sqlUsuario = "INSERT INTO usuarios (id_persona, id_area, username, password) 
-                       VALUES (:id_persona, :id_area, :username, :password)";
+            // 2. Validar si la persona ya tiene cuenta de usuario
+            $stmtUserCheck = $this->db->prepare("SELECT id_usuario FROM usuarios WHERE id_persona = :id_persona LIMIT 1");
+            $stmtUserCheck->execute([':id_persona' => $idPersona]);
+            if ($stmtUserCheck->fetchColumn()) {
+                throw new \Exception("Esta persona ya cuenta con un usuario registrado en el sistema.");
+            }
 
+            // 3. Crear usuario
+            $sqlUsuario = "INSERT INTO usuarios (id_persona, id_area, username, password, estado) VALUES (:id_persona, :id_area, :username, :password, 'Activo')";
             $stmtUsuario = $this->db->prepare($sqlUsuario);
             $stmtUsuario->execute([
                 ':id_persona' => $idPersona,
@@ -174,10 +230,9 @@ class Usuario
                 ':username' => $datosUsuario['username'],
                 ':password' => password_hash($datosUsuario['password'], PASSWORD_BCRYPT),
             ]);
-
             $idUsuario = (int) $this->db->lastInsertId();
 
-            // 3. Insertar en tabla usuario_roles
+            // 4. Asignar rol
             $sqlRol = "INSERT INTO usuario_roles (id_usuario, id_rol) VALUES (:id_usuario, :id_rol)";
             $stmtRol = $this->db->prepare($sqlRol);
             $stmtRol->execute([
@@ -186,11 +241,14 @@ class Usuario
             ]);
 
             $this->db->commit();
+
+            // Retornar éxito con el ID del usuario creado
             return ['estatus' => true, 'id' => $idUsuario];
-        } catch (PDOException $e) {
+
+        } catch (\Exception $e) {
             $this->db->rollBack();
             error_log("Error al crear usuario: " . $e->getMessage());
-            return ['estatus' => false, 'id' => null, 'error' =>  $e->getMessage()];
+            return ['estatus' => false, 'error' => $e->getMessage()];
         }
     }
 
