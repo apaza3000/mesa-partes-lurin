@@ -336,7 +336,7 @@ $navigation = [
   [
     'title' => 'Inicio',
     'icon' => 'bi bi-house-fill',
-    'url' => '#',
+    'url' => '/dashboard',
     'roles' => ['consultor']
   ],
 
@@ -386,15 +386,119 @@ $navigation = [
     ]
   ],
 
+  // ========================================================
+  //DASHBOARD
+  // ========================================================
 
+  [
+    'header' => 'DASHBOARD'
+  ],
+  //DASHBOARD
+  // 1. Inicio / Dashboard General
+  [
+    'title' => 'Inicio',
+    'icon' => 'bi bi-house-door',
+    'url' => '/dashboard',
+    'roles' => ['admin', 'mesaParte', 'jefeArea', 'consultor']
+  ],
+
+  // 2. Módulo de Mesa de Partes (Combo con submenús)
+  [
+    'title' => 'Mesa de Partes',
+    'icon' => 'bi bi-folder2-open',
+    'roles' => ['admin', 'mesaParte'],
+    'children' => [
+      [
+        'title' => 'Registrar Documento',
+        'icon' => 'bi bi-file-earmark-plus',
+        'url' => '/documentos/crear',
+        'roles' => ['admin', 'mesaParte']
+      ],
+      [
+        'title' => 'Bandeja de Entrada',
+        'icon' => 'bi bi-inbox',
+        'url' => '/documentos/bandeja-entrada',
+        'roles' => ['admin', 'mesaParte']
+      ]
+    ]
+  ],
+
+  // 3. Módulo de Gestión de Área (Para Jefaturas)
+  [
+    'title' => 'Gestión de Área',
+    'icon' => 'bi bi-building',
+    'roles' => ['admin', 'jefeArea'],
+    'children' => [
+      [
+        'title' => 'Documentos Derivados',
+        'icon' => 'bi bi-arrow-down-square',
+        'url' => '/area/documentos-derivados',
+        'roles' => ['admin', 'jefeArea']
+      ],
+      [
+        'title' => 'Atender y Observar',
+        'icon' => 'bi bi-pencil-square',
+        'url' => '/area/atencion',
+        'roles' => ['admin', 'jefeArea']
+      ]
+    ]
+  ],
+
+  // 4. Módulo de Seguimiento y Trazabilidad (Formato que ya tenías)
+  [
+    'title' => 'Seguimiento',
+    'icon' => 'bi bi-activity',
+    'roles' => ['admin', 'mesaParte', 'jefeArea', 'consultor'],
+    'children' => [
+      [
+        'title' => 'Trazabilidad documentaria',
+        'icon' => 'bi bi-diagram-3',
+        'url' => '/seguimiento/trazabilidad',
+        'roles' => ['admin', 'mesaParte', 'jefeArea', 'consultor']
+      ],
+      [
+        'title' => 'Historial',
+        'icon' => 'bi bi-clock-history',
+        'url' => '/seguimiento/historial',
+        'roles' => ['admin', 'mesaParte', 'jefeArea', 'consultor']
+      ]
+    ]
+  ],
+
+  // 5. Módulo de Administración (Exclusivo para el rol admin)
+  [
+    'title' => 'Administración',
+    'icon' => 'bi bi-gear',
+    'roles' => ['admin'],
+    'children' => [
+      [
+        'title' => 'Gestión de Usuarios y Roles',
+        'icon' => 'bi bi-people',
+        'url' => '/usuarios',
+        'roles' => ['admin']
+      ],
+      [
+        'title' => 'Reportes del Flujo',
+        'icon' => 'bi bi-file-earmark-bar-graph',
+        'url' => '/reportes',
+        'roles' => ['admin']
+      ],
+      [
+        'title' => 'Auditoría del Sistema',
+        'icon' => 'bi bi-shield-check',
+        'url' => '/auditoria',
+        'roles' => ['admin']
+      ]
+    ]
+  ],
   // ========================================================
   // OPCIONES GENERALES
   // ========================================================
 
+
   [
     'header' => 'SISTEMA'
   ],
-
   [
     'title' => 'Mi perfil',
     'icon' => 'bi bi-person-circle',
@@ -565,14 +669,6 @@ function renderSidebar($nav, $userRole)
       </ul>
       <!--end::Sidebar Menu-->
 
-      <!-- Docs CTA (bottom of sidebar) 
-      <div class="p-3 mt-3 border-top border-secondary border-opacity-25">
-        <a href="./docs/introduction.html"
-          class="btn btn-sm btn-outline-light w-100 d-flex align-items-center justify-content-center gap-2">
-          <i class="bi bi-book" aria-hidden="true"></i>
-          View documentation
-        </a>
-      </div>-->
     </nav>
   </div>
   <!--end::Sidebar Wrapper-->
