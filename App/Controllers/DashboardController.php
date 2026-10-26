@@ -4,29 +4,55 @@ namespace App\Controllers;
 
 use Src\Core\Controller;
 use Src\Core\Session;
+use App\Models\Auditoria;
+use App\Models\Dashboard;
+use Src\Core\Request;
+use Src\Core\Validator;
 
 class DashboardController extends Controller
 {
+    private Dashboard $DashboardModel;
+
+    public function __construct()
+    {
+        $this->DashboardModel = new Dashboard();
+    }
+
+
     public function index()
     {
-        // 1. Validar autenticación
         if (!Session::isAuthenticated()) {
             return $this->redirect("/login");
         }
-        /*
-                // 2. Obtener datos de la sesión del usuario actual
-                $usuario = Session::user();
+        $dbConectada = false;
+        try {
+            $conexion = \Src\Core\Conexion::getConexion();
+            if ($conexion) {
+                $dbConectada = true;
+            }
+        } catch (\Exception $e) {
+            $dbConectada = false;
+        }
+        $sesionActiva = isset($_SESSION['user']) && !empty($_SESSION['user']);
 
-                // 3. Obtener el rol del usuario (por defecto 'consultor' si no existe)
-                $rolActual = $usuario['rol'] ?? 'consultor';
-        */
-        // 4. Retornar la vista usando el estándar del proyecto (notación con puntos)
-        // Esto buscará en: view/pages/dashboard/index.php
-        $this->view('dashboard.index', [
-            /*
+        $totalDocumentosRegistrados = $this->DashboardModel->getTotalDocumentosRegistrados();
+        $expedientesRegistrados = $this->DashboardModel->getExpedientesRegistrados();
+        $expedientesEnProceso = $this->DashboardModel->getExpedientesEnProceso();
+        $tramitesAtendidos_Archivados = $this->DashboardModel->getTramitesAtendidos_Archivados();
+
+        $usuario = Session::user();
+        $rolActual = $usuario['rol'] ?? 'consultor';
+
+        return $this->view('dashboard.index', [
+            'dbConectada' => $dbConectada,
+            'sesionActiva' => $sesionActiva,
+            'totalDocumentosRegistrados' => $totalDocumentosRegistrados,
+            'expedientesRegistrados' => $expedientesRegistrados,
+            'expedientesEnProceso' => $expedientesEnProceso,
+            'tramitesAtendidos_Archivados' => $tramitesAtendidos_Archivados,
             'usuario' => $usuario,
             'rolActual' => $rolActual
-            */
         ], 'app');
     }
+
 }
