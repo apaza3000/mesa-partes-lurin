@@ -26,7 +26,8 @@
                 <div class="col-12">
                     <div class="alert alert-info alert-dismissible shadow-sm border-0 bg-gradient-info">
                         <h5><i class="icon fas fa-shield-alt"></i> ¡Bienvenido,
-                            <?= htmlspecialchars($usuario['nombres'] ?? 'Usuario') ?>!</h5>
+                            <?= htmlspecialchars($usuario['nombres'] ?? 'Usuario') ?>!
+                        </h5>
                         Estás conectado con el rol: <span
                             class="badge badge-light px-2 py-1 text-uppercase font-weight-bold "><?= htmlspecialchars($rolActual) ?></span>
                         <br>
@@ -66,7 +67,7 @@
                     <div class="col-lg-3 col-6">
                         <div class="small-box text-bg-danger">
                             <div class="inner">
-                                <h3><?= htmlspecialchars($expedientesRegistrados ?? "0") ?></h3>
+                                <h3><?= htmlspecialchars($totalPendientesArea ?? "0") ?></h3>
                                 <p>Expedientes pendientes en general</p>
                             </div>
                             <svg class="small-box-icon" fill="currentColor" viewBox="0 0 24 24"
@@ -267,19 +268,23 @@
     document.addEventListener("DOMContentLoaded", function () {
         const ctx = document.getElementById('pie-chart');
         if (ctx) {
-            // Pasamos los valores dinámicos de PHP hacia JavaScript de forma segura
-            const pendientes = <?= json_encode((int) ($expedientesRegistrados ?? 0)) ?>;
+            const pendientesArea = <?= json_encode((int) ($totalPendientesArea ?? 0)) ?>;
             const enProceso = <?= json_encode((int) ($expedientesEnProceso ?? 0)) ?>;
             const atendidosArchivados = <?= json_encode((int) ($tramitesAtendidos_Archivados ?? 0)) ?>;
 
+            const misPendientes = <?= json_encode((int) ($expedientesPendientes ?? 0)) ?>;
+            const observados = <?= json_encode((int) ($totalObservados ?? 0)) ?>;
+
             new Chart(ctx, {
-                type: 'doughnut', // o 'bar' según prefieras
+                type: 'doughnut',
                 data: {
-                    labels: ['Pendientes (Registrados)', 'En Proceso', 'Atendidos / Archivados', 'Mis pendientes'],
+
+                    labels: ['Pendientes de mi Área', 'En Proceso', 'Atendidos / Archivados', 'Mis pendientes', 'Observados'],
                     datasets: [{
-                        data: [pendientes, enProceso, atendidosArchivados],
-                        backgroundColor: ['#dc3545', '#ffc107', '#198754', '#fd610d'],
-                        borderWidth: 2
+                        data: [pendientesArea, enProceso, atendidosArchivados, misPendientes, observados],
+
+                        backgroundColor: ['#ff0019', '#ffc107', '#198754', '#f75701', '#6f42c1'],
+                        borderWidth: 1
                     }]
                 },
                 options: {
@@ -289,16 +294,16 @@
                         legend: {
                             position: 'right',
                             labels: {
-                                usePointStyle: true,  // Obligatorio para transformar rectángulos en la forma elegida
-                                pointStyle: 'circle', // Cambia el marcador a un punto redondo
-                                boxWidth: 10,         // Tamaño del punto
-                                boxHeight: 10
+                                usePointStyle: true,
+                                pointStyle: 'circle',
+                                boxWidth: 8,
+                                boxHeight: 8,
+                                padding: 16
                             }
                         }
                     }
                 }
             });
-
         }
     });
 </script>

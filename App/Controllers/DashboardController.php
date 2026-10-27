@@ -24,41 +24,26 @@ class DashboardController extends Controller
         if (!Session::isAuthenticated()) {
             return $this->redirect("/login");
         }
-        $dbConectada = false;
-        try {
-            $conexion = \Src\Core\Conexion::getConexion();
-            if ($conexion) {
-                $dbConectada = true;
-            }
-        } catch (\Exception $e) {
-            $dbConectada = false;
-        }
-        $sesionActiva = isset($_SESSION['user']) && !empty($_SESSION['user']);
         $datosUsuarioBD = $this->DashboardModel->obtenerDatosDelUserDesdeBD();
 
         $rolActual = $datosUsuarioBD['rol'] ?? 'CONSULTOR';
         $expedientesPendientes = $datosUsuarioBD['expedientes_pendientes'] ?? [];
+        $totalPendientesArea = $datosUsuarioBD['total_pendientes_area'] ?? 0;
 
         $totalDocumentosRegistrados = $this->DashboardModel->getTotalDocumentosRegistrados();
-        $expedientesRegistrados = $this->DashboardModel->getExpedientesRegistrados();
         $expedientesEnProceso = $this->DashboardModel->getExpedientesEnProceso();
         $tramitesAtendidos_Archivados = $this->DashboardModel->getTramitesAtendidos_Archivados();
-
-        $datosUsuarioBD = $this->DashboardModel->obtenerDatosDelUserDesdeBD();
-
-        $usuario = Session::user();
-
+        $totalObservados = $this->DashboardModel->getDocumentosObservados();
 
         return $this->view('dashboard.index', [
-            'dbConectada' => $dbConectada,
-            'sesionActiva' => $sesionActiva,
-
+            'usuario' => $datosUsuarioBD,
+            'rolActual' => $rolActual,
+            'expedientesPendientes' => $expedientesPendientes,
+            'totalPendientesArea' => $totalPendientesArea,
             'totalDocumentosRegistrados' => $totalDocumentosRegistrados,
-            'expedientesRegistrados' => $expedientesRegistrados,
             'expedientesEnProceso' => $expedientesEnProceso,
             'tramitesAtendidos_Archivados' => $tramitesAtendidos_Archivados,
-            'rolActual' => $rolActual,
-            'usuario' => $datosUsuarioBD,
+            'totalObservados' => $totalObservados
         ], 'app');
     }
 

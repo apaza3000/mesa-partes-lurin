@@ -23,23 +23,21 @@ class Dashboard
      */
     public function obtenerDatosDelUserDesdeBD()
     {
-        // 1. Obtener el usuario logueado en la sesión
         $userSession = Session::user();
 
         if (!$userSession || !isset($userSession['id_usuario'])) {
-            return null; // No hay usuario autenticado
+            return null;
         }
 
         $idUsuario = $userSession['id_usuario'];
 
         try {
-            // 2. Consultar rol, área y nombre del área directamente en la base de datos
             $sql = "SELECT u.id_area, r.nombre AS rol, a.nombre AS nombre_area 
-                    FROM usuarios u
-                    LEFT JOIN usuario_roles ur ON u.id_usuario = ur.id_usuario
-                    LEFT JOIN roles r ON ur.id_rol = r.id_rol
-                    LEFT JOIN areas a ON u.id_area = a.id_area
-                    WHERE u.id_usuario = ?";
+                FROM usuarios u
+                LEFT JOIN usuario_roles ur ON u.id_usuario = ur.id_usuario
+                LEFT JOIN roles r ON ur.id_rol = r.id_rol
+                LEFT JOIN areas a ON u.id_area = a.id_area
+                WHERE u.id_usuario = ?";
 
             $stmt = $this->db->prepare($sql);
             $stmt->execute([$idUsuario]);
@@ -51,43 +49,58 @@ class Dashboard
 
             $rolActual = $userData['rol'] ?? 'CONSULTOR';
             $idAreaUsuario = $userData['id_area'] ?? null;
-            $nombreArea = $userData['nombre_area'] ?? 'Sin área asignada';
+            $nombreArea = $userData['nombre_area'] ?? 'Acceso Global';
 
-            // 3. Obtener los expedientes pendientes según el rol o área detectados
             $expedientesPendientes = [];
+            $totalPendientes = 0;
 
-            if ($rolActual === 'ADMINISTRADOR' || $rolActual === 'MESA_DE_PARTES') {
-                // Roles globales ven todos los pendientes generales (Registrados)
+            // LÓGICA DIFERENCIADA POR ROL:
+            if ($rolActual === 'ADMINISTRADOR') {
+                // El Administrador ve TODOS los pendientes generales de la institución
                 $sqlExp = "SELECT e.*, p.nombres, p.apellido_paterno, p.razon_social 
-                           FROM expedientes e
-                           INNER JOIN personas p ON e.id_remitente = p.id_persona
-                           WHERE e.estado_actual = 'Registrado'
-                           ORDER BY e.fecha_registro DESC";
+                       FROM expedientes e
+                       INNER JOIN personas p ON e.id_remitente = p.id_persona
+                       WHERE e.estado_actual = 'Registrado'
+                       ORDER BY e.fecha_registro DESC";
 
                 $stmtExp = $this->db->query($sqlExp);
                 $expedientesPendientes = $stmtExp->fetchAll(PDO::FETCH_ASSOC);
+                $totalPendientes = count($expedientesPendientes);
+
+            } elseif ($rolActual === 'MESA_DE_PARTES') {
+                // Mesa de partes también ve los trámites recién ingresados para derivarlos
+                $sqlExp = "SELECT e.*, p.nombres, p.apellido_paterno, p.razon_social 
+                       FROM expedientes e
+                       INNER JOIN personas p ON e.id_remitente = p.id_persona
+                       WHERE e.estado_actual = 'Registrado'
+                       ORDER BY e.fecha_registro DESC";
+
+                $stmtExp = $this->db->query($sqlExp);
+                $expedientesPendientes = $stmtExp->fetchAll(PDO::FETCH_ASSOC);
+                $totalPendientes = count($expedientesPendientes);
 
             } elseif (!is_null($idAreaUsuario)) {
-                // Roles de área ven solo los pendientes derivados a su oficina
+                // Los usuarios comunes de área solo ven lo derivado a su oficina
                 $sqlExp = "SELECT e.*, p.nombres, p.apellido_paterno, p.razon_social, d.estado as estado_derivacion
-                           FROM expedientes e
-                           INNER JOIN personas p ON e.id_remitente = p.id_persona
-                           INNER JOIN derivaciones d ON e.id_expediente = d.id_expediente
-                           WHERE d.id_area_destino = ? 
-                           AND d.estado IN ('Pendiente', 'Recibido', 'En_Atencion')
-                           ORDER BY d.fecha_envio DESC";
+                       FROM expedientes e
+                       INNER JOIN personas p ON e.id_remitente = p.id_persona
+                       INNER JOIN derivaciones d ON e.id_expediente = d.id_expediente
+                       WHERE d.id_area_destino = ? 
+                       AND d.estado IN ('Pendiente', 'Recibido', 'En_Atencion')
+                       ORDER BY d.fecha_envio DESC";
 
                 $stmtExp = $this->db->prepare($sqlExp);
                 $stmtExp->execute([$idAreaUsuario]);
                 $expedientesPendientes = $stmtExp->fetchAll(PDO::FETCH_ASSOC);
+                $totalPendientes = count($expedientesPendientes);
             }
 
-            // 4. Retornar un arreglo compacto con toda la información unificada
             return [
                 'id_area' => $idAreaUsuario,
                 'rol' => $rolActual,
                 'nombre_area' => $nombreArea,
-                'expedientes_pendientes' => $expedientesPendientes
+                'expedientes_pendientes' => $expedientesPendientes,
+                'total_pendientes_area' => $totalPendientes // Servirá tanto para el gráfico como para la tarjeta global del Admin
             ];
 
         } catch (Exception $e) {
@@ -127,7 +140,6 @@ class Dashboard
         }
     }
 
-
     public function getExpedientesEnProceso()
     {
         try {
@@ -155,6 +167,22 @@ class Dashboard
             return 0;
         }
     }
+
+    public function getDocumentosObservados()
+    {
+        try {
+            $stmt = $this->db->query(
+                'SELECT COUNT(*) as total from expedientes where estado_actual = "Observado"'
+            );
+
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            return (int) $result['total'];
+        } catch (Exception $e) {
+            return 0;
+        }
+    }
+
+
 
 
 
