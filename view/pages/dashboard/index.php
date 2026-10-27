@@ -25,14 +25,15 @@
             <div class="row">
                 <div class="col-12">
                     <div class="alert alert-info alert-dismissible shadow-sm border-0 bg-gradient-info">
-                        <h5><i class="icon fas fa-shield-alt"></i> ¡Bienvenido al Sistema de Gestión Documentaria,
-                            <?= htmlspecialchars($usuario['nombres'] ?? 'Usuario') ?>!
-                        </h5>
-                        Estás conectado en el sistema del IESTP "Lurín" con el rol activo de:
-                        <span class="badge badge-light px-2 py-1 text-uppercase font-weight-bold">
-                            <?= htmlspecialchars($rolActual ?? 'Rol no detectado') ?>
+                        <h5><i class="icon fas fa-shield-alt"></i> ¡Bienvenido,
+                            <?= htmlspecialchars($usuario['nombres'] ?? 'Usuario') ?>!</h5>
+                        Estás conectado con el rol: <span
+                            class="badge badge-light px-2 py-1 text-uppercase font-weight-bold "><?= htmlspecialchars($rolActual) ?></span>
+                        <br>
+                        Área asignada:
+                        <span class="badge badge-light px-2 py-1 font-weight-bold">
+                            <?= isset($usuario['nombre_area']) && $usuario['nombre_area'] !== null ? htmlspecialchars($usuario['nombre_area']) : 'Sin área asignada (Acceso Global)' ?>
                         </span>
-                        Desde aquí podrás supervisar los accesos y el flujo de trámites de la institución.
                     </div>
                 </div>
             </div>
@@ -66,7 +67,7 @@
                         <div class="small-box text-bg-danger">
                             <div class="inner">
                                 <h3><?= htmlspecialchars($expedientesRegistrados ?? "0") ?></h3>
-                                <p>Documentos pendientes en general</p>
+                                <p>Expedientes pendientes en general</p>
                             </div>
                             <svg class="small-box-icon" fill="currentColor" viewBox="0 0 24 24"
                                 xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -274,10 +275,10 @@
             new Chart(ctx, {
                 type: 'doughnut', // o 'bar' según prefieras
                 data: {
-                    labels: ['Pendientes (Registrados)', 'En Proceso', 'Atendidos / Archivados'],
+                    labels: ['Pendientes (Registrados)', 'En Proceso', 'Atendidos / Archivados', 'Mis pendientes'],
                     datasets: [{
                         data: [pendientes, enProceso, atendidosArchivados],
-                        backgroundColor: ['#dc3545', '#ffc107', '#198754'],
+                        backgroundColor: ['#dc3545', '#ffc107', '#198754', '#fd610d'],
                         borderWidth: 2
                     }]
                 },

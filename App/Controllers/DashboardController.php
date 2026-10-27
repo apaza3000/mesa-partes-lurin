@@ -34,24 +34,31 @@ class DashboardController extends Controller
             $dbConectada = false;
         }
         $sesionActiva = isset($_SESSION['user']) && !empty($_SESSION['user']);
+        $datosUsuarioBD = $this->DashboardModel->obtenerDatosDelUserDesdeBD();
+
+        $rolActual = $datosUsuarioBD['rol'] ?? 'CONSULTOR';
+        $expedientesPendientes = $datosUsuarioBD['expedientes_pendientes'] ?? [];
 
         $totalDocumentosRegistrados = $this->DashboardModel->getTotalDocumentosRegistrados();
         $expedientesRegistrados = $this->DashboardModel->getExpedientesRegistrados();
         $expedientesEnProceso = $this->DashboardModel->getExpedientesEnProceso();
         $tramitesAtendidos_Archivados = $this->DashboardModel->getTramitesAtendidos_Archivados();
 
+        $datosUsuarioBD = $this->DashboardModel->obtenerDatosDelUserDesdeBD();
+
         $usuario = Session::user();
-        $rolActual = $usuario['rol'] ?? 'consultor';
+
 
         return $this->view('dashboard.index', [
             'dbConectada' => $dbConectada,
             'sesionActiva' => $sesionActiva,
+
             'totalDocumentosRegistrados' => $totalDocumentosRegistrados,
             'expedientesRegistrados' => $expedientesRegistrados,
             'expedientesEnProceso' => $expedientesEnProceso,
             'tramitesAtendidos_Archivados' => $tramitesAtendidos_Archivados,
-            'usuario' => $usuario,
-            'rolActual' => $rolActual
+            'rolActual' => $rolActual,
+            'usuario' => $datosUsuarioBD,
         ], 'app');
     }
 
