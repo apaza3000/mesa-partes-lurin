@@ -100,6 +100,7 @@ CREATE TABLE `archivos_adjuntos` (
   `mime_type` VARCHAR(100),
   `tamanio` BIGINT,
   `hash_archivo` VARCHAR(64),
+  `hash_sha256` VARCHAR(64),
   `creado_por` INT,
   `creado_en` TIMESTAMP NOT NULL DEFAULT (CURRENT_TIMESTAMP)
 );

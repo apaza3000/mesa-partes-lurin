@@ -13,6 +13,7 @@ require_once __DIR__ . "/personas.php";
 require_once __DIR__ . "/auth.php";
 require_once __DIR__ . "/error.php";
 require_once __DIR__ . "/entrega.php";
+require_once __DIR__ . "/expedientes.php";
 
 Router::get("/", [DashboardController::class, "index"]);
 Router::get("/home", [DashboardController::class, "home"]);
