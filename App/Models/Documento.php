@@ -3,14 +3,36 @@ namespace App\Models;
 
 use PDO;
 use PDOException;
+use Src\Core\Conexion;
 
 class Documento
 {
     private PDO $db;
  
-    public function __construct()
+    public function __construct(?PDO $db = null)
     {
-        $this->db = Conexion::getConexion();
+        $this->db = $db ?? Conexion::getConexion();
+    }
+
+    public function crear(array $datos): int
+    {
+        $stmt = $this->db->prepare(
+            "INSERT INTO documentos
+             (id_expediente, id_tipo_doc, numero_documento, asunto, folios, fecha_documento,
+              tipo_documento_registro, es_principal, creado_por)
+             VALUES (:expediente, :tipo, :numero, :asunto, :folios, :fecha,
+                     'Ingresado', 1, :creado_por)"
+        );
+        $stmt->execute([
+            ':expediente' => (int) $datos['id_expediente'],
+            ':tipo' => (int) $datos['id_tipo_doc'],
+            ':numero' => $datos['numero_documento'],
+            ':asunto' => $datos['asunto'],
+            ':folios' => (int) $datos['folios'],
+            ':fecha' => $datos['fecha_documento'],
+            ':creado_por' => $datos['creado_por'],
+        ]);
+        return (int) $this->db->lastInsertId();
     }
 
     // Obtener todos los documentos con información de la persona y el tipo de documento
