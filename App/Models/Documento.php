@@ -3,6 +3,7 @@ namespace App\Models;
 
 use PDO;
 use PDOException;
+use Src\Core\Conexion;
 
 class Documento
 {
@@ -18,7 +19,7 @@ class Documento
     {
         try {
             $sql = "SELECT d.*, td.nombre AS tipo_documento,
-                    CONCAT(p.nombre, ' ', p.apellido_p, ' ', p.apellido_m) AS remitente
+                    CONCAT(p.nombres, ' ', p.apellido_paterno, ' ', COALESCE(p.apellido_materno, '')) AS remitente
                     FROM documentos d
                     INNER JOIN tipos_documento td ON d.id_tipo_doc = td.id_tipo_doc
                     INNER JOIN personas p ON d.id_persona = p.id_persona

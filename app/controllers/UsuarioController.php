@@ -113,6 +113,15 @@ class UsuarioController extends Controller
         $validator = new Validator();
         // Usando la clase de forma limpia gracias al 'use'
         $resultadoValidacion = UsuarioValidator::validar($data);
+        if (!$resultadoValidacion['esValido']) {
+            $this->view('usuarios.crear', [
+                'errors' => $resultadoValidacion['errores'],
+                'datos_viejos' => $data,
+                'areas' => $this->user->getAllArea(),
+                'roles' => $this->user->getAllRol()
+            ], 'app');
+            return;
+        }
 
         $rules = [
             //datos de personas
@@ -131,7 +140,16 @@ class UsuarioController extends Controller
             //datos de rol
             'id_rol' => ['required', 'exists' => ['roles', 'id_rol']]
         ];
-        //Validar inputs del formulario
+        // Validar inputs del formulario con Validator
+        if (!$validator->validate($rules, $data)) {
+            $this->view('usuarios.crear', [
+                'errors' => $validator->getErrors(),
+                'datos_viejos' => $data,
+                'areas' => $this->user->getAllArea(),
+                'roles' => $this->user->getAllRol()
+            ], 'app');
+            return;
+        }
         $normalized = $this->normalize($data);
         $res = $this->user->crearUsuarioCompleto($normalized['persona'], $normalized['usuario'], $normalized['id_rol']);
 

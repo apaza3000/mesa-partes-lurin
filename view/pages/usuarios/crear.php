@@ -11,10 +11,24 @@ $roles = $roles ?? [];
 <div class="app-content">
     <div class="container-fluid">
 
-        <?php if (!empty($errors['db'])): ?>
+        <?php if (!empty($errors)): ?>
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
                 <i class="fas fa-exclamation-triangle me-2"></i>
-                <?= htmlspecialchars($errors['db'], ENT_QUOTES, 'UTF-8') ?>
+                <?php if (isset($errors['db'])): ?>
+                    <?= htmlspecialchars($errors['db'], ENT_QUOTES, 'UTF-8') ?>
+                <?php else: ?>
+                    <ul class="mb-0 ps-3">
+                        <?php foreach ((array)$errors as $errorItem): ?>
+                            <?php if (is_array($errorItem)): ?>
+                                <?php foreach ($errorItem as $subErr): ?>
+                                    <li><?= htmlspecialchars($subErr, ENT_QUOTES, 'UTF-8') ?></li>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <li><?= htmlspecialchars($errorItem, ENT_QUOTES, 'UTF-8') ?></li>
+                            <?php endif; ?>
+                        <?php endforeach; ?>
+                    </ul>
+                <?php endif; ?>
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         <?php endif; ?>

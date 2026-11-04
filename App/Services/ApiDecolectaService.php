@@ -11,8 +11,8 @@ class ApiDecolectaService
 
     public function __construct()
     {
-        $this->token = env("API_DECOLECTA_TOKEN", "https://api.decolecta.com/v1/");
-        $this->uri = env("API_DECOLECTA_SERVER", "sk_19999.DGFTLn6K2ecgD2b42qVE09SklINSGth4");
+        $this->token = env("API_DECOLECTA_TOKEN", "sk_19999.DGFTLn6K2ecgD2b42qVE09SklINSGth4");
+        $this->uri = rtrim(env("API_DECOLECTA_SERVER", "https://api.decolecta.com/v1"), '/');
         $this->accept = "application/json";
     }
 

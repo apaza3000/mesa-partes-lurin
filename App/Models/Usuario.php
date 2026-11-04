@@ -403,7 +403,7 @@ class Usuario
 
         LEFT JOIN roles r ON ur.id_rol = r.id_rol
 
-        WHERE u.id_usuario = :id_usuario; LIMIT 1";
+        WHERE u.id_usuario = :id_usuario LIMIT 1";
 
 
         $stmt = $this->db->prepare($sql);
