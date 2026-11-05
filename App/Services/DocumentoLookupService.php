@@ -4,12 +4,11 @@ namespace App\Services;
 
 class DocumentoLookupService
 {
-
-    public function getByDni(string $dni) {
-
-
-    
-    }
+    /**
+     * OPT-04: única firma de consulta externa {encontrado, origen, datos}.
+     * El transporte HTTP ya no se duplica aquí: delega en ApiDecolectaService
+     * (antes había dos implementaciones paralelas de cURL + parseo).
+     */
     public function consultar(string $tipoDocumento, string $numero): array
     {
         $tipoDocumento = strtoupper(trim($tipoDocumento));
@@ -24,55 +23,25 @@ class DocumentoLookupService
             return ['encontrado' => false, 'mensaje' => 'Ingrese un ' . $tipoDocumento . ' válido.'];
         }
 
-        $token = $this->variable('PERSONA_LOOKUP_TOKEN');
+        $token = $this->variable('API_DECOLECTA_TOKEN');
         if ($token === '') {
             return ['encontrado' => false, 'mensaje' => 'La consulta externa no está configurada. Contacte al administrador.'];
         }
 
-        $urlVariable = $tipoDocumento === 'DNI' ? 'PERSONA_LOOKUP_DNI_URL' : 'PERSONA_LOOKUP_RUC_URL';
-        $urlPredeterminada = $tipoDocumento === 'DNI'
-            ? 'https://api.decolecta.com/v1/reniec/dni?numero={numero}'
-            : 'https://api.decolecta.com/v1/sunat/ruc?numero={numero}';
-        $urlConfigurada = $this->variable($urlVariable);
-        $url = str_replace('{numero}', rawurlencode($numero), $urlConfigurada ?: $urlPredeterminada);
+        $endpoint = $tipoDocumento === 'DNI' ? '/reniec/dni?numero=' : '/sunat/ruc?numero=';
+        $respuesta = (new ApiDecolectaService())->request($endpoint, $numero, $token);
 
-        $curl = curl_init($url);
-        if ($curl === false) {
-            return ['encontrado' => false, 'mensaje' => 'El servicio de consulta no está disponible. Intente más tarde.'];
-        }
-
-        curl_setopt_array($curl, [
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_CONNECTTIMEOUT => 5,
-            CURLOPT_TIMEOUT => 10,
-            CURLOPT_HTTPHEADER => [
-                'Accept: application/json',
-                'Authorization: Bearer ' . $token,
-                'Referer: https://apis.net.pe/'
-            ]
-        ]);
-
-        $respuesta = curl_exec($curl);
-        $estadoHttp = (int) curl_getinfo($curl, CURLINFO_HTTP_CODE);
-        $errorCurl = curl_errno($curl) !== 0;
-        curl_close($curl);
-
-        if ($errorCurl || !is_string($respuesta)) {
-            return ['encontrado' => false, 'mensaje' => 'El servicio de consulta no está disponible. Intente más tarde.'];
-        }
-
-        if ($estadoHttp === 404 || $estadoHttp === 400 || $estadoHttp === 422) {
+        if (!$respuesta['encontrado']) {
+            $http = (int) ($respuesta['http'] ?? 0);
+            // Errores de red, autenticación o respuesta corrupta: servicio no disponible.
+            if ($http === 0 || $http === 401 || $http === 403 || $http >= 500) {
+                return ['encontrado' => false, 'mensaje' => 'El servicio de consulta no está disponible. Intente más tarde.'];
+            }
+            // 400/404/422 y demás: documento no encontrado.
             return ['encontrado' => false, 'mensaje' => 'No se encontró información para ese documento.'];
         }
 
-        if ($estadoHttp === 401 || $estadoHttp === 403 || $estadoHttp < 200 || $estadoHttp >= 300) {
-            return ['encontrado' => false, 'mensaje' => 'El servicio de consulta no está disponible. Intente más tarde.'];
-        }
-
-        $datos = json_decode($respuesta, true);
-        if (!is_array($datos)) {
-            return ['encontrado' => false, 'mensaje' => 'El servicio de consulta devolvió una respuesta inválida.'];
-        }
+        $datos = $respuesta['datos'];
 
         foreach (['data', 'resultado', 'result'] as $envoltura) {
             if (isset($datos[$envoltura]) && is_array($datos[$envoltura])) {
@@ -103,7 +72,7 @@ class DocumentoLookupService
             : ['razon_social'];
         foreach ($camposEsperados as $campo) {
             if ($persona[$campo] !== '') {
-                return ['encontrado' => true, 'persona' => $persona];
+                return ['encontrado' => true, 'origen' => 'decolecta', 'persona' => $persona];
             }
         }
 

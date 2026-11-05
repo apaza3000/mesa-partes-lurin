@@ -4,6 +4,7 @@
 // Manejo de la solicitud actual
 
 use App\Controllers\DashboardController;
+use App\Controllers\LandingController;
 use src\Core\Router;
 
 require_once __DIR__ . "/areas.php";
@@ -13,9 +14,16 @@ require_once __DIR__ . "/personas.php";
 require_once __DIR__ . "/auth.php";
 require_once __DIR__ . "/error.php";
 require_once __DIR__ . "/entrega.php";
+require_once __DIR__ . "/dashboard.php";
+require_once __DIR__ . "/bandeja_area.php";
+require_once __DIR__ . "/observaciones.php";
+require_once __DIR__ . "/mesa_partes.php";
 
-Router::get("/", [DashboardController::class, "index"]);
-Router::get("/home", [DashboardController::class, "home"]);
+// La raíz es la landing pública (punto de llegada del ciudadano); el panel
+// autenticado vive en /home y /dashboard.
+Router::get("/", [LandingController::class, "index"]);
+// FAT-01: apuntaba a un método inexistente ("home"); el panel es index().
+Router::get("/home", [DashboardController::class, "index"]);
 
 
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);

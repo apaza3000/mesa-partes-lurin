@@ -2,7 +2,12 @@
 
 namespace App\Controllers;
 
+use App\Controllers\Concerns\AuthorizesRequest;
 use App\Models\Usuario;
+use App\Support\Catalogos;
+use App\Support\Csrf;
+use App\Support\Flash;
+use App\Support\Roles;
 use PDOException;
 use Src\Core\Controller;
 use Src\Core\Request;
@@ -11,12 +16,18 @@ use Src\Core\Validator;
 
 class AuthController extends Controller
 {
+    use AuthorizesRequest;
+
     public function showLogin()
     {
         if (Session::isAuthenticated()) {
             $this->redirect("/");
         }
-        return $this->view("login");
+        // Csrf::token() materializa el token de sesión que consumen las vistas.
+        return $this->view("login", [
+            'csrf_token' => Csrf::token(),
+            'flash' => Flash::pull(),
+        ]);
     }
 
     public function login()
@@ -24,6 +35,9 @@ class AuthController extends Controller
         $requst = new Request();
 
         $data = $requst->all();
+
+        // SEC-01: el login también exige token CSRF (previene fuerza de sesión).
+        $this->requerirCsrf($data, '/login');
 
         $rules = [
             "username" => ["required"],
@@ -37,6 +51,7 @@ class AuthController extends Controller
             return $this->view('login', [
                 'errors' => $validator->getErrors(),
                 'datos_viejos' => $data,
+                'csrf_token' => Csrf::token(),
             ]);
         }
 
@@ -65,36 +80,50 @@ class AuthController extends Controller
                     $usuario['apellido_paterno'] ?? '',
                     $usuario['apellido_materno'] ?? '',
                 ])));
-                $roles = array_values(array_filter(array_map(
-                    'trim',
-                    explode(',', $usuario['roles'] ?? '')
-                )));
+
+                // MEN-03: Usuario::login() ya devuelve `roles` como array.
+                $roles = Roles::normalize($usuario['roles'] ?? []);
 
                 Session::set("usuario_id", (int) $usuario['id_usuario']);
                 Session::set("usuario_nombre", $nombre !== '' ? $nombre : $usuario['username']);
-                Session::set("usuario_rol", $roles[0] ?? null);
+                Session::set("usuario_rol", Roles::prioritario($roles));
                 Session::set("usuario_roles", $roles);
                 Session::set("usuario_area", $usuario['id_area'] ?? null);
+                Session::set("usuario_login_ts", time());
 
                 Session::login($usuario);
-                return   $this->redirect("/");
+
+                // SEC-01: token nuevo por sesión autenticada.
+                Csrf::rotar();
+
+                return $this->redirect("/dashboard");
             }
         }
         return $this->view('login', [
             'error_message' => "Usuario o contraseña incorrectos",
             'datos_viejos' => $data,
+            'csrf_token' => Csrf::token(),
         ]);
     }
 
 
     public function register()
     {
-        return $this->view("register");
+        return $this->view("register", [
+            'tiposDocumento' => Catalogos::TipoDocumento,
+            'csrf_token' => Csrf::token(),
+            'flash' => Flash::pull(),
+        ]);
     }
 
 
     public function logout(): void
     {
+        // El cierre se ejecuta solo con token: evita el logout forzado por GET.
+        $datos = (new Request())->all();
+        $this->requerirCsrf($datos, '/dashboard');
+
+        Csrf::borrar();
         Session::logout();
 
         $this->redirect("/login");
@@ -125,16 +154,20 @@ class AuthController extends Controller
 
         $datos = $request->all();
 
+        // SEC-01
+        $this->requerirCsrf($datos, '/register');
+
         $rules = [
-            'tipo_documento' => ['required', 'in' => ['DNI', 'CE', 'Pasaporte', 'Otro'],],
-            'numero_documento' => ['required', 'string', 'minLength' => 6, 'maxLength' => 20, 'unique' => ['personas', 'numero_documento']],
-            'nombres' => ['required', 'string', 'minLength' => 3, 'maxLength' => 100,],
-            'apellido_paterno' => ['required', 'string', 'minLength' => 3, 'maxLength' => 100,],
-            'apellido_materno' => ['nullable', 'string', 'maxLength' => 100,],
-            'email' => ['required', 'email', 'maxLength' => 150, 'unique' => ['personas', 'email'],],
-            'telefono' => ['nullable', 'string', 'maxLength' => 30,],
-            'direccion' => ['nullable', 'string', 'maxLength' => 255,],
-            'username' => ['required', 'string', 'minLength' => 4, 'maxLength' => 50, 'unique' => ['usuarios', 'username'],],
+            // VAL-05: catálogo completo del ENUM (faltaba RUC).
+            'tipo_documento' => ['required', 'in' => Catalogos::TipoDocumento],
+            'numero_documento' => ['required', 'string', 'minLength' => 6, 'maxLength' => Catalogos::limite('personas.numero_documento'), 'unique' => ['personas', 'numero_documento']],
+            'nombres' => ['required', 'string', 'minLength' => 3, 'maxLength' => Catalogos::limite('personas.nombres'),],
+            'apellido_paterno' => ['required', 'string', 'minLength' => 3, 'maxLength' => Catalogos::limite('personas.apellido_paterno'),],
+            'apellido_materno' => ['nullable', 'string', 'maxLength' => Catalogos::limite('personas.apellido_materno'),],
+            'email' => ['required', 'email', 'maxLength' => Catalogos::limite('personas.email'), 'unique' => ['personas', 'email'],],
+            'telefono' => ['nullable', 'string', 'maxLength' => Catalogos::limite('personas.telefono'),],
+            'direccion' => ['nullable', 'string', 'maxLength' => Catalogos::limite('personas.direccion'),],
+            'username' => ['required', 'string', 'minLength' => 4, 'maxLength' => Catalogos::limite('usuarios.username'), 'unique' => ['usuarios', 'username'],],
             'password' => ['required', 'string', 'minLength' => 6, 'maxLength' => 100,],
             'password_confirm' => ['required', 'string', 'minLength' => 6, 'maxLength' => 100,],
         ];
@@ -143,6 +176,8 @@ class AuthController extends Controller
             return $this->view("register", [
                 'errors' => $validator->getErrors(),
                 'datos_viejos'   => $datos,
+                'tiposDocumento' => Catalogos::TipoDocumento,
+                'csrf_token' => Csrf::token(),
             ]);
         }
 
@@ -150,6 +185,8 @@ class AuthController extends Controller
             return $this->view("register", [
                 'errors' => ['Las contraseñas no coinciden.'],
                 'datos_viejos'   => $datos,
+                'tiposDocumento' => Catalogos::TipoDocumento,
+                'csrf_token' => Csrf::token(),
             ]);
         }
 
@@ -162,21 +199,15 @@ class AuthController extends Controller
             return $this->view("register", [
                 'errors' => ['Error al registrar: ' . $resultado['mensaje']],
                 'datos_viejos'   => $datos,
-                'trace' => $resultado['trace']
+                'tiposDocumento' => Catalogos::TipoDocumento,
+                'csrf_token' => Csrf::token(),
             ]);
         }
 
-        // Guardar en sesión al usuario recién registrado
-        $_SESSION['usuario'] = [
-            'id_usuario' => $resultado['id_usuario'],
-            'id_persona' => $resultado['id_persona'],
-            'username'   => $datos['username'],
-            'nombres'    => $datos['nombres'],
-            'email'      => $datos['email'],
-            'rol'        => 'INVITADO',
-        ];
-
-        $this->redirect("/home");
-        exit;
+        // SEC-08: no se inventa una sesión a mano (eso dejaba al usuario sin
+        // `authenticated` y con un rol inexistente en BD) y no se apunta a /home.
+        // El alta pública queda pendiente de que un administrador le asigne rol.
+        Flash::exito('Registro enviado. Un administrador debe asignarle un rol para que pueda ingresar.');
+        $this->redirect("/login");
     }
 }

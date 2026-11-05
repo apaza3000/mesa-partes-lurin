@@ -21,6 +21,7 @@
                 <div class="card card-warning card-outline mb-4">
 
                     <form action="/usuarios/<?= $usuario['id_usuario'] ?> " class="needs-validation" method="POST">
+                        <?= \App\Support\Csrf::campo() ?>
                         <!-- Campo oculto con el ID del usuario -->
                         <input type="hidden" name="id_usuario" value="<?= htmlspecialchars($usuario['id_usuario']) ?>">
 
@@ -33,14 +34,9 @@
                                 <div class="col-md-4 mb-3">
                                     <label class="form-label">Tipo Documento</label>
                                     <select name="tipo_documento" class="form-select" required>
-                                        <option value="DNI" <?= ($usuario['tipo_documento'] ?? '') === 'DNI' ? 'selected' : '' ?>>
-                                            DNI
-                                        </option>
-                                        <option value="RUC" <?= ($usuario['tipo_documento'] ?? '') === 'CE' ? 'selected' : '' ?>>
-                                            CE
-                                        </option>
-                                        <option value="CE" <?= ($usuario['tipo_documento'] ?? '') === 'Pasaporte' ? 'selected' : '' ?>>
-                                            Pasaporte</option>
+                                        <?php foreach (\App\Support\Catalogos::TipoDocumento as $tipoOpcion): ?>
+                                            <option value="<?= $tipoOpcion ?>" <?= ($usuario['tipo_documento'] ?? '') === $tipoOpcion ? 'selected' : '' ?>><?= $tipoOpcion ?></option>
+                                        <?php endforeach; ?>
                                     </select>
                                     <?php if (isset($errors['tipo_documento'])): ?>
                                         <div class="invalid-feedback">
@@ -161,12 +157,9 @@
                                 <div class="col-md-3 mb-3">
                                     <label class="form-label">Estado</label>
                                     <select name="estado" class="form-select" required>
-                                        <option value="Activo" <?= ($usuario['estado'] === 'Activo') ? 'selected' : '' ?>>
-                                            Activo
-                                        </option>
-                                        <option value="Inactivo" <?= ($usuario['estado'] === 'Inactivo') ? 'selected' : '' ?>>
-                                            Inactivo
-                                        </option>
+                                        <?php foreach ((isset($estados) && is_array($estados)) ? $estados : \App\Support\Catalogos::EstadoUsuario as $estadoOpcion): ?>
+                                            <option value="<?= $estadoOpcion ?>" <?= ($usuario['estado'] ?? '') === $estadoOpcion ? 'selected' : '' ?>><?= $estadoOpcion ?></option>
+                                        <?php endforeach; ?>
                                     </select>
                                 </div>
                             </div>

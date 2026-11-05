@@ -14,6 +14,7 @@
                         <a href="/areas" class="btn btn-secondary">Volver</a>
                     <?php else: ?>
                         <form action="/areas/<?= (int) $area['id_area'] ?>/update" method="POST">
+                            <?= \App\Support\Csrf::campo() ?>
                             <!-- Campo oculto para llevar el ID -->
                             <input type="hidden" name="id_area" value="<?= (int) $area['id_area'] ?>">
 

@@ -65,6 +65,7 @@
                                                     </a>
                                                     <?php if ($item['estado'] === 'Activo'): ?>
                                                         <form action="/areas/<?= (int) $item['id_area'] ?>/delete" method="POST" class="d-inline" onsubmit="return confirm('¿Está seguro de eliminar esta área?');">
+                                                            <?= \App\Support\Csrf::campo() ?>
                                                             <button type="submit" class="btn btn-sm btn-danger" title="Eliminar"><i class="bi bi-trash"></i></button>
                                                         </form>
                                                     <?php endif; ?>

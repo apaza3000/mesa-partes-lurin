@@ -23,6 +23,7 @@
                         </div>
                     <?php else: ?>
                         <form action="/roles/<?= (int) $rol['id_rol'] ?>/update" method="POST">
+                            <?= \App\Support\Csrf::campo() ?>
                             <div class="card-body">
                                 <div class="form-group mb-3 has-validation">
                                     <label for="nombre" class="form-label">Nombre del Rol</label>

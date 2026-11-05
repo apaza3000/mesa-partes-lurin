@@ -1,142 +1,101 @@
 <?php
 
+use App\Models\Notificacion;
+use App\Support\Roles;
 use Src\Core\Session;
 
-$user = Session::user();
+/*
+ * Barra superior (header) del layout `app`.
+ *
+ * SID-08 / SEC-07: todo dato de sesión o de BD se escapa; ya no se imprimen
+ * contadores inventados ni perfiles de demostración, y el cierre de sesión se
+ * envía por POST con token CSRF (antes era un enlace GET, falsificable).
+ */
 
+$user = Session::user() ?? [];
+
+$nombres = trim(
+    (string) ($user['nombres'] ?? '') . ' ' .
+    (string) ($user['apellido_paterno'] ?? '') . ' ' .
+    (string) ($user['apellido_materno'] ?? '')
+);
+
+if ($nombres === '') {
+    $nombres = (string) ($user['username'] ?? 'Usuario');
+}
+
+// MEN-03: `roles` llegó a ser una cadena; hoy es array. Se soportan ambas formas.
+$rolesCrudos = Roles::normalize($user['roles'] ?? ($user['rol'] ?? null));
+$rolesEtiquetas = array_map(static fn($r) => Roles::etiqueta($r), $rolesCrudos);
+$rolesTexto = $rolesEtiquetas !== [] ? implode(' · ', $rolesEtiquetas) : 'Sin rol asignado';
+
+$idUsuario = (int) ($user['id_usuario'] ?? Session::get('usuario_id') ?? 0);
+
+// SID-08: conteos reales (con tolerancia a BD caída o tabla vacía).
+try {
+    $notificador = new Notificacion();
+    $sinLeer = $notificador->sinLeer($idUsuario);
+    $listaNotificaciones = $notificador->ultimas($idUsuario, 5);
+} catch (Throwable $e) {
+    $sinLeer = 0;
+    $listaNotificaciones = [];
+}
+
+$token = App\Support\Csrf::token();
 ?>
 
 <nav class="app-header navbar navbar-expand bg-body">
-    <!--begin::Container-->
     <div class="container-fluid">
-        <!--begin::Start Navbar Links-->
         <ul class="navbar-nav">
             <li class="nav-item">
                 <a class="nav-link" data-lte-toggle="sidebar" href="#" role="button" aria-label="Toggle sidebar">
                     <i class="bi bi-list"></i>
                 </a>
             </li>
-
-
         </ul>
-        <!--end::Start Navbar Links-->
 
-
-        <!--begin::End Navbar Links-->
         <ul class="navbar-nav ms-auto">
-            <!--begin::Messages Dropdown Menu-->
+            <!-- Notificaciones reales del usuario autenticado -->
             <li class="nav-item dropdown">
-                <a class="nav-link" data-bs-toggle="dropdown" href="#" aria-label="Messages: 3 unread">
-                    <i class="bi bi-chat-text"></i>
-                    <span class="navbar-badge badge text-bg-danger">3</span>
-                </a>
-                <div class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
-                    <a href="#" class="dropdown-item">
-                        <!--begin::Message-->
-                        <div class="d-flex">
-                            <div class="flex-shrink-0">
-                                <img src="/view/assets/img/user1-128x128.jpg" alt=""
-                                    class="img-size-50 rounded-circle me-3" />
-                            </div>
-                            <div class="flex-grow-1">
-                                <p class="dropdown-item-title">
-                                    Brad Diesel
-                                    <span class="float-end fs-7 text-danger"><i class="bi bi-star-fill"></i></span>
-                                </p>
-                                <p class="fs-7">Call me whenever you can...</p>
-                                <p class="fs-7 text-secondary">
-                                    <i class="bi bi-clock-fill me-1"></i> 4 Hours Ago
-                                </p>
-                            </div>
-                        </div>
-                        <!--end::Message-->
-                    </a>
-                    <div class="dropdown-divider"></div>
-                    <a href="#" class="dropdown-item">
-                        <!--begin::Message-->
-                        <div class="d-flex">
-                            <div class="flex-shrink-0">
-                                <img src="/view/assets/img/user8-128x128.jpg" alt=""
-                                    class="img-size-50 rounded-circle me-3" />
-                            </div>
-                            <div class="flex-grow-1">
-                                <p class="dropdown-item-title">
-                                    John Pierce
-                                    <span class="float-end fs-7 text-secondary">
-                                        <i class="bi bi-star-fill"></i>
-                                    </span>
-                                </p>
-                                <p class="fs-7">I got your message bro</p>
-                                <p class="fs-7 text-secondary">
-                                    <i class="bi bi-clock-fill me-1"></i> 4 Hours Ago
-                                </p>
-                            </div>
-                        </div>
-                        <!--end::Message-->
-                    </a>
-                    <div class="dropdown-divider"></div>
-                    <a href="#" class="dropdown-item">
-                        <!--begin::Message-->
-                        <div class="d-flex">
-                            <div class="flex-shrink-0">
-                                <img src="/view/assets/img/user3-128x128.jpg" alt=""
-                                    class="img-size-50 rounded-circle me-3" />
-                            </div>
-                            <div class="flex-grow-1">
-                                <p class="dropdown-item-title">
-                                    Nora Silvester
-                                    <span class="float-end fs-7 text-warning">
-                                        <i class="bi bi-star-fill"></i>
-                                    </span>
-                                </p>
-                                <p class="fs-7">The subject goes here</p>
-                                <p class="fs-7 text-secondary">
-                                    <i class="bi bi-clock-fill me-1"></i> 4 Hours Ago
-                                </p>
-                            </div>
-                        </div>
-                        <!--end::Message-->
-                    </a>
-                    <div class="dropdown-divider"></div>
-                    <a href="#" class="dropdown-item dropdown-footer">See All Messages</a>
-                </div>
-            </li>
-            <!--end::Messages Dropdown Menu-->
-
-            <!--begin::Notifications Dropdown Menu-->
-            <li class="nav-item dropdown">
-                <a class="nav-link" data-bs-toggle="dropdown" href="#" aria-label="Notifications: 15 unread">
+                <a class="nav-link" data-bs-toggle="dropdown" href="#"
+                    aria-label="Notificaciones: <?= $sinLeer ?> sin leer">
                     <i class="bi bi-bell-fill"></i>
-                    <span class="navbar-badge badge text-bg-warning">15</span>
+                    <?php if ($sinLeer > 0): ?>
+                        <span class="navbar-badge badge text-bg-danger"><?= (int) $sinLeer ?></span>
+                    <?php endif; ?>
                 </a>
                 <div class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
-                    <span class="dropdown-item dropdown-header">15 Notifications</span>
+                    <span class="dropdown-item dropdown-header">
+                        <?= $sinLeer ?> notificaci<?= $sinLeer === 1 ? 'ón' : 'ones' ?> sin leer
+                    </span>
                     <div class="dropdown-divider"></div>
-                    <a href="#" class="dropdown-item">
-                        <i class="bi bi-envelope me-2"></i> 4 new messages
-                        <span class="float-end text-secondary fs-7">3 mins</span>
-                    </a>
-                    <div class="dropdown-divider"></div>
-                    <a href="#" class="dropdown-item">
-                        <i class="bi bi-people-fill me-2"></i> 8 friend requests
-                        <span class="float-end text-secondary fs-7">12 hours</span>
-                    </a>
-                    <div class="dropdown-divider"></div>
-                    <a href="#" class="dropdown-item">
-                        <i class="bi bi-file-earmark-fill me-2"></i> 3 new reports
-                        <span class="float-end text-secondary fs-7">2 days</span>
-                    </a>
-                    <div class="dropdown-divider"></div>
-                    <a href="#" class="dropdown-item dropdown-footer"> See All Notifications </a>
+                    <?php if ($listaNotificaciones === []): ?>
+                        <a href="#" class="dropdown-item text-muted">No tiene notificaciones pendientes.</a>
+                    <?php else: ?>
+                        <?php foreach ($listaNotificaciones as $notificacion): ?>
+                            <a href="#" class="dropdown-item">
+                                <div class="d-flex">
+                                    <div class="flex-grow-1">
+                                        <p class="dropdown-item-title">
+                                            <?= htmlspecialchars((string) ($notificacion['titulo'] ?? ''), ENT_QUOTES, 'UTF-8') ?>
+                                        </p>
+                                        <p class="fs-7">
+                                            <?= htmlspecialchars(mb_strimwidth((string) ($notificacion['mensaje'] ?? ''), 0, 90, '…'), ENT_QUOTES, 'UTF-8') ?>
+                                        </p>
+                                        <p class="fs-7 text-secondary">
+                                            <i class="bi bi-clock-fill me-1"></i>
+                                            <?= htmlspecialchars((string) ($notificacion['creado_en'] ?? ''), ENT_QUOTES, 'UTF-8') ?>
+                                        </p>
+                                    </div>
+                                </div>
+                            </a>
+                            <div class="dropdown-divider"></div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                 </div>
             </li>
-            <!--end::Notifications Dropdown Menu-->
 
-
-
-            <!--end::Fullscreen Toggle-->
-
-            <!--begin::Color Mode Toggle (#6010)-->
+            <!-- Alternancia de esquema de color (control del template) -->
             <li class="nav-item dropdown">
                 <a class="nav-link" href="#" id="bd-theme" aria-label="Toggle color scheme" data-bs-toggle="dropdown"
                     aria-expanded="false">
@@ -172,39 +131,39 @@ $user = Session::user();
                     </li>
                 </ul>
             </li>
-            <!--end::Color Mode Toggle-->
 
-            <!--begin::User Menu Dropdown-->
+            <!-- Menú de usuario -->
             <li class="nav-item dropdown user-menu">
                 <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
                     <img src="/view/assets/img/user2-160x160.jpg" class="user-image rounded-circle shadow"
-                        alt="Alexander Pierce" />
-                    <span class="d-none d-md-inline"><?= $user['nombres'] . ' ' . $user['apellido_paterno'] ?></span>
+                        alt="Avatar del usuario" />
+                    <span class="d-none d-md-inline"><?= htmlspecialchars($nombres, ENT_QUOTES, 'UTF-8') ?></span>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
-                    <!--begin::User Image-->
                     <li class="user-header text-bg-primary">
                         <img src="/view/assets/img/user2-160x160.jpg" class="rounded-circle shadow"
-                            alt="Alexander Pierce" />
+                            alt="Avatar del usuario" />
                         <p>
-                            <?= $user['nombres'] . ' ' . $user['apellido_paterno'] ?>
-
-                            <small><?= $user['roles'] ?></small>
+                            <?= htmlspecialchars($nombres, ENT_QUOTES, 'UTF-8') ?>
+                            <small><?= htmlspecialchars($rolesTexto, ENT_QUOTES, 'UTF-8') ?></small>
                         </p>
                     </li>
-
-                    <!--end::Menu Body-->
-                    <!--begin::Menu Footer-->
                     <li class="user-footer">
-                        <a href="#" class="btn btn-outline-secondary">Profile</a>
-                        <a href="/logout" class="btn btn-outline-danger float-end">Sign out</a>
+                        <?php if (Roles::usuarioTiene(Roles::Administracion)): ?>
+                            <a href="/usuarios/<?= $idUsuario ?>" class="btn btn-outline-secondary">Mi usuario</a>
+                        <?php else: ?>
+                            <a href="/dashboard" class="btn btn-outline-secondary">Mi panel</a>
+                        <?php endif; ?>
+
+                        <!-- Logout por POST + CSRF: un <img> externo ya no puede cerrar la sesión. -->
+                        <form action="/logout" method="post" class="d-inline float-end">
+                            <input type="hidden" name="csrf_token"
+                                value="<?= htmlspecialchars($token, ENT_QUOTES, 'UTF-8') ?>">
+                            <button type="submit" class="btn btn-outline-danger">Cerrar sesión</button>
+                        </form>
                     </li>
-                    <!--end::Menu Footer-->
                 </ul>
             </li>
-            <!--end::User Menu Dropdown-->
         </ul>
-        <!--end::End Navbar Links-->
     </div>
-    <!--end::Container-->
 </nav>

@@ -12,6 +12,7 @@ $e = fn($v) => htmlspecialchars((string) ($v ?? ''), ENT_QUOTES, 'UTF-8');
     <div class="container-fluid">
         <div class="card card-primary card-outline">
             <form action="/personas" method="POST">
+                <?= \App\Support\Csrf::campo() ?>
                 <div class="card-body">
                     <?php if (isset($errors['db'])): ?><div class="alert alert-danger"><?= $e($errors['db']) ?></div>
                     <?php endif; ?>
