@@ -11,10 +11,24 @@ $roles = $roles ?? [];
 <div class="app-content">
     <div class="container-fluid">
 
-        <?php if (!empty($errors['db'])): ?>
+        <?php if (!empty($errors)): ?>
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
                 <i class="fas fa-exclamation-triangle me-2"></i>
-                <?= htmlspecialchars($errors['db'], ENT_QUOTES, 'UTF-8') ?>
+                <?php if (isset($errors['db'])): ?>
+                    <?= htmlspecialchars($errors['db'], ENT_QUOTES, 'UTF-8') ?>
+                <?php else: ?>
+                    <ul class="mb-0 ps-3">
+                        <?php foreach ((array)$errors as $errorItem): ?>
+                            <?php if (is_array($errorItem)): ?>
+                                <?php foreach ($errorItem as $subErr): ?>
+                                    <li><?= htmlspecialchars($subErr, ENT_QUOTES, 'UTF-8') ?></li>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <li><?= htmlspecialchars($errorItem, ENT_QUOTES, 'UTF-8') ?></li>
+                            <?php endif; ?>
+                        <?php endforeach; ?>
+                    </ul>
+                <?php endif; ?>
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         <?php endif; ?>
@@ -37,9 +51,9 @@ $roles = $roles ?? [];
                                 <div class="col-md-4 col-lg-3 col-sm-6 mb-3">
                                     <label for="tipo_documento" class="form-label">Tipo Documento</label>
                                     <select name="tipo_documento" id="tipo_documento" class="form-select" required>
-                                        <option value="DNI">DNI</option>
-                                        <option value="CE">CE</option>
-                                        <option value="Pasaporte">Pasaporte</option>
+                                        <?php foreach ((isset($tiposDocumento) && is_array($tiposDocumento)) ? $tiposDocumento : \App\Support\Catalogos::TipoDocumento as $tipoOpcion): ?>
+                                            <option value="<?= $tipoOpcion ?>" <?= ($datos_viejos['tipo_documento'] ?? 'DNI') === $tipoOpcion ? 'selected' : '' ?>><?= $tipoOpcion ?></option>
+                                        <?php endforeach; ?>
                                     </select>
                                 </div>
 

@@ -22,6 +22,10 @@ require_once("head.php");
         <main class="app-main">
             <!--begin::App Content Header-->
             <?php
+            // OPT-07 / MEN-05: flash global. Se renderiza una sola vez para todas
+            // las pantallas del layout; los controladores ya no necesitan pasar
+            // la variable `flash` a cada vista.
+            require_once("flash.php");
             echo $contenido ?? "";
             ?>
             <!--end::App Content-->

@@ -254,6 +254,9 @@ $colorEstado = $estadoColores[$expediente['estado_actual']] ?? 'secondary';
                         <?= str_replace('_', ' ', $expediente['estado_actual']) ?>
                     </span>
                     <div class="mt-2">
+                        <a href="/consulta/cargo/<?= htmlspecialchars($expediente['codigo_expediente']) ?>" target="_blank" rel="noopener" class="btn btn-success btn-sm">
+                            <i class="fas fa-file-pdf"></i> Descargar cargo (PDF)
+                        </a>
                         <a href="/consulta" class="btn btn-light btn-sm">
                             <i class="fas fa-search"></i> Nueva consulta
                         </a>
@@ -421,7 +424,7 @@ $colorEstado = $estadoColores[$expediente['estado_actual']] ?? 'secondary';
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <a href="/consulta/descargar/<?= (int)$a['id_archivo'] ?>"
+                                                    <a href="/consulta/descargar/<?= (int)$a['id_archivo'] ?>?codigo=<?= urlencode($expediente['codigo_expediente']) ?>"
                                                         class="btn-descargar">
                                                         <i class="fas fa-download"></i> Descargar
                                                     </a>

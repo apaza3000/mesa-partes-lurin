@@ -174,28 +174,6 @@ class Persona
         }
     }
 
-    public function registrarAuditoria(?int $idUsuario, string $modulo, string $accion, string $tabla, ?int $idRegistro, string $descripcion): bool
-    {
-        try {
-            $stmt = $this->db->prepare(
-                'INSERT INTO auditoria (id_usuario, modulo, accion, tabla_afectada, id_registro, descripcion, ip)
-                 VALUES (:id_usuario, :modulo, :accion, :tabla_afectada, :id_registro, :descripcion, :ip)'
-            );
-
-            return $stmt->execute([
-                ':id_usuario' => $idUsuario,
-                ':modulo' => $modulo,
-                ':accion' => $accion,
-                ':tabla_afectada' => $tabla,
-                ':id_registro' => $idRegistro,
-                ':descripcion' => $descripcion,
-                ':ip' => $_SERVER['REMOTE_ADDR'] ?? null,
-            ]);
-        } catch (PDOException $e) {
-            return false;
-        }
-    }
-
 
 
    

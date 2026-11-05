@@ -15,6 +15,7 @@
             <div class="col-md-6">
                 <div class="card card-primary card-outline mb-4">
                     <form action="/roles/store" method="POST">
+                        <?= \App\Support\Csrf::campo() ?>
                         <div class="card-body">
                             <div class="form-group mb-3 has-validation">
                                 <label for="nombre" class="form-label">Nombre del Rol</label>

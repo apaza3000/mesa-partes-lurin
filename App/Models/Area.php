@@ -79,4 +79,17 @@ class Area implements InterfaceModel {
             return false;
         }
     }
+
+    /**
+     * Id de la última área insertada (para la auditoría obligatoria).
+     */
+    public function ultimoId(): ?int {
+        try {
+            $id = (int) $this->db->lastInsertId();
+
+            return $id > 0 ? $id : null;
+        } catch (PDOException $e) {
+            return null;
+        }
+    }
 }

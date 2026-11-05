@@ -30,7 +30,12 @@ $errors = $errors ?? [];
                 <span class="badge">Sistema de gestión documentaria</span>
             </header>
 
+            <?php foreach (($flash ?? []) as $flashItem): ?>
+                <p class="error-text" role="alert"><?= htmlspecialchars($flashItem['mensaje'] ?? '', ENT_QUOTES, 'UTF-8') ?></p>
+            <?php endforeach; ?>
+
             <form action="/login" method="POST" id="login-form">
+                <?= \App\Support\Csrf::campo() ?>
                 <div class="form-group">
                     <label class="form-label" for="identificador">Usuario o correo electrónico</label>
                     <input
