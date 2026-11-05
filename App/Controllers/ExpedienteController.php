@@ -2,7 +2,7 @@
 
 namespace App\Controllers;
 
-use App\Models\EntregaModel;
+use App\Services\ExpedienteService;
 use PDO;
 use RuntimeException;
 use Src\Core\Conexion;
@@ -33,7 +33,8 @@ class ExpedienteController extends Controller
                  ORDER BY e.fecha_registro DESC, e.id_expediente DESC'
             );
 
-            $this->json(['expedientes' => $stmt->fetchAll(PDO::FETCH_ASSOC)]);
+            $expedientes = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $this->view('expedientes.index', ['expedientes' => $expedientes], 'app');
         } catch (Throwable $e) {
             $this->reportError('listar expedientes', $e);
             $this->json(['error' => 'No se pudieron cargar los expedientes.'], 500);
@@ -54,21 +55,9 @@ class ExpedienteController extends Controller
                  ORDER BY nombre"
             );
 
-            $this->json([
+            $this->view('expedientes.create', [
                 'tipos_documento' => $stmt->fetchAll(PDO::FETCH_ASSOC),
-                'campos_requeridos' => [
-                    'tipo_documento',
-                    'numero_documento',
-                    'nombres',
-                    'apellido_paterno',
-                    'email',
-                    'asunto',
-                    'prioridad',
-                    'doc_tipo',
-                    'doc_asunto',
-                    'doc_folios',
-                ],
-            ]);
+            ], 'app');
         } catch (Throwable $e) {
             $this->reportError('cargar formulario de expediente', $e);
             $this->json(['error' => 'No se pudo cargar el formulario de expediente.'], 500);
@@ -120,10 +109,23 @@ class ExpedienteController extends Controller
                 'fecha_documento' => $this->stringValue($datos, 'doc_fecha'),
             ];
 
-            $resultado = (new EntregaModel())->registrarExpediente($datosExpediente, $documento, []);
+            $resultado = (new ExpedienteService($this->database()))->registrar([
+                ...$datosExpediente,
+                'asunto' => trim((string) $datos['asunto']),
+                'prioridad' => trim((string) $datos['prioridad']),
+                'canal_ingreso' => trim((string) ($datos['canal_ingreso'] ?? 'Virtual')),
+                'id_remitente' => isset($datos['id_remitente']) ? (int) $datos['id_remitente'] : null,
+                'doc_tipo' => $idTipoDocumento,
+                'doc_numero' => $this->stringValue($datos, 'doc_numero'),
+                'doc_asunto' => trim((string) $datos['doc_asunto']),
+                'doc_folios' => (int) $datos['doc_folios'],
+                'doc_fecha' => $this->stringValue($datos, 'doc_fecha'),
+            ], (new Request())->file('archivos') ?? []);
             if (empty($resultado['ok'])) {
                 error_log('Error al registrar expediente: ' . ($resultado['mensaje'] ?? 'Error desconocido.'));
-                $this->json(['error' => 'No se pudo registrar el expediente.'], 500);
+                $this->json([
+                    'error' => trim((string) ($resultado['mensaje'] ?? 'No se pudo registrar el expediente.')),
+                ], 500);
             }
 
             $this->json([
@@ -179,8 +181,9 @@ class ExpedienteController extends Controller
             $documentos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             $stmtAdjuntos = $db->prepare(
-                'SELECT id_archivo, id_documento, nombre_original, nombre_archivo,
-                        ruta_archivo, extension, mime_type, tamanio, hash_archivo, creado_en
+                'SELECT id_archivo, id_documento, nombre_original, nombre_sistema,
+                        ruta_privada AS ruta_archivo, extension, mime_type, tamanio_bytes AS tamanio,
+                        hash_sha256 AS hash_archivo, creado_por
                  FROM archivos_adjuntos
                  WHERE id_documento = :id
                  ORDER BY id_archivo ASC'
@@ -191,12 +194,63 @@ class ExpedienteController extends Controller
             }
             unset($documento);
 
-            $this->json(['expediente' => $expediente, 'documentos' => $documentos]);
+            $stmtHistorial = $db->prepare(
+                'SELECT h.*, u.username
+                 FROM historial_expediente h
+                 LEFT JOIN usuarios u ON u.id_usuario = h.id_usuario
+                 WHERE h.id_expediente = :id
+                 ORDER BY h.fecha ASC, h.id_historial ASC'
+            );
+            $stmtHistorial->execute([':id' => $idExpediente]);
+            $historial = $stmtHistorial->fetchAll(PDO::FETCH_ASSOC);
+
+            $this->view('expedientes.show', [
+                'expediente' => $expediente,
+                'documentos' => $documentos,
+                'historial' => $historial,
+            ], 'app');
         } catch (Throwable $e) {
             $this->reportError('obtener expediente', $e);
             $this->json(['error' => 'No se pudo cargar el expediente.'], 500);
         }
     }
+
+    public function constancia(string $id): void
+        {
+            if (!$this->ensureAuthenticated()) {
+                return;
+            }
+
+            $idExpediente = $this->parseId($id);
+            if ($idExpediente === null) {
+                $this->json(['error' => 'El identificador del expediente no es válido.'], 400);
+            }
+
+            try {
+                $stmt = $this->database()->prepare(
+                    'SELECT codigo_expediente FROM expedientes WHERE id_expediente = :id'
+                );
+                $stmt->execute([':id' => $idExpediente]);
+                $codigo = $stmt->fetchColumn();
+                if (!$codigo) {
+                    $this->json(['error' => 'El expediente no existe.'], 404);
+                }
+
+                $ruta = dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'storage'
+                    . DIRECTORY_SEPARATOR . 'expedientes' . DIRECTORY_SEPARATOR . $idExpediente
+                    . DIRECTORY_SEPARATOR . 'constancia-' . $codigo . '.html';
+                if (!is_file($ruta)) {
+                    $this->json(['error' => 'La constancia no está disponible.'], 404);
+                }
+
+                header('Content-Type: text/html; charset=UTF-8');
+                header('Content-Disposition: inline; filename="constancia-' . $codigo . '.html"');
+                readfile($ruta);
+            } catch (Throwable $e) {
+                $this->reportError('descargar constancia', $e);
+                $this->json(['error' => 'No se pudo obtener la constancia.'], 500);
+            }
+        }
 
     public function seguimiento(string $id): void
     {
@@ -257,12 +311,12 @@ class ExpedienteController extends Controller
             $stmt->execute([':id' => $idExpediente]);
             $observaciones = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-            $this->json([
+            $this->view('expedientes.seguimiento', [
                 'expediente' => $expediente,
                 'historial' => $historial,
                 'derivaciones' => $derivaciones,
                 'observaciones' => $observaciones,
-            ]);
+            ], 'app');
         } catch (Throwable $e) {
             $this->reportError('cargar seguimiento de expediente', $e);
             $this->json(['error' => 'No se pudo cargar el seguimiento del expediente.'], 500);
@@ -326,8 +380,11 @@ class ExpedienteController extends Controller
         if (isset($datos['tipo_documento']) && !in_array($datos['tipo_documento'], ['DNI', 'CE', 'RUC', 'Pasaporte', 'Otro'], true)) {
             $errores['tipo_documento'] = 'Seleccione un tipo de documento válido.';
         }
-        if (isset($datos['prioridad']) && !in_array($datos['prioridad'], ['Normal', 'Urgente'], true)) {
+        if (isset($datos['prioridad']) && !in_array($datos['prioridad'], ['Normal', 'Alta', 'Urgente'], true)) {
             $errores['prioridad'] = 'Seleccione una prioridad válida.';
+        }
+        if (isset($datos['canal_ingreso']) && !in_array($datos['canal_ingreso'], ['Virtual', 'Presencial', 'Interno'], true)) {
+            $errores['canal_ingreso'] = 'Seleccione un canal válido.';
         }
         if (isset($datos['numero_documento']) && is_scalar($datos['numero_documento']) && strlen((string) $datos['numero_documento']) > 20) {
             $errores['numero_documento'] = 'El número de documento no puede superar 20 caracteres.';
