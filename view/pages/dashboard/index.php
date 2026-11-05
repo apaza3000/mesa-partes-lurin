@@ -26,14 +26,14 @@
                 <div class="col-12">
                     <div class="alert alert-info alert-dismissible shadow-sm border-0 bg-gradient-info">
                         <h5><i class="icon fas fa-shield-alt"></i> ¡Bienvenido,
-                            <?= htmlspecialchars($usuario['nombres'] ?? 'Usuario') ?>!
+                            <?= htmlspecialchars($usuario) ?>!
                         </h5>
                         Estás conectado con el rol: <span
                             class="badge badge-light px-2 py-1 text-uppercase font-weight-bold "><?= htmlspecialchars($rolActual) ?></span>
                         <br>
                         Área asignada:
                         <span class="badge badge-light px-2 py-1 font-weight-bold">
-                            <?= isset($usuario['nombre_area']) && $usuario['nombre_area'] !== null ? htmlspecialchars($usuario['nombre_area']) : 'Sin área asignada (Acceso Global)' ?>
+                            <?= htmlspecialchars($areaActual) ?>
                         </span>
                     </div>
                 </div>
@@ -47,8 +47,8 @@
                     <div class="col-lg-3 col-6">
                         <div class="small-box text-bg-primary">
                             <div class="inner">
-                                <h3><?= htmlspecialchars($totalDocumentosRegistrados ?? "0") ?></h3>
-                                <p>Total documentos registrados</p>
+                                <h3><?= htmlspecialchars($getTotalExpedientes ?? "0") ?></h3>
+                                <p>Total expedientes registrados</p>
                             </div>
                             <svg class="small-box-icon" fill="currentColor" viewBox="0 0 24 24"
                                 xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -67,7 +67,7 @@
                     <div class="col-lg-3 col-6">
                         <div class="small-box text-bg-danger">
                             <div class="inner">
-                                <h3><?= htmlspecialchars($totalPendientesArea ?? "0") ?></h3>
+                                <h3><?= htmlspecialchars($getExpedientesRegistrados ?? "0") ?></h3>
                                 <p>Expedientes pendientes en general</p>
                             </div>
                             <svg class="small-box-icon" fill="currentColor" viewBox="0 0 24 24"
@@ -150,25 +150,6 @@
                                     aria-label="Gráfico de distribución de expedientes"></canvas>
                             </div>
                         </div>
-                        <div class="card-footer p-0">
-                            <ul class="nav nav-pills flex-column p-2">
-                                <li class="nav-item d-flex justify-content-between px-3 py-2 border-bottom">
-                                    <span><i class="fas fa-circle text-danger mr-2"></i> Pendientes (Registrados)</span>
-                                    <span
-                                        class="font-weight-bold"><?= htmlspecialchars($expedientesRegistrados ?? 0) ?></span>
-                                </li>
-                                <li class="nav-item d-flex justify-content-between px-3 py-2 border-bottom">
-                                    <span><i class="fas fa-circle text-warning mr-2"></i> En Proceso</span>
-                                    <span
-                                        class="font-weight-bold"><?= htmlspecialchars($expedientesEnProceso ?? 0) ?></span>
-                                </li>
-                                <li class="nav-item d-flex justify-content-between px-3 py-2">
-                                    <span><i class="fas fa-circle text-success mr-2"></i> Atendidos / Archivados</span>
-                                    <span
-                                        class="font-weight-bold"><?= htmlspecialchars($tramitesAtendidos_Archivados ?? 0) ?></span>
-                                </li>
-                            </ul>
-                        </div>
                     </div>
                 </div>
 
@@ -216,18 +197,19 @@
                                 <!-- Estado de la Base de Datos Dinámico -->
                                 <li class="item py-2">
                                     <div class="product-info ml-0">
-                                        <?php if (!empty($dbConectada)): ?>
-                                            <span class="text-success font-weight-bold">
-                                                <i class="fas fa-circle fa-xs"></i> Base de Datos
-                                            </span>
-                                            <span class="product-description text-muted small">Conectada y sincronizada
-                                                correctamente.</span>
+                                        <span>
+                                            Base de Datos:
+                                        </span>
+                                        <?php if (!empty($estadoSistema['db_status'])): ?>
+                                            <span class="badge bg-success rounded-circle p-1 me-2"
+                                                style="width: 10px; height: 10px;"></span>
+                                            <span class="text-success"> Conexión establecida correctamente con
+                                                el servidor SQL.</span>
                                         <?php else: ?>
-                                            <span class="text-danger font-weight-bold">
-                                                <i class="fas fa-times-circle fa-xs"></i> Base de Datos
-                                            </span>
-                                            <span class="product-description text-danger small">Error de conexión con el
-                                                servidor SQL.</span>
+                                            <span class="badge bg-danger rounded-circle p-1 me-2"
+                                                style="width: 10px; height: 10px;"></span>
+                                            <span class="text-danger font-weight-bold">Error de conexión con
+                                                el servidor SQL.</span>
                                         <?php endif; ?>
                                     </div>
                                 </li>
@@ -235,18 +217,17 @@
                                 <!-- Estado de la Sesión / Token Dinámico -->
                                 <li class="item py-2">
                                     <div class="product-info ml-0">
-                                        <?php if (!empty($sesionActiva)): ?>
-                                            <span class="text-primary font-weight-bold">
-                                                <i class="fas fa-shield-alt fa-xs"></i> Sesión Segura
-                                            </span>
-                                            <span class="product-description text-muted small">Token activo bajo protocolo
-                                                MVC.</span>
+                                        <span>
+                                            Etado de sesion:
+                                        </span>
+                                        <?php if (!empty($estadoSistema['session_warning'])): ?>
+                                            <span class="badge bg-warning rounded-circle p-1 me-2"
+                                                style="width: 10px; height: 10px;"></span>
+                                            <span class="text-warning">Advertencia Sesión próxima a expirar.</span>
                                         <?php else: ?>
-                                            <span class="text-warning font-weight-bold">
-                                                <i class="fas fa-exclamation-triangle fa-xs"></i> Sesión Segura
-                                            </span>
-                                            <span class="product-description text-warning small">Advertencia: Sesión próxima
-                                                a expirar.</span>
+                                            <span class="badge bg-success rounded-circle p-1 me-2"
+                                                style="width: 10px; height: 10px;"></span>
+                                            <span class="text-success"> Activa y protegida.</span>
                                         <?php endif; ?>
                                     </div>
                                 </li>
@@ -268,22 +249,22 @@
     document.addEventListener("DOMContentLoaded", function () {
         const ctx = document.getElementById('pie-chart');
         if (ctx) {
+
+            const Pendientes = <?= json_encode((int) ($getExpedientesRegistrados - $totalPendientesArea ?? 0)) ?>;
             const pendientesArea = <?= json_encode((int) ($totalPendientesArea ?? 0)) ?>;
             const enProceso = <?= json_encode((int) ($expedientesEnProceso ?? 0)) ?>;
             const atendidosArchivados = <?= json_encode((int) ($tramitesAtendidos_Archivados ?? 0)) ?>;
-
-            const misPendientes = <?= json_encode((int) ($expedientesPendientes ?? 0)) ?>;
-            const observados = <?= json_encode((int) ($totalObservados ?? 0)) ?>;
+            const observados = <?= json_encode((int) ($getExpedientesObservados ?? 0)) ?>;
 
             new Chart(ctx, {
                 type: 'doughnut',
                 data: {
 
-                    labels: ['Pendientes de mi Área', 'En Proceso', 'Atendidos / Archivados', 'Mis pendientes', 'Observados'],
+                    labels: ['Pendientes en general', 'Pendientes de mi Área', 'En Proceso', 'Atendidos / Archivados', 'Observados'],
                     datasets: [{
-                        data: [pendientesArea, enProceso, atendidosArchivados, misPendientes, observados],
+                        data: [Pendientes, pendientesArea, enProceso, atendidosArchivados, observados],
 
-                        backgroundColor: ['#ff0019', '#ffc107', '#198754', '#f75701', '#6f42c1'],
+                        backgroundColor: ['#f70101', '#ff7023', '#ffc107', '#198754', '#6f42c1'],
                         borderWidth: 1
                     }]
                 },

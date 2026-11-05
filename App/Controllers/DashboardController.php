@@ -24,26 +24,54 @@ class DashboardController extends Controller
         if (!Session::isAuthenticated()) {
             return $this->redirect("/login");
         }
+
+        // 1. Obtener datos del usuario y sus expedientes correspondientes
         $datosUsuarioBD = $this->DashboardModel->obtenerDatosDelUserDesdeBD();
 
-        $rolActual = $datosUsuarioBD['rol'] ?? 'CONSULTOR';
+        $nombrePersona = $datosUsuarioBD['nombre_persona'] ?? 'Nombre_de_usuario_no_encontrado';
+        $rolActual = $datosUsuarioBD['rol'] ?? 'Rol_no_encontrado';
+        $areaActual = $datosUsuarioBD['nombre_area'] ?? 'Sin área asignada (Acceso Global)';
         $expedientesPendientes = $datosUsuarioBD['expedientes_pendientes'] ?? [];
         $totalPendientesArea = $datosUsuarioBD['total_pendientes_area'] ?? 0;
 
-        $totalDocumentosRegistrados = $this->DashboardModel->getTotalDocumentosRegistrados();
+        // 2. Métricas generales para las tarjetas del dashboard
+        $getTotalExpedientes = $this->DashboardModel->getTotalExpedientes();
+        $getExpedientesRegistrados = $this->DashboardModel->getExpedientesRegistrados();
         $expedientesEnProceso = $this->DashboardModel->getExpedientesEnProceso();
         $tramitesAtendidos_Archivados = $this->DashboardModel->getTramitesAtendidos_Archivados();
-        $totalObservados = $this->DashboardModel->getDocumentosObservados();
+        $getExpedientesObservados = $this->DashboardModel->getExpedientesObservados();
 
+        // 3. NUEVO: Verificaciones para el componente "Estado del Sistema"
+        $dbConectada = $this->DashboardModel->verificarEstadoBD();
+
+        $sesionProximaAExpirar = false;
+        if (isset($_SESSION['ultimo_actividad'])) {
+            $tiempoInactivo = time() - $_SESSION['ultimo_actividad'];
+            $limiteInactividad = 15 * 60; // 15 minutos (ajusta según tu config)
+            if ($tiempoInactivo > ($limiteInactividad - 180)) { // Advertir si faltan menos de 3 min
+                $sesionProximaAExpirar = true;
+            }
+        }
+
+        $estadoSistema = [
+            'db_status' => $dbConectada,
+            'session_warning' => $sesionProximaAExpirar
+        ];
+
+        // 4. Retornar la vista enviando también el estado del sistema
         return $this->view('dashboard.index', [
-            'usuario' => $datosUsuarioBD,
+            'usuario' => $nombrePersona,
             'rolActual' => $rolActual,
+            'areaActual' => $areaActual,
+
             'expedientesPendientes' => $expedientesPendientes,
             'totalPendientesArea' => $totalPendientesArea,
-            'totalDocumentosRegistrados' => $totalDocumentosRegistrados,
+            'getTotalExpedientes' => $getTotalExpedientes,
+            'getExpedientesRegistrados' => $getExpedientesRegistrados,
             'expedientesEnProceso' => $expedientesEnProceso,
             'tramitesAtendidos_Archivados' => $tramitesAtendidos_Archivados,
-            'totalObservados' => $totalObservados
+            'getExpedientesObservados' => $getExpedientesObservados,
+            'estadoSistema' => $estadoSistema // <-- Agregado aquí
         ], 'app');
     }
 
