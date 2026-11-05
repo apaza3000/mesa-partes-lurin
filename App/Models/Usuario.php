@@ -43,6 +43,22 @@ class Usuario
                 ':email' => trim($identificador),
             ]);
             $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            // MEN-03: `roles` se devuelve como ARRAY, tal y como documenta
+            // arquitectura.md §3.3 (el string GROUP_CONCAT se mantenía solo
+            // si quien llama lo pide vía `roles_texto`).
+            if (is_array($usuario)) {
+                $texto = (string) ($usuario['roles'] ?? '');
+                $lista = array_values(array_unique(array_filter(array_map(
+                    static fn($r) => mb_strtoupper(trim($r)),
+                    explode(',', $texto)
+                ), static fn($r) => $r !== '')));
+
+                $usuario['roles_texto'] = $texto;
+                $usuario['roles'] = $lista;
+                $usuario['rol'] = $lista[0] ?? '';
+            }
+
             return $usuario;
         } catch (PDOException $e) {
             return null;
@@ -69,6 +85,7 @@ class Usuario
     public function obtenerPorEmail(string $email)
     {
     }
+
 
     public function getAllRol(): array
     {
@@ -115,10 +132,16 @@ class Usuario
                     u.id_usuario, 
                     u.avatar,
                     u.username, 
+                    p.nombres,
+                    p.apellido_paterno,
+                    p.apellido_materno,
+                    a.nombre AS area_nombre,
                     u.estado, 
                     u.creado_en,
                     r.nombre AS rol_nombre
             FROM usuarios AS u
+            INNER JOIN personas p ON p.id_persona = u.id_persona
+            INNER JOIN areas a on a.id_area = u.id_area 
             LEFT JOIN usuario_roles ur ON u.id_usuario = ur.id_usuario
             LEFT JOIN roles r ON ur.id_rol = r.id_rol
             ORDER BY u.id_usuario DESC 
@@ -135,34 +158,87 @@ class Usuario
             return [];
         }
     }
+    /**
+     * Buscar una persona por su tipo y número de documento
+     */
+    public function obtenerPersonaPorDocumento(string $tipo, string $numero): ?array
+    {
+        $sql = "SELECT * FROM personas WHERE tipo_documento = :tipo AND numero_documento = :numero LIMIT 1";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([
+            ':tipo' => $tipo,
+            ':numero' => $numero
+        ]);
 
+        $persona = $stmt->fetch(\PDO::FETCH_ASSOC);
+        return $persona ? $persona : null;
+    }
+
+    /**
+     * Verificar si una persona ya cuenta con un usuario registrado en el sistema
+     */
+    public function tieneUsuarioAsignado(int $idPersona): bool
+    {
+        $sql = "SELECT COUNT(*) FROM usuarios WHERE id_persona = :id_persona";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([':id_persona' => $idPersona]);
+
+        return (int) $stmt->fetchColumn() > 0;
+    }
     //nuevo ususario
-    public function crearUsuarioCompleto(array $datosPersona, array $datosUsuario, int $idRol): bool
+    public function crearUsuarioCompleto(array $datosPersona, array $datosUsuario, int $idRol): array
     {
         try {
             $this->db->beginTransaction();
 
-            // 1. Insertar en tabla personas
-            $sqlPersona = "INSERT INTO personas 
-            (tipo_persona, tipo_documento, numero_documento, nombres, apellido_paterno, apellido_materno, email) 
-            VALUES ('Natural', :tipo_doc, :num_doc, :nombres, :paterno, :materno, :email)";
-
-            $stmtPersona = $this->db->prepare($sqlPersona);
-            $stmtPersona->execute([
+            // 1. Verificar si la persona ya existe
+            $stmtCheck = $this->db->prepare("SELECT id_persona FROM personas WHERE tipo_documento = :tipo_doc AND numero_documento = :num_doc LIMIT 1");
+            $stmtCheck->execute([
                 ':tipo_doc' => $datosPersona['tipo_documento'],
-                ':num_doc' => $datosPersona['numero_documento'],
-                ':nombres' => $datosPersona['nombres'],
-                ':paterno' => $datosPersona['apellido_paterno'],
-                ':materno' => $datosPersona['apellido_materno'],
-                ':email' => $datosPersona['email'],
+                ':num_doc' => $datosPersona['numero_documento']
             ]);
+            $idPersona = $stmtCheck->fetchColumn();
 
-            $idPersona = (int) $this->db->lastInsertId();
+            if (!$idPersona) {
+                // Insertar persona si no existe
+                $sqlPersona = "INSERT INTO personas (tipo_documento, numero_documento, nombres, apellido_paterno, apellido_materno, email, telefono, direccion) 
+                           VALUES (:tipo_doc, :num_doc, :nombres, :paterno, :materno, :email, :telefono, :direccion)";
+                $stmtPersona = $this->db->prepare($sqlPersona);
+                $stmtPersona->execute([
+                    ':tipo_doc' => $datosPersona['tipo_documento'],
+                    ':num_doc' => $datosPersona['numero_documento'],
+                    ':nombres' => $datosPersona['nombres'],
+                    ':paterno' => $datosPersona['apellido_paterno'],
+                    ':materno' => $datosPersona['apellido_materno'],
+                    ':email' => $datosPersona['email'],
+                    ':telefono' => $datosPersona['telefono'] ?? null,
+                    ':direccion' => $datosPersona['direccion'] ?? null,
+                ]);
+                $idPersona = (int) $this->db->lastInsertId();
+            } else {
+                // Actualizar datos de persona existente
+                $sqlUpPersona = "UPDATE personas SET nombres = :nombres, apellido_paterno = :paterno, apellido_materno = :materno, email = :email, telefono = :telefono, direccion = :direccion WHERE id_persona = :id_persona";
+                $stmtUp = $this->db->prepare($sqlUpPersona);
+                $stmtUp->execute([
+                    ':nombres' => $datosPersona['nombres'],
+                    ':paterno' => $datosPersona['apellido_paterno'],
+                    ':materno' => $datosPersona['apellido_materno'],
+                    ':email' => $datosPersona['email'],
+                    ':telefono' => $datosPersona['telefono'] ?? null,
+                    ':direccion' => $datosPersona['direccion'] ?? null,
+                    ':id_persona' => $idPersona
+                ]);
+            }
 
-            // 2. Insertar en tabla usuarios
-            $sqlUsuario = "INSERT INTO usuarios (id_persona, id_area, username, password) 
-                       VALUES (:id_persona, :id_area, :username, :password)";
+            // 2. Validar si la persona ya tiene cuenta de usuario
+            $stmtUserCheck = $this->db->prepare("SELECT id_usuario FROM usuarios WHERE id_persona = :id_persona LIMIT 1");
+            $stmtUserCheck->execute([':id_persona' => $idPersona]);
+            if ($stmtUserCheck->fetchColumn()) {
+                throw new \Exception("Esta persona ya cuenta con un usuario registrado en el sistema.");
+            }
 
+            // 3. Crear usuario
+            $sqlUsuario = "INSERT INTO usuarios (id_persona, id_area, username, password, estado) VALUES (:id_persona, :id_area, :username, :password, 'Activo')";
             $stmtUsuario = $this->db->prepare($sqlUsuario);
             $stmtUsuario->execute([
                 ':id_persona' => $idPersona,
@@ -170,10 +246,9 @@ class Usuario
                 ':username' => $datosUsuario['username'],
                 ':password' => password_hash($datosUsuario['password'], PASSWORD_BCRYPT),
             ]);
-
             $idUsuario = (int) $this->db->lastInsertId();
 
-            // 3. Insertar en tabla usuario_roles
+            // 4. Asignar rol
             $sqlRol = "INSERT INTO usuario_roles (id_usuario, id_rol) VALUES (:id_usuario, :id_rol)";
             $stmtRol = $this->db->prepare($sqlRol);
             $stmtRol->execute([
@@ -182,26 +257,18 @@ class Usuario
             ]);
 
             $this->db->commit();
-            return true;
-        } catch (PDOException $e) {
+
+            // Retornar éxito con el ID del usuario creado
+            return ['estatus' => true, 'id' => $idUsuario];
+
+        } catch (\Exception $e) {
             $this->db->rollBack();
             error_log("Error al crear usuario: " . $e->getMessage());
-            return false;
+            return ['estatus' => false, 'error' => $e->getMessage()];
         }
     }
 
-
-    // Cambiar Estado (Activo / Inactivo / Suspendido)
-    public function cambiarEstado(int $idUsuario, string $nuevoEstado): bool
-    {
-        $sql = "UPDATE usuarios SET estado = :estado, update_at = NOW() WHERE id_usuario = :id";
-        $stmt = $this->db->prepare($sql);
-        return $stmt->execute([
-            ':estado' => $nuevoEstado,
-            ':id' => $idUsuario
-        ]);
-    }
-
+    // Alta pública de invitado (persona + usuario sin rol)
     public function registrarInvitado($data)
     {
         try {
@@ -279,7 +346,7 @@ class Usuario
         }
     }
 
-    // Obtener un usuario por ID
+    // Obtener un USUARIO por ID
     public function obtenerPorId(int $id)
     {
         $sql = "SELECT u.id_usuario, u.id_persona, u.id_area, u.username, u.estado,
@@ -295,8 +362,60 @@ class Usuario
         $stmt->execute([':id' => $id]);
         return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
     }
+    // Obtener un MAS DETALLES DE USUARIO por ID
+    public function obtenerAllPorId(int $id)
+    {
+        $sql =
+            "SELECT 
+            u.id_usuario,
+            u.username,
+            u.avatar,
+            u.estado AS estado_usuario,
+            u.ultimo_acceso,
+            u.creado_en AS usuario_creado_en,
+            u.actualizado_en AS usuario_actualizado_en,
 
-    //ACTUALIZAR
+            -- Datos de la persona
+            p.id_persona,
+            p.tipo_persona,
+            p.tipo_documento,
+            p.numero_documento,
+            p.nombres,
+            p.apellido_paterno,
+            p.apellido_materno,
+            p.razon_social,
+            p.email,
+            p.telefono,
+            p.direccion,
+            p.estado AS estado_persona,
+
+            -- Datos del área
+            a.id_area,
+            a.nombre AS area_nombre,
+            a.siglas AS area_siglas,
+
+            -- Datos del rol
+            r.id_rol,
+            r.nombre AS rol_nombre,
+            r.descripcion AS rol_descripcion
+
+        FROM usuarios u
+        INNER JOIN personas p ON u.id_persona = p.id_persona
+
+        LEFT JOIN areas a ON u.id_area = a.id_area
+
+        LEFT JOIN usuario_roles ur ON u.id_usuario = ur.id_usuario
+
+        LEFT JOIN roles r ON ur.id_rol = r.id_rol
+
+        WHERE u.id_usuario = :id_usuario LIMIT 1";
+
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([':id_usuario' => $id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
     public function actualizarCompleto(int $idUsuario, array $datosPersona, array $datosUsuario, int $idRol): bool
     {
         try {
@@ -362,7 +481,6 @@ class Usuario
 
             $this->db->commit();
             return true;
-
         } catch (PDOException $e) {
             $this->db->rollBack();
             error_log("Error al actualizar usuario: " . $e->getMessage());
@@ -394,6 +512,61 @@ class Usuario
             $this->db->rollBack();
             error_log("Error al eliminar usuario: " . $e->getMessage());
             return false;
+        }
+    }
+
+    /**
+     * Cambia solo el estado del usuario (ENUM usuarios.estado).
+     * FAT-02: la ruta /usuarios/{id}/estado necesita este mínimo.
+     *
+     * Sustituye a una versión anterior que escribía `update_at`, columna
+     * inexistente en el DDL (siempre fallaba en tiempo de ejecución).
+     */
+    public function cambiarEstado(int $id, string $estado): bool
+    {
+        try {
+            $stmt = $this->db->prepare(
+                "UPDATE usuarios SET estado = :estado, actualizado_en = NOW() WHERE id_usuario = :id"
+            );
+            $stmt->execute([':estado' => $estado, ':id' => $id]);
+
+            return $stmt->rowCount() > 0;
+        } catch (PDOException $e) {
+            error_log('Error al cambiar estado de usuario: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * ¿El usuario participa en trazabilidad que impide su borrado físico?
+     * (derivaciones RESTRICT, observaciones RESTRICT, documentos/auditoría, etc.)
+     */
+    public function tieneRegistrosAsociados(int $id): bool
+    {
+        $sql = "SELECT COALESCE(SUM(n), 0) AS total FROM (
+                    SELECT COUNT(*) AS n FROM derivaciones        WHERE id_usuario_envia  = :a
+            UNION ALL SELECT COUNT(*) FROM derivaciones           WHERE id_usuario_recibe = :b
+            UNION ALL SELECT COUNT(*) FROM observaciones          WHERE id_usuario        = :c
+            UNION ALL SELECT COUNT(*) FROM documentos             WHERE creado_por        = :d
+            UNION ALL SELECT COUNT(*) FROM archivos_adjuntos      WHERE creado_por        = :e
+            UNION ALL SELECT COUNT(*) FROM historial_expediente    WHERE id_usuario        = :f
+            UNION ALL SELECT COUNT(*) FROM notificaciones          WHERE id_usuario        = :g
+            UNION ALL SELECT COUNT(*) FROM auditoria                WHERE id_usuario        = :h
+                ) AS t";
+
+        try {
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([
+                ':a' => $id, ':b' => $id, ':c' => $id, ':d' => $id,
+                ':e' => $id, ':f' => $id, ':g' => $id, ':h' => $id,
+            ]);
+            $fila = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            return (int) ($fila['total'] ?? 0) > 0;
+        } catch (PDOException $e) {
+            // Ante la duda se asocia: más vale desactivar que romper la BD.
+            error_log('Error al evaluar registros asociados: ' . $e->getMessage());
+            return true;
         }
     }
 }

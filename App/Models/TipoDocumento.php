@@ -16,10 +16,11 @@ class TipoDocumento
     }
 
     // Listar tipos de documentos habilitados
+    // OPT-02: fuente única del catálogo (la usan MesaPartes y EntregaModel).
     public function obtenerActivos(): array
     {
         try {
-            $sql = "SELECT * FROM tipos_documento WHERE estado = 'Activo' ORDER BY nombre ASC";
+            $sql = "SELECT id_tipo_doc, nombre FROM tipos_documento WHERE estado = 'Activo' ORDER BY nombre ASC";
             $stmt = $this->db->prepare($sql);
             $stmt->execute();
             return $stmt->fetchAll();

@@ -2,7 +2,12 @@
 
 namespace App\Controllers;
 
+use App\Controllers\Concerns\AuthorizesRequest;
 use App\Models\Area;
+use App\Models\Auditoria;
+use App\Support\Catalogos;
+use App\Support\Flash;
+use App\Support\Roles;
 use Src\Core\Controller;
 use Src\Core\Request;
 use Src\Core\Session;
@@ -10,6 +15,11 @@ use Src\Core\Validator;
 
 class AreaController extends Controller
 {
+    use AuthorizesRequest;
+
+    /** SEC-02: el alta y baja de áreas es exclusiva de ADMINISTRADOR. */
+    private const RolesPermitidos = Roles::Administracion;
+
     private Area  $area;
     public function __construct()
     {
@@ -18,18 +28,14 @@ class AreaController extends Controller
 
     public function index()
     {
-        if (!Session::isAuthenticated()) {
-            return $this->redirect("/login");
-        }
+        $this->requerirRol(self::RolesPermitidos);
         $areas = $this->area->getAll();
         return $this->view("areas.index", ['areas' => $areas], "app");
     }
 
     public function edit($id)
     {
-        if (!Session::isAuthenticated()) {
-            return $this->redirect("/login");
-        }
+        $this->requerirRol(self::RolesPermitidos);
 
         $area = $this->area->getById($id);
         $areas = $this->area->getAll();
@@ -38,9 +44,7 @@ class AreaController extends Controller
 
     public function create()
     {
-        if (!Session::isAuthenticated()) {
-            return $this->redirect("/login");
-        }
+        $this->requerirRol(self::RolesPermitidos);
 
         $areas = $this->area->getAll();
         return $this->view("areas.crear", ["areasPadre" => $areas], "app");
@@ -49,17 +53,16 @@ class AreaController extends Controller
     public function store()
     {
 
-        if (!Session::isAuthenticated()) {
-            return $this->redirect("/login");
-        }
+        $this->requerirRol(self::RolesPermitidos);
 
         $req  = new Request();
-        $data = $req->all();
+        $data = $this->sanearEntrada($req->all());
+        $this->requerirCsrf($data, '/areas/nuevo');
 
         $rule = [
-            'nombre'        => ['required', 'string', 'maxLength' => 100],
-            'siglas'        => ['required', 'string', 'maxLength' => 20],
-            'estado'        => ['required', 'string', 'in' => ['Activo', 'Inactivo']],
+            'nombre'        => ['required', 'string', 'maxLength' => Catalogos::limite('areas.nombre')],
+            'siglas'        => ['required', 'string', 'maxLength' => Catalogos::limite('areas.siglas')],
+            'estado'        => ['required', 'string', 'in' => Catalogos::EstadoSimple],
             'id_area_padre' => ['nullable', 'number'], // opcional
         ];
 
@@ -109,7 +112,8 @@ class AreaController extends Controller
         }
 
         // 6. Redirigir al listado con flash
-        $_SESSION['flash'] = 'Área creada correctamente.';
+        Flash::exito('Área creada correctamente.');
+        $this->auditar('crear', $this->area->ultimoId(), 'Creó el área "' . $datos['nombre'] . '" (' . $datos['siglas'] . ').');
         $this->redirect('/areas');
     }
 
@@ -117,28 +121,27 @@ class AreaController extends Controller
     {
 
 
-        if (!Session::isAuthenticated()) {
-            return $this->redirect("/login");
-        }
+        $this->requerirRol(self::RolesPermitidos);
         $id = (int) $id;
 
         // 1. Verificar que exista
         $areaActual = $this->area->getById($id);
 
         if (!$areaActual) {
-            $_SESSION['flash_error'] = 'El área no existe.';
+            Flash::error('El área no existe.');
             return $this->redirect('/areas');
         }
 
         // 2. Obtener datos del request
         $req  = new Request();
-        $data = $req->all();
+        $data = $this->sanearEntrada($req->all());
+        $this->requerirCsrf($data, '/areas/' . $id . '/editar');
 
         // 3. Reglas (igual que store, quizá sin 'id_area_padre' por el tema de ciclos)
         $rule = [
-            'nombre'        => ['required', 'string', 'maxLength' => 100],
-            'siglas'        => ['required', 'string', 'maxLength' => 20],
-            'estado'        => ['required', 'string', 'in' => ['Activo', 'Inactivo']],
+            'nombre'        => ['required', 'string', 'maxLength' => Catalogos::limite('areas.nombre')],
+            'siglas'        => ['required', 'string', 'maxLength' => Catalogos::limite('areas.siglas')],
+            'estado'        => ['required', 'string', 'in' => Catalogos::EstadoSimple],
             'id_area_padre' => ['nullable', 'number'],
         ];
 
@@ -190,24 +193,24 @@ class AreaController extends Controller
         }
 
         // 8. Redirigir con flash
-        $_SESSION['flash'] = 'Área actualizada correctamente.';
+        Flash::exito('Área actualizada correctamente.');
+        $this->auditar('editar', $id, 'Actualizó el área "' . $datos['nombre'] . '".');
         return $this->redirect('/areas');
     }
 
     public function delete($id)
     {
 
-        if (!Session::isAuthenticated()) {
-            return $this->redirect("/login");
-        }
+        $this->requerirRol(self::RolesPermitidos);
 
         $id = (int) $id;
+        $this->requerirCsrf((new Request())->all(), '/areas');
 
         // 1. Verificar que exista
         $areaActual = $this->area->getById($id);
 
         if (!$areaActual) {
-            $_SESSION['flash_error'] = 'El área no existe.';
+            Flash::error('El área no existe.');
             return $this->redirect('/areas');
         }
 
@@ -215,11 +218,45 @@ class AreaController extends Controller
         $ok = $this->area->delete($id);
 
         if (!$ok) {
-            $_SESSION['flash_error'] = 'No se pudo eliminar el área. Quizá tenga dependencias.';
+            Flash::error('No se pudo eliminar el área. Quizá tenga dependencias.');
         } else {
-            $_SESSION['flash'] = 'Área eliminada correctamente.';
+            Flash::exito('Área eliminada correctamente.');
+            $this->auditar('eliminar', $id, 'Eliminó el área "' . $areaActual['nombre'] . '".');
         }
 
         return $this->redirect('/areas');
+    }
+
+    /**
+     * SEC-07: nombres de área se muestran en menús y bandej as, se sanea la entrada.
+     */
+    private function sanearEntrada(array $data): array
+    {
+        if (isset($data['nombre'])) {
+            $data['nombre'] = Catalogos::sanear($data['nombre'], 'areas.nombre');
+        }
+        if (isset($data['siglas'])) {
+            $data['siglas'] = mb_strtoupper(Catalogos::sanear($data['siglas'], 'areas.siglas'));
+        }
+
+        return $data;
+    }
+
+    private function auditar(string $accion, ?int $idRegistro, string $descripcion): void
+    {
+        try {
+            $usuario = Session::user() ?? [];
+            (new Auditoria())->insertar(
+                $usuario['id_usuario'] ?? null,
+                'areas',
+                $accion,
+                'areas',
+                $idRegistro,
+                $descripcion,
+                $_SERVER['REMOTE_ADDR'] ?? null
+            );
+        } catch (\Throwable $e) {
+            error_log('Auditoría de áreas falló: ' . $e->getMessage());
+        }
     }
 }

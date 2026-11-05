@@ -41,6 +41,7 @@
             </div>
 
             <form method="POST" action="/register" id="formRegistro" novalidate>
+                <?= \App\Support\Csrf::campo() ?>
                 <div class="card-body">
 
                     <?php if (!empty($errors)): ?>
@@ -68,7 +69,7 @@
                                     class="form-control <?= isset($errors['tipo_documento']) ? 'is-invalid' : '' ?>"
                                     required>
                                     <?php $td_actual = $datos_viejos['tipo_documento'] ?? 'DNI'; ?>
-                                    <?php foreach (['DNI', 'CE', 'Pasaporte', 'Otro'] as $td): ?>
+                                    <?php foreach (\App\Support\Catalogos::TipoDocumento as $td): ?>
                                         <option value="<?= $td ?>" <?= $td_actual === $td ? 'selected' : '' ?>>
                                             <?= $td ?>
                                         </option>

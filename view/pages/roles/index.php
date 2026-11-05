@@ -52,6 +52,7 @@
                                                 <i class="bi bi-pencil-square"></i>
                                             </a>
                                             <form action="/roles/<?= (int) $rol['id_rol'] ?>/delete" method="POST" class="d-inline" onsubmit="return confirm('¿Está seguro de eliminar este rol?');">
+                                                <?= \App\Support\Csrf::campo() ?>
                                                 <button type="submit" class="btn btn-sm btn-danger" title="Eliminar">
                                                     <i class="bi bi-trash"></i>
                                                 </button>
