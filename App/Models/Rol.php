@@ -84,4 +84,18 @@ class Rol implements InterfaceModel
             return false;
         }
     }
+
+    /**
+     * Id del último rol insertado (para la auditoría obligatoria).
+     */
+    public function ultimoId(): ?int
+    {
+        try {
+            $id = (int) $this->db->lastInsertId();
+
+            return $id > 0 ? $id : null;
+        } catch (PDOException $e) {
+            return null;
+        }
+    }
 }

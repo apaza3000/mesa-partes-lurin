@@ -202,6 +202,7 @@ $totalPaginas = $totalPaginas ?? 0;
                                                             action="/usuarios/<?= (int) ($user['id_usuario'] ?? $user['id'] ?? 0) ?>/delete"
                                                             method="POST" class="d-inline"
                                                             onsubmit="return confirm('¿Está seguro de eliminar este usuario?');">
+                                                            <?= \App\Support\Csrf::campo() ?>
                                                             <button type="submit" class="btn btn-sm btn-danger"
                                                                 title="Eliminar">
                                                                 <i class="bi bi-trash"></i>

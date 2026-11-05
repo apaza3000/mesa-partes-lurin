@@ -32,5 +32,9 @@ $dotenv->load();
 
 Path::setBasePath(__DIR__);
 
+// SEC-09: los errores de aplicación se registran en storage/php-error.log y se
+// responde una página 500 genérica; nunca rutas absolutas ni trazas al navegador.
+App\Support\ManejadorErrores::registrar();
+
 
 require_once __DIR__ . DIRECTORY_SEPARATOR . "routes" . DIRECTORY_SEPARATOR . "Router.php";

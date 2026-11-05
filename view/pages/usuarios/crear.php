@@ -51,9 +51,9 @@ $roles = $roles ?? [];
                                 <div class="col-md-4 col-lg-3 col-sm-6 mb-3">
                                     <label for="tipo_documento" class="form-label">Tipo Documento</label>
                                     <select name="tipo_documento" id="tipo_documento" class="form-select" required>
-                                        <option value="DNI">DNI</option>
-                                        <option value="CE">CE</option>
-                                        <option value="Pasaporte">Pasaporte</option>
+                                        <?php foreach ((isset($tiposDocumento) && is_array($tiposDocumento)) ? $tiposDocumento : \App\Support\Catalogos::TipoDocumento as $tipoOpcion): ?>
+                                            <option value="<?= $tipoOpcion ?>" <?= ($datos_viejos['tipo_documento'] ?? 'DNI') === $tipoOpcion ? 'selected' : '' ?>><?= $tipoOpcion ?></option>
+                                        <?php endforeach; ?>
                                     </select>
                                 </div>
 

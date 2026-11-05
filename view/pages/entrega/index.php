@@ -261,6 +261,7 @@
             </div>
 
             <form method="POST" action="/entregas/store" enctype="multipart/form-data" id="formEntrega" novalidate>
+                <?= \App\Support\Csrf::campo() ?>
                 <div class="card-body">
 
                     <?php if (!empty($errors)): ?>
@@ -290,7 +291,7 @@
                                     <select name="tipo_documento"
                                         class="form-control <?= isset($errors['tipo_documento']) ? 'is-invalid' : '' ?>">
                                         <?php $td = $datos_viejos['tipo_documento'] ?? 'DNI'; ?>
-                                        <?php foreach (['DNI', 'CE', 'Pasaporte', 'Otro'] as $t): ?>
+                                        <?php foreach (\App\Support\Catalogos::TipoDocumento as $t): ?>
                                             <option value="<?= $t ?>" <?= $td === $t ? 'selected' : '' ?>><?= $t ?></option>
                                         <?php endforeach; ?>
                                     </select>

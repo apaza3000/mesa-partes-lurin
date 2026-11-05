@@ -183,16 +183,20 @@
                         <div class="card-body">
                             <p class="text-muted">Selecciona una opción de acuerdo a tus funciones permitidas:</p>
                             <div class="row">
+                                <?php if (\App\Support\Roles::usuarioTiene(array_merge(\App\Support\Roles::MesaDePartes, \App\Support\Roles::Administracion))): ?>
+                                    <!-- FAT-04: apunta a una ruta real registrada (/mesa-partes/registrar). -->
+                                    <div class="col-md-6 mb-3">
+                                        <a href="/mesa-partes/registrar"
+                                            class="btn btn-app bg-light border shadow-sm w-100 py-3 text-left">
+                                            <i class="bi bi-file-earmark-plus text-primary fa-2x mb-1"></i>
+                                            <span class="font-weight-bold d-block text-dark">Registrar Trámite</span>
+                                            <small class="text-muted">Nueva entrada en Mesa de Partes</small>
+                                        </a>
+                                    </div>
+                                <?php endif; ?>
                                 <div class="col-md-6 mb-3">
-                                    <a href="/documentos/crear"
-                                        class="btn btn-app bg-light border shadow-sm w-100 py-3 text-left">
-                                        <i class="bi bi-file-earmark-plus text-primary fa-2x mb-1"></i>
-                                        <span class="font-weight-bold d-block text-dark">Registrar Trámite</span>
-                                        <small class="text-muted">Nueva entrada en Mesa de Partes</small>
-                                    </a>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <a href="/seguimiento/trazabilidad"
+                                    <!-- FAT-04: antes enlazaba a /seguimiento/trazabilidad (ruta inexistente). -->
+                                    <a href="/consulta"
                                         class="btn btn-app bg-light border shadow-sm w-100 py-3 text-left">
                                         <i class="bi bi-diagram-3 text-success fa-2x mb-1"></i>
                                         <span class="font-weight-bold d-block text-dark">Trazabilidad</span>
@@ -272,7 +276,7 @@
             const enProceso = <?= json_encode((int) ($expedientesEnProceso ?? 0)) ?>;
             const atendidosArchivados = <?= json_encode((int) ($tramitesAtendidos_Archivados ?? 0)) ?>;
 
-            const misPendientes = <?= json_encode((int) ($expedientesPendientes ?? 0)) ?>;
+            const misPendientes = <?= json_encode((int) ($misPendientes ?? (is_array($expedientesPendientes ?? null) ? count($expedientesPendientes) : 0))) ?>;
             const observados = <?= json_encode((int) ($totalObservados ?? 0)) ?>;
 
             new Chart(ctx, {

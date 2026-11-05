@@ -13,4 +13,7 @@ Router::post("/entregas/store", [EntregaController::class, "store"]);
 Router::get("/consulta", [ConsultaExpedienteController::class, "index"]);
 Router::post("/consulta/buscar", [ConsultaExpedienteController::class, "buscar"]);
 
+// EPICA 3 — Cargo de Recepción en PDF (descarga pública por código, enlazada desde el QR)
+Router::get("/consulta/cargo/{codigo}", [ConsultaExpedienteController::class, "imprimirCargo"]);
+
 Router::get("/consulta/descargar/{idArchivo}", [ConsultaExpedienteController::class, "descargar"]);

@@ -1,0 +1,2 @@
+# Mantener el directorio storage/ en el repositorio.
+# El contenido (logs de runtime, sesiones, artefactos temporales) se ignora.

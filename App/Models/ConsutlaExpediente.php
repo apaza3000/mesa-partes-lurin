@@ -52,6 +52,30 @@ class ConsutlaExpediente
     }
 
     /* ============================================================
+     * ADJUNTO CON SU CONTEXTO DE SEGURIDAD (SEC-05)
+     * Devuelve el archivo junto al código del expediente y el
+     * documento del remitente para poder restringir la descarga.
+     * ============================================================ */
+    public function obtenerAdjunto(int $idArchivo): ?array
+    {
+        $stmt = $this->db->prepare(
+            "SELECT a.id_archivo, a.nombre_original, a.ruta_archivo, a.mime_type,
+                    e.codigo_expediente,
+                    p.numero_documento AS numero_remitente
+             FROM archivos_adjuntos a
+             INNER JOIN documentos d ON d.id_documento = a.id_documento
+             INNER JOIN expedientes e ON e.id_expediente = d.id_expediente
+             INNER JOIN personas p ON p.id_persona = e.id_remitente
+             WHERE a.id_archivo = :id_archivo
+             LIMIT 1"
+        );
+        $stmt->execute([':id_archivo' => $idArchivo]);
+        $archivo = $stmt->fetch();
+
+        return $archivo ?: null;
+    }
+
+    /* ============================================================
      * DOCUMENTO PRINCIPAL + ADJUNTOS
      * ============================================================ */
     public function obtenerDocumentos($idExpediente)

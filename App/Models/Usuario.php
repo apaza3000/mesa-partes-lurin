@@ -43,6 +43,22 @@ class Usuario
                 ':email' => trim($identificador),
             ]);
             $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            // MEN-03: `roles` se devuelve como ARRAY, tal y como documenta
+            // arquitectura.md §3.3 (el string GROUP_CONCAT se mantenía solo
+            // si quien llama lo pide vía `roles_texto`).
+            if (is_array($usuario)) {
+                $texto = (string) ($usuario['roles'] ?? '');
+                $lista = array_values(array_unique(array_filter(array_map(
+                    static fn($r) => mb_strtoupper(trim($r)),
+                    explode(',', $texto)
+                ), static fn($r) => $r !== '')));
+
+                $usuario['roles_texto'] = $texto;
+                $usuario['roles'] = $lista;
+                $usuario['rol'] = $lista[0] ?? '';
+            }
+
             return $usuario;
         } catch (PDOException $e) {
             return null;
@@ -252,18 +268,7 @@ class Usuario
         }
     }
 
-
-    // Cambiar Estado (Activo / Inactivo / Suspendido)
-    public function cambiarEstado(int $idUsuario, string $nuevoEstado): bool
-    {
-        $sql = "UPDATE usuarios SET estado = :estado, update_at = NOW() WHERE id_usuario = :id";
-        $stmt = $this->db->prepare($sql);
-        return $stmt->execute([
-            ':estado' => $nuevoEstado,
-            ':id' => $idUsuario
-        ]);
-    }
-
+    // Alta pública de invitado (persona + usuario sin rol)
     public function registrarInvitado($data)
     {
         try {
@@ -507,6 +512,61 @@ class Usuario
             $this->db->rollBack();
             error_log("Error al eliminar usuario: " . $e->getMessage());
             return false;
+        }
+    }
+
+    /**
+     * Cambia solo el estado del usuario (ENUM usuarios.estado).
+     * FAT-02: la ruta /usuarios/{id}/estado necesita este mínimo.
+     *
+     * Sustituye a una versión anterior que escribía `update_at`, columna
+     * inexistente en el DDL (siempre fallaba en tiempo de ejecución).
+     */
+    public function cambiarEstado(int $id, string $estado): bool
+    {
+        try {
+            $stmt = $this->db->prepare(
+                "UPDATE usuarios SET estado = :estado, actualizado_en = NOW() WHERE id_usuario = :id"
+            );
+            $stmt->execute([':estado' => $estado, ':id' => $id]);
+
+            return $stmt->rowCount() > 0;
+        } catch (PDOException $e) {
+            error_log('Error al cambiar estado de usuario: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * ¿El usuario participa en trazabilidad que impide su borrado físico?
+     * (derivaciones RESTRICT, observaciones RESTRICT, documentos/auditoría, etc.)
+     */
+    public function tieneRegistrosAsociados(int $id): bool
+    {
+        $sql = "SELECT COALESCE(SUM(n), 0) AS total FROM (
+                    SELECT COUNT(*) AS n FROM derivaciones        WHERE id_usuario_envia  = :a
+            UNION ALL SELECT COUNT(*) FROM derivaciones           WHERE id_usuario_recibe = :b
+            UNION ALL SELECT COUNT(*) FROM observaciones          WHERE id_usuario        = :c
+            UNION ALL SELECT COUNT(*) FROM documentos             WHERE creado_por        = :d
+            UNION ALL SELECT COUNT(*) FROM archivos_adjuntos      WHERE creado_por        = :e
+            UNION ALL SELECT COUNT(*) FROM historial_expediente    WHERE id_usuario        = :f
+            UNION ALL SELECT COUNT(*) FROM notificaciones          WHERE id_usuario        = :g
+            UNION ALL SELECT COUNT(*) FROM auditoria                WHERE id_usuario        = :h
+                ) AS t";
+
+        try {
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([
+                ':a' => $id, ':b' => $id, ':c' => $id, ':d' => $id,
+                ':e' => $id, ':f' => $id, ':g' => $id, ':h' => $id,
+            ]);
+            $fila = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            return (int) ($fila['total'] ?? 0) > 0;
+        } catch (PDOException $e) {
+            // Ante la duda se asocia: más vale desactivar que romper la BD.
+            error_log('Error al evaluar registros asociados: ' . $e->getMessage());
+            return true;
         }
     }
 }
