@@ -96,7 +96,7 @@ class AuthController extends Controller
                 // SEC-01: token nuevo por sesión autenticada.
                 Csrf::rotar();
 
-                return $this->redirect("/");
+                return $this->redirect("/dashboard");
             }
         }
         return $this->view('login', [

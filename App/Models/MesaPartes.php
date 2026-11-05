@@ -38,7 +38,10 @@ class MesaPartes
             $esDocumento = (bool) preg_match('/^[0-9]+$/', $busqueda);
 
             if ($esDocumento) {
+                // Se devuelven los campos individuales además del nombre completo:
+                // la vista los necesita para precargar nombres y apellidos al seleccionar.
                 $sql = "SELECT id_persona, tipo_persona, tipo_documento, numero_documento,
+                                nombres, apellido_paterno, apellido_materno, razon_social,
                                 COALESCE(NULLIF(razon_social, ''),
                     TRIM(CONCAT_WS(' ', nombres, apellido_paterno, apellido_materno))) AS nombre_completo,
                                 email, telefono, direccion
@@ -50,6 +53,7 @@ class MesaPartes
                          LIMIT {$limite}";
             } else {
                 $sql = "SELECT id_persona, tipo_persona, tipo_documento, numero_documento,
+                                nombres, apellido_paterno, apellido_materno, razon_social,
                                 COALESCE(NULLIF(razon_social, ''),
                     TRIM(CONCAT_WS(' ', nombres, apellido_paterno, apellido_materno))) AS nombre_completo,
                                 email, telefono, direccion
@@ -206,7 +210,7 @@ class MesaPartes
                 if ($idAreaOrigen <= 0) {
                     throw new Exception(
                         'No es posible originar la derivación: el usuario que registra no tiene un área asignada '
-                        . 'y no existe un área de Mesa de Partes activa. Asigne un área al usuario o cree el área de Mesa de Partes.'
+                            . 'y no existe un área de Mesa de Partes activa. Asigne un área al usuario o cree el área de Mesa de Partes.'
                     );
                 }
 
@@ -355,7 +359,7 @@ class MesaPartes
                            d.numero_documento AS doc_numero, d.folios AS doc_folios,
                            td.nombre AS tipo_doc_nombre,
                            der.id_derivacion, der.estado AS estado_derivacion, der.fecha_recepcion,
-                           ad.nombre AS area_destino_nombre, ad.siglas AS area_destino_siglas,
+                           ad.id_area AS area_destino_id, ad.nombre AS area_destino_nombre, ad.siglas AS area_destino_siglas,
                            u.username AS usuario_registra
                     FROM expedientes e
                     INNER JOIN personas p ON e.id_remitente = p.id_persona
@@ -368,11 +372,11 @@ class MesaPartes
                     LEFT JOIN derivaciones der ON der.id_derivacion = (
                         SELECT der2.id_derivacion FROM derivaciones der2
                         WHERE der2.id_expediente = e.id_expediente
-                        ORDER BY der2.id_derivacion ASC LIMIT 1
+                        ORDER BY der2.id_derivacion DESC LIMIT 1
                     )
                     LEFT JOIN areas ad ON ad.id_area = der.id_area_destino
                     LEFT JOIN usuarios u ON u.id_usuario = d.creado_por
-                    WHERE e.canal_ingreso IN ('Presencial', 'Interno')";
+                    WHERE e.canal_ingreso IN ('Presencial', 'Interno', 'Virtual')";
 
             $params = [];
 
@@ -431,7 +435,7 @@ class MesaPartes
                 'registros'    => $stmt->fetchAll(PDO::FETCH_ASSOC),
                 'total'        => $total,
                 'paginas'      => $paginas,
-                'pagina_actual'=> $paginaActual,
+                'pagina_actual' => $paginaActual,
             ];
         } catch (PDOException $e) {
             error_log('Error en MesaPartes::listarMesaPartes: ' . $e->getMessage());
@@ -468,9 +472,9 @@ class MesaPartes
                     LEFT JOIN derivaciones der ON der.id_derivacion = (
                         SELECT der2.id_derivacion FROM derivaciones der2
                         WHERE der2.id_expediente = e.id_expediente
-                        ORDER BY der2.id_derivacion ASC LIMIT 1
+                        ORDER BY der2.id_derivacion DESC LIMIT 1
                     )
-                    WHERE e.canal_ingreso IN ('Presencial', 'Interno')
+                    WHERE e.canal_ingreso IN ('Presencial', 'Interno','Virtual')
                       AND e.fecha_registro BETWEEN :desde AND :hasta";
 
             $stmt = $this->db->prepare($sql);
@@ -484,7 +488,7 @@ class MesaPartes
                 'total'               => (int) ($fila['total'] ?? 0),
                 'urgentes'            => (int) ($fila['urgentes'] ?? 0),
                 'sin_derivar'         => (int) ($fila['sin_derivar'] ?? 0),
-                'pendientes_recepcion'=> (int) ($fila['pendientes_recepcion'] ?? 0),
+                'pendientes_recepcion' => (int) ($fila['pendientes_recepcion'] ?? 0),
                 'internos'            => (int) ($fila['internos'] ?? 0),
             ];
         } catch (PDOException $e) {
@@ -614,5 +618,144 @@ class MesaPartes
     public function existeArea(int $idArea): bool
     {
         return $this->getArea($idArea) !== [];
+    }
+
+    /**
+     * Derivar un expediente desde Mesa de Partes hacia un área destino.
+     */
+    public function derivarExpediente(
+        int $idExpediente,
+        int $idAreaDestino,
+        int $idUsuario,
+        string $observaciones,
+        ?int $idAreaUsuario = null
+    ): array {
+        try {
+            $this->db->beginTransaction();
+
+            // 1. Verificar existencia del expediente
+            $stmt = $this->db->prepare(
+                'SELECT id_expediente, codigo_expediente, asunto, estado_actual
+                 FROM expedientes
+                 WHERE id_expediente = :id FOR UPDATE'
+            );
+            $stmt->execute([':id' => $idExpediente]);
+            $exp = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$exp) {
+                $this->db->rollBack();
+                return ['success' => false, 'message' => 'El expediente especificado no existe.'];
+            }
+
+            // 2. Verificar existencia del área destino
+            $areaDestino = $this->getArea($idAreaDestino);
+            if (empty($areaDestino) || ($areaDestino['estado'] ?? '') !== 'Activo') {
+                $this->db->rollBack();
+                return ['success' => false, 'message' => 'El área de destino no existe o se encuentra inactiva.'];
+            }
+
+            // 3. Obtener área de origen (Mesa de Partes)
+            $areaOrigen = $this->obtenerAreaMesaPartes($idAreaUsuario);
+            $idAreaOrigen = (int) ($areaOrigen['id_area'] ?? $idAreaUsuario ?? 1);
+
+            // 4. Si existe derivación previa en Pendiente, cerrarla para reasignar
+            $stmtDer = $this->db->prepare(
+                'SELECT id_derivacion, estado, observaciones
+                 FROM derivaciones
+                 WHERE id_expediente = :id
+                 ORDER BY id_derivacion DESC LIMIT 1 FOR UPDATE'
+            );
+            $stmtDer->execute([':id' => $idExpediente]);
+            $derivacionPrevia = $stmtDer->fetch(PDO::FETCH_ASSOC);
+
+            if ($derivacionPrevia && $derivacionPrevia['estado'] === 'Pendiente') {
+                $stmtCerrar = $this->db->prepare(
+                    "UPDATE derivaciones
+                     SET estado = 'Devuelto',
+                         observaciones = CONCAT(COALESCE(observaciones, ''), '\n[Reasignado por Mesa de Partes a ', :siglas, ']')
+                     WHERE id_derivacion = :id"
+                );
+                $stmtCerrar->execute([
+                    ':siglas' => $areaDestino['siglas'],
+                    ':id'     => $derivacionPrevia['id_derivacion'],
+                ]);
+            }
+
+            // 5. Insertar nueva derivación
+            $textoObs = $observaciones !== '' ? $observaciones : 'Derivación emitida desde Mesa de Partes.';
+            $stmtIns = $this->db->prepare(
+                'INSERT INTO derivaciones
+                 (id_expediente, id_area_origen, id_area_destino, id_usuario_envia, observaciones, estado, fecha_envio)
+                 VALUES (:id_exp, :origen, :destino, :usuario_envia, :observaciones, :estado, NOW())'
+            );
+            $stmtIns->execute([
+                ':id_exp'         => $idExpediente,
+                ':origen'         => $idAreaOrigen,
+                ':destino'        => $idAreaDestino,
+                ':usuario_envia'  => $idUsuario,
+                ':observaciones'  => $textoObs,
+                ':estado'         => 'Pendiente',
+            ]);
+            $idDerivacionNueva = (int) $this->db->lastInsertId();
+
+            // 6. Actualizar expediente a En_Proceso
+            $estadoAnterior = (string) $exp['estado_actual'];
+            $stmtUp = $this->db->prepare(
+                "UPDATE expedientes
+                 SET estado_actual = 'En_Proceso', actualizado_en = NOW()
+                 WHERE id_expediente = :id"
+            );
+            $stmtUp->execute([':id' => $idExpediente]);
+
+            // 7. Historial de expediente
+            $comentario = sprintf(
+                'Expediente derivado a %s (%s). Proveído: %s',
+                $areaDestino['nombre'],
+                $areaDestino['siglas'],
+                $textoObs
+            );
+            $stmtHist = $this->db->prepare(
+                'INSERT INTO historial_expediente (id_expediente, estado_anterior, estado_nuevo, id_usuario, comentario, fecha)
+                 VALUES (:id_exp, :anterior, :nuevo, :id_usuario, :comentario, NOW())'
+            );
+            $stmtHist->execute([
+                ':id_exp'     => $idExpediente,
+                ':anterior'   => $estadoAnterior,
+                ':nuevo'      => 'En_Proceso',
+                ':id_usuario' => $idUsuario,
+                ':comentario' => $comentario,
+            ]);
+
+            // 8. Auditoría
+            $auditoria = new Auditoria();
+            $auditoria->insertar(
+                $idUsuario,
+                'mesa_partes',
+                'derivar',
+                'derivaciones',
+                $idDerivacionNueva,
+                sprintf('Derivación de expediente %s hacia %s', $exp['codigo_expediente'], $areaDestino['siglas']),
+                $_SERVER['REMOTE_ADDR'] ?? null
+            );
+
+            $this->db->commit();
+
+            return [
+                'success' => true,
+                'message' => sprintf(
+                    'Expediente %s derivado exitosamente a %s (%s).',
+                    $exp['codigo_expediente'],
+                    $areaDestino['nombre'],
+                    $areaDestino['siglas']
+                ),
+            ];
+        } catch (\Throwable $e) {
+            $this->db->rollBack();
+            error_log('Error en MesaPartes::derivarExpediente: ' . $e->getMessage());
+            return [
+                'success' => false,
+                'message' => 'Ocurrió un error al derivar el expediente: ' . $e->getMessage(),
+            ];
+        }
     }
 }

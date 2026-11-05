@@ -4,6 +4,7 @@
 // Manejo de la solicitud actual
 
 use App\Controllers\DashboardController;
+use App\Controllers\LandingController;
 use src\Core\Router;
 
 require_once __DIR__ . "/areas.php";
@@ -18,7 +19,9 @@ require_once __DIR__ . "/bandeja_area.php";
 require_once __DIR__ . "/observaciones.php";
 require_once __DIR__ . "/mesa_partes.php";
 
-Router::get("/", [DashboardController::class, "index"]);
+// La raíz es la landing pública (punto de llegada del ciudadano); el panel
+// autenticado vive en /home y /dashboard.
+Router::get("/", [LandingController::class, "index"]);
 // FAT-01: apuntaba a un método inexistente ("home"); el panel es index().
 Router::get("/home", [DashboardController::class, "index"]);
 

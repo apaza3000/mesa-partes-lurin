@@ -30,6 +30,9 @@ function env($key, $default = null)
 $dotenv = Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
+// Configuración de la zona horaria institucional (Perú / America/Lima por defecto)
+date_default_timezone_set(env('APP_TIMEZONE', 'America/Lima'));
+
 Path::setBasePath(__DIR__);
 
 // SEC-09: los errores de aplicación se registran en storage/php-error.log y se

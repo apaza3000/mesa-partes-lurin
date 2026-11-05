@@ -14,6 +14,7 @@ Router::get('/mesa-partes/exitoso', [MesaPartesController::class, 'exitoso']);
 
 // TAREA E02-2: Bandeja de Mesa de Partes
 Router::get('/mesa-partes/bandeja', [MesaPartesController::class, 'bandeja']);
+Router::post('/mesa-partes/derivar', [MesaPartesController::class, 'derivar']);
 Router::get('/mesa-partes/cargo/{id}', [MesaPartesController::class, 'imprimirCargo']);
 
 // EPICA 3 — Documentos formales en PDF (operador de ventanilla)

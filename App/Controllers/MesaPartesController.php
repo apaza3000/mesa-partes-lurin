@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Controllers\Concerns\AuthorizesRequest;
 use App\Models\MesaPartes;
 use App\Models\Auditoria;
+use App\Models\Persona;
 use App\Services\DocumentoLookupService;
 use App\Services\PdfCargoService;
 use App\Support\Catalogos;
@@ -29,6 +30,7 @@ class MesaPartesController extends Controller
 
     public function __construct()
     {
+        date_default_timezone_set('America/Lima');
         $this->modelo = new MesaPartes();
     }
 
@@ -238,7 +240,7 @@ class MesaPartesController extends Controller
             'hasta'  => $this->fechaValida((string) ($request->get('hasta') ?? '')) ? (string) $request->get('hasta') : $hoy,
             'canal'  => in_array((string) ($request->get('canal') ?? ''), ['Presencial', 'Interno'], true) ? (string) $request->get('canal') : '',
             'estado' => $this->estadoPermitido((string) ($request->get('estado') ?? '')) ? (string) $request->get('estado') : '',
-            'area_id'=> max(0, (int) ($request->get('area_id') ?? 0)),
+            'area_id' => max(0, (int) ($request->get('area_id') ?? 0)),
             'q'      => trim((string) ($request->get('q') ?? '')),
             'pagina' => max(1, (int) ($request->get('pagina') ?? 1)),
             'por_pagina' => 20,
@@ -259,6 +261,8 @@ class MesaPartesController extends Controller
             'paginaActual'  => $resultado['pagina_actual'],
             'indicadores'   => $indicadores,
             'areas'         => $this->modelo->listarAreasActivas(),
+            // Origen de la derivación: se excluye del selector de destinos en la vista.
+            'areaOrigenId'  => (int) ($this->modelo->obtenerAreaMesaPartes()['id_area'] ?? 0),
             'flash_success' => $this->primerMensaje($mensajes, Flash::Exito),
             'flash_error'   => $this->primerMensaje($mensajes, Flash::Error),
             'csrf_token'    => Csrf::token(),
@@ -282,8 +286,8 @@ class MesaPartesController extends Controller
 
         $this->view('mesa-partes.cargo', [
             'titulo'    => 'Cargo de Recepción — ' . $detalle['expediente']['codigo_expediente'],
-            'expediente'=> $detalle['expediente'],
-            'documentos'=> $detalle['documentos'],
+            'expediente' => $detalle['expediente'],
+            'documentos' => $detalle['documentos'],
             'derivaciones' => $detalle['derivaciones'],
         ], 'app');
     }
@@ -330,6 +334,54 @@ class MesaPartesController extends Controller
 
         $contenido = (new PdfCargoService())->generarHojaRuta($datos);
         PdfCargoService::stream($contenido, 'HojaRuta-' . $datos['codigo'] . '.pdf', 'attachment');
+    }
+
+    /* ============================================================
+     * DERIVAR EXPEDIENTE DESDE LA BANDEJA DE MESA DE PARTES
+     * ============================================================ */
+    public function derivar(): void
+    {
+        $this->requerirRol(self::RolesPermitidos, '/dashboard');
+
+        $request = new Request();
+        $idExpediente = (int) $request->input('id_expediente', 0);
+        $idAreaDestino = (int) $request->input('id_area_destino', 0);
+        $observaciones = trim((string) $request->input('observaciones', ''));
+
+        // Validar CSRF
+        $this->requerirCsrf($request->all(), '/mesa-partes/bandeja');
+
+        if ($idExpediente <= 0) {
+            Flash::error('Identificador de expediente no válido.');
+            $this->redirect('/mesa-partes/bandeja');
+            return;
+        }
+
+        if ($idAreaDestino <= 0) {
+            Flash::error('Debe seleccionar un área de destino válida.');
+            $this->redirect('/mesa-partes/bandeja');
+            return;
+        }
+
+        $user = Session::user();
+        $idUsuario = (int) ($user['id_usuario'] ?? Session::get('usuario_id') ?? 0);
+        $idAreaUsuario = (int) (Session::get('usuario_area') ?? $user['id_area'] ?? 0);
+
+        $resultado = $this->modelo->derivarExpediente(
+            $idExpediente,
+            $idAreaDestino,
+            $idUsuario,
+            $observaciones,
+            $idAreaUsuario
+        );
+
+        if ($resultado['success']) {
+            Flash::exito($resultado['message']);
+        } else {
+            Flash::error($resultado['message']);
+        }
+
+        $this->redirect('/mesa-partes/bandeja');
     }
 
     /**
@@ -422,7 +474,9 @@ class MesaPartesController extends Controller
     }
 
     /* ============================================================
-     * ENDPOINT AJAX: CONSULTA EXTERNA RENIEC / SUNAT
+     * ENDPOINT AJAX: VERIFICACIÓN DE DOCUMENTO (BD → RENIEC/SUNAT)
+     * Primero consulta la base local; el servicio externo SOLO se usa
+     * cuando la persona no existe aún en `personas`.
      * ============================================================ */
     public function consultarDocumento(): void
     {
@@ -443,6 +497,31 @@ class MesaPartesController extends Controller
             return;
         }
 
+        // 1) Fuente preferente: base de datos local (coincidencia exacta).
+        $personaLocal = (new Persona())->buscarPorDocumento($tipoDocumento, $numero);
+        if ($personaLocal) {
+            $this->json([
+                'encontrado' => true,
+                'origen'     => 'interna',
+                'mensaje'    => 'El remitente ya está registrado en la base local.',
+                'data'       => [
+                    'id_persona'        => (int) $personaLocal['id_persona'],
+                    'tipo_persona'      => $personaLocal['tipo_persona'] ?? 'Natural',
+                    'tipo_documento'    => $personaLocal['tipo_documento'],
+                    'numero_documento'  => $personaLocal['numero_documento'],
+                    'nombres'           => $personaLocal['nombres'] ?? '',
+                    'apellido_paterno'  => $personaLocal['apellido_paterno'] ?? '',
+                    'apellido_materno'  => $personaLocal['apellido_materno'] ?? '',
+                    'razon_social'      => $personaLocal['razon_social'] ?? '',
+                    'email'             => $personaLocal['email'] ?? '',
+                    'telefono'          => $personaLocal['telefono'] ?? '',
+                    'direccion'         => $personaLocal['direccion'] ?? '',
+                ],
+            ]);
+            return;
+        }
+
+        // 2) Solo si no existe en BD: servicio externo RENIEC / SUNAT.
         $resultado = (new DocumentoLookupService())->consultar($tipoDocumento, $numero);
 
         // Se expone la misma estructura 'data' que usa el formulario de personas
@@ -451,6 +530,7 @@ class MesaPartesController extends Controller
                 ['numero_documento' => $numero],
                 $resultado['persona']
             );
+            $resultado['origen'] = 'externa';
         }
 
         $estado = ($resultado['encontrado'] ?? false) ? 200 : (str_contains($resultado['mensaje'] ?? '', 'disponible') ? 503 : 422);

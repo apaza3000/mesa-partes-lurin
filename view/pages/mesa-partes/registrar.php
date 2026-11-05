@@ -96,7 +96,7 @@ $tieneAdjuntos = !empty($errors['adjuntos']);
                                 </label>
                                 <input type="text" class="form-control" id="busqueda-remitente"
                                        placeholder="Escriba el documento o el nombre del remitente..." aria-describedby="ayuda-busqueda">
-                                <div class="form-text" id="ayuda-busqueda">Mínimo 3 caracteres. Seleccione un resultado para precargar los datos.</div>
+                                <div class="form-text" id="ayuda-busqueda">Mínimo 3 caracteres. Seleccione un resultado para precargar nombres y apellidos desde la base local.</div>
                                 <div id="listado-remitentes" class="list-group mt-2 d-none"></div>
                             </div>
 
@@ -146,8 +146,9 @@ $tieneAdjuntos = !empty($errors['adjuntos']);
                                 </div>
 
                                 <div class="col-md-3 d-flex align-items-end">
-                                    <button type="button" class="btn btn-outline-primary w-100" id="btn-buscar-reniec">
-                                        <i class="bi bi-broadcast me-1"></i>RENIEC/SUNAT
+                                    <button type="button" class="btn btn-outline-primary w-100" id="btn-buscar-reniec"
+                                            title="Carga la persona si ya existe en la base; solo si no existe consulta RENIEC/SUNAT">
+                                        <i class="bi bi-broadcast me-1"></i>Verificar&nbsp;BD/RENIEC
                                     </button>
                                 </div>
 
@@ -358,20 +359,28 @@ document.addEventListener('DOMContentLoaded', function () {
         alternarTipoPersona();
         tipoDocumento.value = persona.tipo_documento || 'DNI';
         numeroDocumento.value = persona.numero_documento || '';
-        document.getElementById('id_persona_existente').value = persona.id_persona || '';
+        idPersonaExistente.value = persona.id_persona || '';
+
+        const nombres = document.getElementById('nombres');
+        const apPaterno = document.getElementById('apellido_paterno');
+        const apMaterno = document.getElementById('apellido_materno');
+        const razonSocial = document.getElementById('razon_social');
 
         if (tipoPersona.value === 'Natural') {
-            document.getElementById('nombres').value = persona.nombres || '';
-            document.getElementById('apellido_paterno').value = persona.apellido_paterno || '';
-            document.getElementById('apellido_materno').value = persona.apellido_materno || '';
-            document.getElementById('razon_social').value = '';
+            nombres.value = persona.nombres || '';
+            apPaterno.value = persona.apellido_paterno || '';
+            apMaterno.value = persona.apellido_materno || '';
+            razonSocial.value = '';
         } else {
-            document.getElementById('razon_social').value = persona.razon_social || '';
+            razonSocial.value = persona.razon_social || persona.nombre_completo || '';
+            nombres.value = '';
+            apPaterno.value = '';
+            apMaterno.value = '';
         }
 
-        if (persona.direccion) document.getElementById('direccion').value = persona.direccion;
-        if (persona.email) document.getElementById('email').value = persona.email;
-        if (persona.telefono) document.getElementById('telefono').value = persona.telefono;
+        document.getElementById('direccion').value = persona.direccion || '';
+        document.getElementById('email').value = persona.email || '';
+        document.getElementById('telefono').value = persona.telefono || '';
     };
 
     /* ---------- BÚSQUEDA EN VIVO (registro interno) ---------- */
@@ -395,7 +404,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 const resultados = data.resultados || [];
 
                 if (!resultados.length) {
-                    listado.innerHTML = '<button type="button" class="list-group-item list-group-item-action text-muted small" disabled>Sin registros en el sistema. Complete los datos manualmente.</button>';
+                    listado.innerHTML = '<button type="button" class="list-group-item list-group-item-action text-muted small" disabled>Sin registros en el sistema. Complete los datos y use «Verificar BD/RENIEC».</button>';
                     listado.classList.remove('d-none');
                     return;
                 }
@@ -428,13 +437,15 @@ document.addEventListener('DOMContentLoaded', function () {
         mostrarMensaje('success', 'Datos del remitente cargados desde el registro interno.');
     });
 
-    /* ---------- CONSULTA EXTERNA RENIEC / SUNAT ---------- */
+    /* ---------- VERIFICACIÓN: BASE LOCAL → RENIEC / SUNAT ----------
+     * El endpoint empieza buscando en `personas`; el servicio externo
+     * solo se invierte cuando la persona no existe aún en la base. */
     btnReniec.addEventListener('click', async function () {
         const tipo = tipoDocumento.value;
         const numero = numeroDocumento.value.trim();
 
         if (!['DNI', 'RUC'].includes(tipo)) {
-            mostrarMensaje('warning', 'La búsqueda externa funciona con DNI o RUC.');
+            mostrarMensaje('warning', 'La verificación funciona con DNI o RUC.');
             return;
         }
         const longitud = tipo === 'DNI' ? 8 : 11;
@@ -457,14 +468,23 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
 
+            // `asignarRemitente` usa data.id_persona: si viene de la BD local queda
+            // como persona existente; si es externa no trae id y se deja vacío.
             asignarRemitente(Object.assign({ tipo_persona: data.data.tipo_persona }, data.data));
-            idPersonaExistente.value = '';
-            mostrarMensaje('success', 'Datos encontrados en RENIEC/SUNAT. Verifique antes de registrar.');
+            if (data.origen !== 'interna') {
+                idPersonaExistente.value = '';
+            }
+            mostrarMensaje(
+                'success',
+                data.origen === 'interna'
+                    ? 'Remitente encontrado en la base local. No se consultó a RENIEC/SUNAT.'
+                    : 'Datos encontrados en RENIEC/SUNAT. Verifique antes de registrar.'
+            );
         } catch (error) {
             mostrarMensaje('danger', 'El servicio de consulta no está disponible. Intente más tarde.');
         } finally {
             btnReniec.disabled = false;
-            btnReniec.innerHTML = '<i class="bi bi-broadcast me-1"></i>RENIEC/SUNAT';
+            btnReniec.innerHTML = '<i class="bi bi-broadcast me-1"></i>Verificar&nbsp;BD/RENIEC';
         }
     });
 

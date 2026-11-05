@@ -28,6 +28,12 @@ $e = fn(?string $v): string => htmlspecialchars((string) ($v ?? ''), ENT_QUOTES,
 // global de la vista (un doble include provocaba "Cannot redeclare").
 $EstadosDerivacionBandeja = \App\Support\Catalogos::DerivacionEtiquetas;
 
+// Derivación desde Mesa de Partes: estados que admiten derivar/reasignar y
+// área de origen (se excluye del selector de destinos).
+$estadosDerivables = ['', 'Pendiente', 'Devuelto'];
+$areaOrigenId = (int) ($areaOrigenId ?? 0);
+$csrfBandeja = (string) ($csrf_token ?? '');
+
 $enlacePagina = function (int $pagina) use ($filtros): string {
     $query = array_filter([
         'desde'   => $filtros['desde'] ?? '',
@@ -208,7 +214,7 @@ $enlacePagina = function (int $pagina) use ($filtros): string {
                                     <th style="width: 180px;">Derivación inicial</th>
                                     <th style="width: 120px;">Estado</th>
                                     <th style="width: 130px;">Registrado</th>
-                                    <th class="text-end" style="width: 150px;">Acciones</th>
+                                    <th class="text-end" style="width: 220px;">Acciones</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -226,6 +232,10 @@ $enlacePagina = function (int $pagina) use ($filtros): string {
                                     $etiquetaDerivacion = $estadoDerivacion === ''
                                         ? 'Sin derivar'
                                         : ($EstadosDerivacionBandeja[$estadoDerivacion] ?? $estadoDerivacion);
+                                    $puedeDerivar = in_array($estadoDerivacion, $estadosDerivables, true);
+                                    $destinoActual = !empty($item['area_destino_nombre'])
+                                        ? trim((string) ($item['area_destino_siglas'] ?? '')) . ' — ' . $item['area_destino_nombre']
+                                        : '';
                                     $badgeEstado = match ((string) ($item['estado_actual'] ?? '')) {
                                         'En_Proceso' => 'bg-primary',
                                         'Observado' => 'bg-warning text-dark',
@@ -285,10 +295,16 @@ $enlacePagina = function (int $pagina) use ($filtros): string {
                                                         data-id="<?= (int) $item['id_expediente'] ?>" title="Ver expediente">
                                                     <i class="bi bi-eye"></i>
                                                 </button>
-                                                <?php if ($estadoDerivacion === ''): ?>
-                                                    <a href="/mesa-partes/registrar" class="btn btn-outline-primary" title="Expediente sin derivación inicial: registre la derivación desde la bandeja del área">
-                                                        <i class="bi bi-send"></i>
-                                                    </a>
+                                                <?php if ($puedeDerivar): ?>
+                                                    <!-- Derivación Mesa de Partes → otra área (POST /mesa-partes/derivar) -->
+                                                    <button type="button" class="btn btn-outline-success btn-derivar"
+                                                            data-id="<?= (int) $item['id_expediente'] ?>"
+                                                            data-codigo="<?= $e((string) $item['codigo_expediente']) ?>"
+                                                            data-destino="<?= $e($destinoActual) ?>"
+                                                            data-estado="<?= $e($etiquetaDerivacion) ?>"
+                                                            title="<?= $estadoDerivacion === '' ? 'Derivar a un área' : 'Reasignar el área destino' ?>">
+                                                        <i class="bi bi-send-fill"></i>
+                                                    </button>
                                                 <?php endif; ?>
                                                 <a href="/mesa-partes/cargo/<?= (int) $item['id_expediente'] ?>" target="_blank" rel="noopener"
                                                    class="btn btn-outline-dark" title="Reimprimir cargo de recepción">
@@ -366,6 +382,61 @@ $enlacePagina = function (int $pagina) use ($filtros): string {
     </div>
 </div>
 
+<!-- MODAL DERIVAR (Mesa de Partes → otra área) -->
+<div class="modal fade" id="modalDerivar" tabindex="-1" aria-labelledby="modalDerivarLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <form method="post" action="/mesa-partes/derivar" class="modal-content" id="formDerivar">
+            <input type="hidden" name="csrf_token" value="<?= $e($csrfBandeja) ?>">
+            <input type="hidden" name="id_expediente" id="derivar_id" value="">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="modalDerivarLabel"><i class="bi bi-send-fill me-2"></i>Derivar expediente</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3 mb-3">
+                    <div class="col-sm-7">
+                        <label class="text-muted small text-uppercase fw-bold d-block">Expediente</label>
+                        <span class="fs-5 fw-bold text-primary" id="derivar_codigo">—</span>
+                    </div>
+                    <div class="col-sm-5 text-sm-end">
+                        <label class="text-muted small text-uppercase fw-bold d-block">Derivación actual</label>
+                        <span class="badge bg-secondary" id="derivar_estado">—</span>
+                    </div>
+                </div>
+                <div id="derivar_destino_actual_wrap" class="alert alert-light border small py-2">
+                    <i class="bi bi-geo-alt me-1"></i>Destino actual:
+                    <strong id="derivar_destino_actual">—</strong>.
+                    <span class="text-muted">Al reasignar, la derivación pendiente quedará como <em>Devuelto</em>.</span>
+                </div>
+                <div class="mb-3">
+                    <label for="derivar_area" class="form-label fw-bold">Área destino <span class="text-danger">*</span></label>
+                    <select class="form-select" id="derivar_area" name="id_area_destino" required>
+                        <option value="">-- Seleccione el área que atenderá el trámite --</option>
+                        <?php foreach ($areas as $area): ?>
+                            <?php if ((int) $area['id_area'] === $areaOrigenId) { continue; } ?>
+                            <option value="<?= (int) $area['id_area'] ?>">
+                                <?= $e((string) ($area['siglas'] ?? '')) ?> — <?= $e((string) ($area['nombre'] ?? '')) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                    <div class="form-text">No se incluye el área de Mesa de Partes (origen de la derivación).</div>
+                </div>
+                <div>
+                    <label for="derivar_observaciones" class="form-label fw-bold">Instrucciones / Proveído</label>
+                    <textarea class="form-control" id="derivar_observaciones" name="observaciones" rows="3" maxlength="1000"
+                              placeholder="Ej: evaluar y emitir informe técnico en el plazo de 5 días."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" class="btn btn-success" id="btnConfirmarDerivar">
+                    <i class="bi bi-send-fill me-1"></i>Derivar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const modalElemento = document.getElementById('modalDetalle');
@@ -384,6 +455,51 @@ document.addEventListener('DOMContentLoaded', function () {
         if (partes.length < 6) return escapar(valor);
         return partes[2] + '/' + partes[1] + '/' + partes[0] + ' ' + partes[3] + ':' + partes[4];
     };
+
+    const modalDerivarElemento = document.getElementById('modalDerivar');
+    if (modalDerivarElemento) {
+        const modalDerivar = new bootstrap.Modal(modalDerivarElemento);
+        const campoId = document.getElementById('derivar_id');
+        const campoCodigo = document.getElementById('derivar_codigo');
+        const campoEstado = document.getElementById('derivar_estado');
+        const campoDestino = document.getElementById('derivar_area');
+        const avisoDestino = document.getElementById('derivar_destino_actual_wrap');
+        const textoDestino = document.getElementById('derivar_destino_actual');
+        const campoObs = document.getElementById('derivar_observaciones');
+        const btnConfirmar = document.getElementById('btnConfirmarDerivar');
+
+        document.querySelectorAll('.btn-derivar').forEach((boton) => {
+            boton.addEventListener('click', function () {
+                const estado = this.getAttribute('data-estado') || 'Sin derivar';
+                const destino = this.getAttribute('data-destino') || '';
+
+                campoId.value = this.getAttribute('data-id');
+                campoCodigo.textContent = this.getAttribute('data-codigo') || '—';
+                campoEstado.textContent = estado;
+                campoDestino.value = '';
+                campoObs.value = '';
+
+                if (destino) {
+                    avisoDestino.classList.remove('d-none');
+                    textoDestino.textContent = destino;
+                } else {
+                    avisoDestino.classList.add('d-none');
+                }
+
+                btnConfirmar.innerHTML = '<i class="bi bi-send-fill me-1"></i>' +
+                    (estado === 'Sin derivar' ? 'Derivar' : 'Reasignar');
+                modalDerivar.show();
+            });
+        });
+
+        // Evita doble envío y deja claro que la operación está en curso.
+        document.getElementById('formDerivar').addEventListener('submit', function () {
+            setTimeout(() => {
+                btnConfirmar.disabled = true;
+                btnConfirmar.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Derivando';
+            }, 0);
+        });
+    }
 
     document.querySelectorAll('.btn-ver-detalle').forEach((boton) => {
         boton.addEventListener('click', async function () {
