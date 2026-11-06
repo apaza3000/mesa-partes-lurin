@@ -137,8 +137,9 @@ $enlacePagina = function (int $pagina) use ($filtros): string {
         </div>
 
         <!-- FILTROS -->
-        <div class="card shadow-sm border-0 mb-3">
+        <div class="card-header">
             <div class="card-body">
+                
                 <form method="GET" action="/mesa-partes/bandeja" class="row g-2 align-items-end">
                     <div class="col-6 col-md-2">
                         <label for="desde" class="form-label small fw-bold mb-1">Desde</label>
@@ -185,6 +186,7 @@ $enlacePagina = function (int $pagina) use ($filtros): string {
                         <a href="/mesa-partes/bandeja" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-clockwise me-1"></i>Hoy</a>
                         <button type="submit" class="btn btn-sm btn-primary"><i class="bi bi-funnel-fill me-1"></i>Filtrar</button>
                     </div>
+
                 </form>
             </div>
         </div>

@@ -14,9 +14,12 @@ $totalPaginas = $totalPaginas ?? 0;
                 </div>
                 <div class="col-sm-6">
                     <nav aria-label="breadcrumb">
-                        <ol class="breadcrumb float-sm-end">
-                            <li class="breadcrumb-item"><a href="#">Home</a></li>
-                            <li class="breadcrumb-item active" aria-current="page">Users</li>
+                        <ol class=" float-sm-end">
+                            <!--Boton nuevo usuario 👇-->
+                            <a href="/usuarios/crear" class="btn btn-primary">
+                                <i class="bi bi-person-plus-fill me-1" aria-hidden="true"> </i>
+                                New user
+                            </a>
                         </ol>
                     </nav>
                 </div>
@@ -35,28 +38,33 @@ $totalPaginas = $totalPaginas ?? 0;
                 <div class="col-12">
                     <!--begin::Card-->
                     <div class="card mb-4">
-                        <!--begin::Card Header-->
-                        <div class="card-header">
-                            <div class="row g-2 align-items-center">
-                                <div class="col-12 col-md-4">
-                                    <h3 class="card-title">User Directory</h3>
-                                </div>
-                                <div class="col-12 col-md-8">
-                                    <div class="d-flex flex-wrap justify-content-md-end gap-2">
+
+
+
+                        <!-- FILTROS -->
+                        <div class="card-header" style="display: flex; justify-content: space-between;">
+                            <div class="card-body ">
+                                <form method="GET" action="/mesa-partes/bandeja" class="row g-2 align-items-end">
+                                    <div class="col-6 col-md-2">
+                                        <label for="q" class="form-label small fw-bold mb-1">Búsqueda usuario</label>
+
+
                                         <div class="input-group input-group-sm w-auto">
                                             <span class="input-group-text">
                                                 <i class="bi bi-search" aria-hidden="true"></i>
                                             </span>
-                                            <input type="search" id="user-search" class="form-control"
-                                                placeholder="Search users" aria-label="Search users"
-                                                style="width: 180px" />
+                                            <input type="search" id="user-search" class="form-control form-control-sm"
+                                                placeholder="Buscar users" aria-label="Search users" />
                                         </div>
-                                        <!-- Combo box de ROLES 👇 -->
-                                        <!-- En tu vista usuarios.index.php -->
-                                        <select id="user-role-filter" name="role_id"
-                                            class="form-select form-select-sm w-auto">
-                                            <option value="all">TODOS LOS ROLES</option>
 
+                                    </div>
+
+
+                                    <!-- Combo box de ESTADO 👇 -->
+                                    <div class="col-6 col-md-2">
+                                        <label for="area_id" class="form-label small fw-bold mb-1">Área</label>
+                                        <select id="user-role-filter" name="role_id" class="form-select form-select-sm">
+                                            <option value="all">TODOS LOS ROLES</option>
                                             <?php if (empty($roles)): ?>
                                                 <option value="" disabled>No hay roles registrados</option>
                                             <?php else: ?>
@@ -67,21 +75,57 @@ $totalPaginas = $totalPaginas ?? 0;
                                                 <?php endforeach; ?>
                                             <?php endif; ?>
                                         </select>
-                                        <!--Boton nuevo usuario 👇-->
-                                        <a href="/usuarios/crear" class="btn btn-primary">
-                                            <i class="bi bi-person-plus-fill me-1" aria-hidden="true"> </i>
-                                            New user
-                                        </a>
                                     </div>
-                                </div>
+                                    <!-- Combo box de ESTADO 👇 -->
+                                    <div class="col-6 col-md-2">
+                                        <label for="area_id" class="form-label small fw-bold mb-1">Roles</label>
+                                        <select id="user-role-filter" name="role_id" class="form-select form-select-sm">
+                                            <option value="all">TODOS LOS ROLES</option>
+                                            <?php if (empty($roles)): ?>
+                                                <option value="" disabled>No hay roles registrados</option>
+                                            <?php else: ?>
+                                                <?php foreach ($roles as $rol): ?>
+                                                    <option value="<?= (int) $rol['id_rol'] ?>">
+                                                        <?= htmlspecialchars($rol['nombre'], ENT_QUOTES, 'UTF-8') ?>
+                                                    </option>
+                                                <?php endforeach; ?>
+                                            <?php endif; ?>
+                                        </select>
+                                    </div>
+                                    <!-- Combo box de ESTADO 👇 -->
+                                    <div class="col-6 col-md-2">
+                                        <label for="area_id" class="form-label small fw-bold mb-1">Estado</label>
+                                        <select id="user-role-filter" name="role_id" class="form-select form-select-sm">
+                                            <option value="all">TODOS LOS ROLES</option>
+                                            <?php if (empty($roles)): ?>
+                                                <option value="" disabled>No hay roles registrados</option>
+                                            <?php else: ?>
+                                                <?php foreach ($roles as $rol): ?>
+                                                    <option value="<?= (int) $rol['id_rol'] ?>">
+                                                        <?= htmlspecialchars($rol['nombre'], ENT_QUOTES, 'UTF-8') ?>
+                                                    </option>
+                                                <?php endforeach; ?>
+                                            <?php endif; ?>
+                                        </select>
+                                    </div>
+
+
+                                </form>
+                            </div>
+                            <div class="col-1 d-flex justify-content-end col-sm-4" >
+                                <button type="submit" class="btn btn-sm btn-primary" style="min-height: 10px;" >
+                                    <i class="bi bi-funnel-fill me-1"></i>Filtrar</button>
                             </div>
                         </div>
+
+
                         <!--tabla-->
+
                         <div class="card-body p-0">
                             <div class="table-responsive">
                                 <table class="table table-hover align-middle m-0">
                                     <thead class="table table-hover align-middle m-0">
-                                        <tr class="table-dark text-center" >
+                                        <tr class="table-dark text-center">
                                             <th>N°</th>
                                             <th>User</th>
                                             <th>Area</th>
@@ -107,7 +151,7 @@ $totalPaginas = $totalPaginas ?? 0;
 
                                             <?php foreach ($usuarios as $indice => $user):
                                                 $nombreCompleto = $user['nombres'] . ' ' . $user['apellido_paterno'] . ' ' . $user['apellido_materno']
-                                            ?>
+                                                    ?>
 
                                                 <tr>
                                                     <!--N°-->
