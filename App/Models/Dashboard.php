@@ -70,17 +70,7 @@ class Dashboard
                 $expedientesPendientes = $stmtExp->fetchAll(PDO::FETCH_ASSOC);
                 $totalPendientes = count($expedientesPendientes);
 
-            } else {
-                // Caso excepcional: Usuario sin área asignada (Admin global u otros)
-                $sqlExp = "SELECT e.*, p.nombres, p.apellido_paterno, p.razon_social 
-                           FROM expedientes e
-                           INNER JOIN personas p ON e.id_remitente = p.id_persona
-                           WHERE e.estado_actual = 'Registrado'
-                           ORDER BY e.fecha_registro DESC";
 
-                $stmtExp = $this->db->query($sqlExp);
-                $expedientesPendientes = $stmtExp->fetchAll(PDO::FETCH_ASSOC);
-                $totalPendientes = count($expedientesPendientes);
             }
 
             return [

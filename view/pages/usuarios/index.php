@@ -37,16 +37,16 @@ $totalPaginas = $totalPaginas ?? 0;
             <div class="row">
                 <div class="col-12">
                     <!--begin::Card-->
+
+
                     <div class="card mb-4">
-
-
-
                         <!-- FILTROS -->
-                        <div class="card-header" style="display: flex; justify-content: space-between;">
+                        <div class="card-header"
+                            style="display: flex; justify-content: space-between; align-items: center;">
                             <div class="card-body ">
                                 <form method="GET" action="/mesa-partes/bandeja" class="row g-2 align-items-end">
-                                    <div class="col-6 col-md-2">
-                                        <label for="q" class="form-label small fw-bold mb-1">Búsqueda usuario</label>
+                                    <div class="col-6 col-md-3">
+                                        <label for="q" class="form-label small fw-bold mb-1">Usuarios</label>
 
 
                                         <div class="input-group input-group-sm w-auto">
@@ -60,11 +60,11 @@ $totalPaginas = $totalPaginas ?? 0;
                                     </div>
 
 
-                                    <!-- Combo box de ESTADO 👇 -->
-                                    <div class="col-6 col-md-2">
+                                    <!-- Combo box de ÁREA 👇 -->
+                                    <div class="col-6 col-md-3">
                                         <label for="area_id" class="form-label small fw-bold mb-1">Área</label>
                                         <select id="user-role-filter" name="role_id" class="form-select form-select-sm">
-                                            <option value="all">TODOS LOS ROLES</option>
+                                            <option value="all">TODAS LAS ÁREAS</option>
                                             <?php if (empty($roles)): ?>
                                                 <option value="" disabled>No hay roles registrados</option>
                                             <?php else: ?>
@@ -76,8 +76,8 @@ $totalPaginas = $totalPaginas ?? 0;
                                             <?php endif; ?>
                                         </select>
                                     </div>
-                                    <!-- Combo box de ESTADO 👇 -->
-                                    <div class="col-6 col-md-2">
+                                    <!-- Combo box de ROLES 👇 -->
+                                    <div class="col-6 col-md-3">
                                         <label for="area_id" class="form-label small fw-bold mb-1">Roles</label>
                                         <select id="user-role-filter" name="role_id" class="form-select form-select-sm">
                                             <option value="all">TODOS LOS ROLES</option>
@@ -93,10 +93,10 @@ $totalPaginas = $totalPaginas ?? 0;
                                         </select>
                                     </div>
                                     <!-- Combo box de ESTADO 👇 -->
-                                    <div class="col-6 col-md-2">
+                                    <div class="col-6 col-md-3">
                                         <label for="area_id" class="form-label small fw-bold mb-1">Estado</label>
                                         <select id="user-role-filter" name="role_id" class="form-select form-select-sm">
-                                            <option value="all">TODOS LOS ROLES</option>
+                                            <option value="all">TODOS LOS ESTADOS</option>
                                             <?php if (empty($roles)): ?>
                                                 <option value="" disabled>No hay roles registrados</option>
                                             <?php else: ?>
@@ -112,19 +112,20 @@ $totalPaginas = $totalPaginas ?? 0;
 
                                 </form>
                             </div>
-                            <div class="col-1 d-flex justify-content-end col-sm-4" >
-                                <button type="submit" class="btn btn-sm btn-primary" style="min-height: 10px;" >
+                            <div class="col-6 d-flex justify-content-end col-sm-4 h-100">
+                                <button type="submit" class="btn btn-sm btn-primary">
                                     <i class="bi bi-funnel-fill me-1"></i>Filtrar</button>
                             </div>
                         </div>
 
-
+                    </div>
+                    <div class="card mb-4">
                         <!--tabla-->
 
                         <div class="card-body p-0">
                             <div class="table-responsive">
                                 <table class="table table-hover align-middle m-0">
-                                    <thead class="table table-hover align-middle m-0">
+                                    <thead class="table table-hover align-middle ">
                                         <tr class="table-dark text-center">
                                             <th>N°</th>
                                             <th>User</th>

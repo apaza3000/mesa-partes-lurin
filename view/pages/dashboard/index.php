@@ -67,7 +67,7 @@
                     <div class="col-lg-3 col-6">
                         <div class="small-box text-bg-danger">
                             <div class="inner">
-                                <h3><?= htmlspecialchars($getExpedientesRegistrados ?? "0") ?></h3>
+                                <h3><?= htmlspecialchars($getExpedientesRegistrados ?? "0") ?> </h3>
                                 <p>Expedientes pendientes en general</p>
                             </div>
                             <svg class="small-box-icon" fill="currentColor" viewBox="0 0 24 24"

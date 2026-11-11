@@ -71,7 +71,7 @@ class DashboardController extends Controller
             'expedientesEnProceso' => $expedientesEnProceso,
             'tramitesAtendidos_Archivados' => $tramitesAtendidos_Archivados,
             'getExpedientesObservados' => $getExpedientesObservados,
-            'estadoSistema' => $estadoSistema // <-- Agregado aquí
+            'estadoSistema' => $estadoSistema
         ], 'app');
     }
 
