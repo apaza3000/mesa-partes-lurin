@@ -1,0 +1,44 @@
+# 1. Dependencias y librerías externas (CRÍTICO: evitan gastar miles de tokens)
+vendor/
+node_modules/
+bower_components/
+
+# 2. Credenciales, llaves y variables de entorno (Seguridad)
+.env
+.env.*
+*.key
+*.pem
+*.cert
+auth.json
+
+# 3. Caché, logs y archivos generados en tiempo de ejecución
+storage/framework/
+storage/logs/
+bootstrap/cache/
+*.log
+.phpunit.result.cache
+
+# 4. Archivos compilados o empaquetados (Frontend / Build)
+public/build/
+public/hot/
+dist/
+build/
+.next/
+out/
+
+# 5. Bases de datos locales y respaldos
+*.sql
+*.sqlite
+*.sqlite3
+*.db
+
+# 6. Archivos multimedia, documentos y comprimidos pesados
+public/uploads/
+storage/app/public/
+*.zip
+*.rar
+*.pdf
+*.mp4
+*.png
+*.jpg
+*.jpeg
