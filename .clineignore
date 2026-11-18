@@ -27,7 +27,7 @@ build/
 out/
 
 # 5. Bases de datos locales y respaldos
-*.sql
+#*.sql
 *.sqlite
 *.sqlite3
 *.db

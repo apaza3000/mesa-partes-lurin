@@ -1,6 +1,8 @@
 <?php
 $paginaActual = $paginaActual ?? 0;
 $totalPaginas = $totalPaginas ?? 0;
+$filtros = $filtros ?? [];
+
 ?>
 <main class="app-main">
 
@@ -40,83 +42,108 @@ $totalPaginas = $totalPaginas ?? 0;
 
 
                     <div class="card mb-4">
-                        <!-- FILTROS -->
-                        <div class="card-header"
-                            style="display: flex; justify-content: space-between; align-items: center;">
-                            <div class="card-body ">
-                                <form method="GET" action="/mesa-partes/bandeja" class="row g-2 align-items-end">
-                                    <div class="col-6 col-md-3">
-                                        <label for="q" class="form-label small fw-bold mb-1">Usuarios</label>
+                       
+
+<!-- FILTROS -->
+<div class="card-header">
+    <form method="GET" action="/usuarios"
+          class="d-flex flex-wrap align-items-end justify-content-between gap-3">
+
+        <!-- CAMPOS DE FILTRO: IZQUIERDA -->
+        <div class="d-flex flex-wrap align-items-end gap-2">
+
+            <!-- BUSCADOR -->
+            <div>
+                <label for="q" class="form-label small fw-bold mb-1">
+                    Buscar
+                </label>
+                <input
+                    type="text"
+                    id="q"
+                    name="q"
+                    class="form-control"
+                    placeholder="Nombre o usuario..."
+                    value="<?= htmlspecialchars($filtros['q'] ?? '') ?>"
+                >
+            </div>
+
+            <!-- ÁREA -->
+            <div>
+                <label for="area_id" class="form-label small fw-bold mb-1">
+                    Área
+                </label>
+                <select name="area_id" id="area_id" class="form-select">
+                    <option value="all">Todas las áreas</option>
+
+                    <?php foreach ($areas as $area): ?>
+                        <option
+                            value="<?= $area['id_area'] ?>"
+                            <?= ($filtros['area_id'] ?? 'all') == $area['id_area'] ? 'selected' : '' ?>
+                        >
+                            <?= htmlspecialchars($area['nombre']) ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+
+            <!-- ROL -->
+            <div>
+                <label for="role_id" class="form-label small fw-bold mb-1">
+                    Rol
+                </label>
+                <select name="role_id" id="role_id" class="form-select">
+                    <option value="all">Todos los roles</option>
+
+                    <?php foreach ($roles as $rol): ?>
+                        <option
+                            value="<?= $rol['id_rol'] ?>"
+                            <?= ($filtros['role_id'] ?? 'all') == $rol['id_rol'] ? 'selected' : '' ?>
+                        >
+                            <?= htmlspecialchars($rol['nombre']) ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+
+            <!-- ESTADO -->
+            
+<!-- ESTADO -->
+<div>
+    <label for="estado" class="form-label small fw-bold mb-1">
+        Estado
+    </label>
+
+    <select name="estado" id="estado" class="form-select">
+        <option value="all">Todos los estados</option>
+
+        <?php foreach ($estados as $estado): ?>
+            <option
+                value="<?= htmlspecialchars($estado) ?>"
+                <?= ($filtros['estado'] ?? 'all') === $estado ? 'selected' : '' ?>
+            >
+                <?= htmlspecialchars($estado) ?>
+            </option>
+        <?php endforeach; ?>
+    </select>
+</div>
 
 
-                                        <div class="input-group input-group-sm w-auto">
-                                            <span class="input-group-text">
-                                                <i class="bi bi-search" aria-hidden="true"></i>
-                                            </span>
-                                            <input type="search" id="user-search" class="form-control form-control-sm"
-                                                placeholder="Buscar users" aria-label="Search users" />
-                                        </div>
+        </div>
 
-                                    </div>
+        <!-- BOTONES: DERECHA -->
+        <div class="d-flex align-items-end gap-2 ms-auto">
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-funnel"></i> Filtrar
+            </button>
 
+            <a href="/usuarios" class="btn btn-outline-secondary">
+                <i class="bi bi-x-circle"></i> Limpiar
+            </a>
+        </div>
 
-                                    <!-- Combo box de ÁREA 👇 -->
-                                    <div class="col-6 col-md-3">
-                                        <label for="area_id" class="form-label small fw-bold mb-1">Área</label>
-                                        <select id="user-role-filter" name="role_id" class="form-select form-select-sm">
-                                            <option value="all">TODAS LAS ÁREAS</option>
-                                            <?php if (empty($roles)): ?>
-                                                <option value="" disabled>No hay roles registrados</option>
-                                            <?php else: ?>
-                                                <?php foreach ($roles as $rol): ?>
-                                                    <option value="<?= (int) $rol['id_rol'] ?>">
-                                                        <?= htmlspecialchars($rol['nombre'], ENT_QUOTES, 'UTF-8') ?>
-                                                    </option>
-                                                <?php endforeach; ?>
-                                            <?php endif; ?>
-                                        </select>
-                                    </div>
-                                    <!-- Combo box de ROLES 👇 -->
-                                    <div class="col-6 col-md-3">
-                                        <label for="area_id" class="form-label small fw-bold mb-1">Roles</label>
-                                        <select id="user-role-filter" name="role_id" class="form-select form-select-sm">
-                                            <option value="all">TODOS LOS ROLES</option>
-                                            <?php if (empty($roles)): ?>
-                                                <option value="" disabled>No hay roles registrados</option>
-                                            <?php else: ?>
-                                                <?php foreach ($roles as $rol): ?>
-                                                    <option value="<?= (int) $rol['id_rol'] ?>">
-                                                        <?= htmlspecialchars($rol['nombre'], ENT_QUOTES, 'UTF-8') ?>
-                                                    </option>
-                                                <?php endforeach; ?>
-                                            <?php endif; ?>
-                                        </select>
-                                    </div>
-                                    <!-- Combo box de ESTADO 👇 -->
-                                    <div class="col-6 col-md-3">
-                                        <label for="area_id" class="form-label small fw-bold mb-1">Estado</label>
-                                        <select id="user-role-filter" name="role_id" class="form-select form-select-sm">
-                                            <option value="all">TODOS LOS ESTADOS</option>
-                                            <?php if (empty($roles)): ?>
-                                                <option value="" disabled>No hay roles registrados</option>
-                                            <?php else: ?>
-                                                <?php foreach ($roles as $rol): ?>
-                                                    <option value="<?= (int) $rol['id_rol'] ?>">
-                                                        <?= htmlspecialchars($rol['nombre'], ENT_QUOTES, 'UTF-8') ?>
-                                                    </option>
-                                                <?php endforeach; ?>
-                                            <?php endif; ?>
-                                        </select>
-                                    </div>
+    </form>
+</div>
 
-
-                                </form>
-                            </div>
-                            <div class="col-6 d-flex justify-content-end col-sm-4 h-100">
-                                <button type="submit" class="btn btn-sm btn-primary">
-                                    <i class="bi bi-funnel-fill me-1"></i>Filtrar</button>
-                            </div>
-                        </div>
 
                     </div>
                     <div class="card mb-4">
@@ -264,37 +291,56 @@ $totalPaginas = $totalPaginas ?? 0;
                             </div>
                         </div>
 
-                        <!--barra de paginacion dinamica segun query👇-->
+                        
+<!-- BARRA DE PAGINACIÓN -->
+<?php
+$parametrosPaginacion = $filtros ?? [];
 
-                        <nav aria-label="Navegación de páginas" style="margin: 10px;">
-                            <ul class="pagination pagination-sm m-0 float-end">
+$parametrosPaginacion = array_filter(
+    $parametrosPaginacion,
+    fn($valor) => $valor !== '' && $valor !== 'all' && $valor !== null
+);
+?>
 
-                                <!-- Botón « (Anterior) -->
-                                <li class="page-item <?= ($paginaActual <= 1) ? 'disabled' : '' ?>">
-                                    <a class="page-link" href="?page=<?= $paginaActual - 1 ?>">&laquo;</a>
-                                </li>
+<nav aria-label="Navegación de páginas" style="margin: 10px;">
+    <ul class="pagination pagination-sm m-0 float-end">
 
-                                <!-- Generación automática de botones según $totalPaginas -->
-                                <?php for ($i = 1; $i <= $totalPaginas; $i++): ?>
-                                    <li class="page-item <?= ($i === $paginaActual) ? 'active' : '' ?>">
-                                        <a class="page-link" href="?page=<?= $i ?>"><?= $i ?></a>
-                                    </li>
-                                <?php endfor; ?>
+        <!-- ANTERIOR -->
+        <li class="page-item <?= ($paginaActual <= 1) ? 'disabled' : '' ?>">
+            <a class="page-link"
+                href="?<?= http_build_query(array_merge($parametrosPaginacion, ['page' => max(1, $paginaActual - 1)])) ?>">
+                &laquo;
+            </a>
+        </li>
 
-                                <!-- Botón » (Siguiente) -->
-                                <li class="page-item <?= ($paginaActual >= $totalPaginas) ? 'disabled' : '' ?>">
-                                    <a class="page-link" href="?page=<?= $paginaActual + 1 ?>">&raquo;</a>
-                                </li>
+        <!-- NÚMEROS -->
+        <?php for ($i = 1; $i <= $totalPaginas; $i++): ?>
+            <li class="page-item <?= ($i === $paginaActual) ? 'active' : '' ?>">
+                <a class="page-link"
+                    href="?<?= http_build_query(array_merge($parametrosPaginacion, ['page' => $i])) ?>">
+                    <?= $i ?>
+                </a>
+            </li>
+        <?php endfor; ?>
 
-                            </ul>
-                        </nav>
+        <!-- SIGUIENTE -->
+        <li class="page-item <?= ($paginaActual >= $totalPaginas) ? 'disabled' : '' ?>">
+            <a class="page-link"
+                href="?<?= http_build_query(array_merge($parametrosPaginacion, ['page' => min($totalPaginas, $paginaActual + 1)])) ?>">
+                &raquo;
+            </a>
+        </li>
+
+    </ul>
+</nav>
+
 
                         <!--Fin de (barra de paginacion)-->
                     </div>
                 </div>
             </div>
             <!--ventana emergente de [👤New user]-->
-            <!--ventana emergente de [🗑️eliminar usuario]👇-->
+            <!--ventana emergente de [🗑️eliminarz usuario]👇-->
             <div class="modal fade" id="modal-delete-user" tabindex="-1" aria-labelledby="modal-delete-user-label"
                 aria-hidden="true">
                 <div class="modal-dialog">

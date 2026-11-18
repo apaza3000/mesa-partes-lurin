@@ -28,39 +28,59 @@ class UsuarioController extends Controller
         $this->user = new Usuario();
     }
 
+
     public function index()
     {
         $this->requerirRol(self::RolesPermitidos);
 
-        // 1. Paginación
-        $porPagina = 10;
-        $paginaActual = isset($_GET['page']) ? (int) $_GET['page'] : 1;
-        if ($paginaActual < 1) {
-            $paginaActual = 1;
-        }
+        // 1. Recibir filtros
+        $filtros = [
+            'q' => trim($_GET['q'] ?? ''),
+            'area_id' => $_GET['area_id'] ?? 'all',
+            'role_id' => $_GET['role_id'] ?? 'all',
+            'estado' => $_GET['estado'] ?? 'all',
+        ];
 
-        // 2. Cálculos de páginas
-        $totalUsuarios = $this->user->getTotalUsuarios();
+        // 2. Configurar paginación
+        $porPagina = 10;
+
+        $paginaActual = isset($_GET['page'])
+            ? max(1, (int) $_GET['page'])
+            : 1;
+
+        // 3. Contar usuarios aplicando los filtros
+        $totalUsuarios = $this->user->getTotalUsuarios($filtros);
+
         $totalPaginas = (int) ceil($totalUsuarios / $porPagina);
 
-        if ($paginaActual > $totalPaginas && $totalPaginas > 0) {
+        if ($totalPaginas > 0 && $paginaActual > $totalPaginas) {
             $paginaActual = $totalPaginas;
         }
 
-        // 3. Obtener los datos (se ejecutan una sola vez)
-        $usuarios = $this->user->getUsuariosPaginados($paginaActual, $porPagina);
+        // 4. Obtener usuarios aplicando los mismos filtros
+        $usuarios = $this->user->getUsuariosPaginados(
+            $paginaActual,
+            $porPagina,
+            $filtros
+        );
+
+        // 5. Obtener opciones de los selectores
         $roles = $this->user->getAllRol();
         $areas = $this->user->getAllArea();
+        $estados = $this->user->getAllEstados();
 
-        // 4. Enviar las variables previamente calculadas a la vista
+        // 6. Enviar información a la vista
         $this->view('usuarios.index', [
             'usuarios' => $usuarios,
             'roles' => $roles,
             'areas' => $areas,
+            'estados' => $estados,
+            'filtros' => $filtros,
             'paginaActual' => $paginaActual,
             'totalPaginas' => $totalPaginas
         ], 'app');
     }
+
 
     public function buscarPersonaAjax()
     {

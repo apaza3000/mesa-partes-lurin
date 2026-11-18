@@ -87,6 +87,89 @@ class Usuario
     }
 
 
+    public function getAllEstados(): array
+    {
+        try {
+            $stmt = $this->db->query("
+            SELECT DISTINCT estado
+            FROM usuarios
+            WHERE estado IS NOT NULL
+              AND estado <> ''
+            ORDER BY estado ASC
+        ");
+
+            return $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+        } catch (PDOException $e) {
+            error_log('Error al obtener estados: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    private function construirCondicionesUsuarios(array $filtros): array
+    {
+        $where = [];
+        $params = [];
+
+        // Búsqueda por texto
+        $q = trim($filtros['q'] ?? '');
+
+        if ($q !== '') {
+            $where[] = "(
+            p.nombres LIKE :q1
+            OR p.apellido_paterno LIKE :q2
+            OR p.apellido_materno LIKE :q3
+            OR u.username LIKE :q4
+            OR p.email LIKE :q5
+            OR p.numero_documento LIKE :q6
+        )";
+
+            $busqueda = "%{$q}%";
+
+            for ($i = 1; $i <= 6; $i++) {
+                $params[":q{$i}"] = $busqueda;
+            }
+        }
+
+        // Filtro por área
+        $areaId = $filtros['area_id'] ?? 'all';
+
+        if ($areaId !== 'all' && filter_var($areaId, FILTER_VALIDATE_INT) !== false && (int) $areaId > 0) {
+            $where[] = "u.id_area = :area_id";
+            $params[':area_id'] = (int) $areaId;
+        }
+
+        // Filtro por rol
+        $roleId = $filtros['role_id'] ?? 'all';
+
+        if ($roleId !== 'all' && filter_var($roleId, FILTER_VALIDATE_INT) !== false && (int) $roleId > 0) {
+            $where[] = "EXISTS (
+            SELECT 1
+            FROM usuario_roles urf
+            WHERE urf.id_usuario = u.id_usuario
+            AND urf.id_rol = :role_id
+        )";
+
+            $params[':role_id'] = (int) $roleId;
+        }
+
+        // Filtro por estado
+        $estado = $filtros['estado'] ?? 'all';
+        $estadosPermitidos = ['Activo', 'Inactivo', 'Suspendido'];
+
+        if (in_array($estado, $estadosPermitidos, true)) {
+            $where[] = "u.estado = :estado";
+            $params[':estado'] = $estado;
+        }
+
+        $sqlWhere = !empty($where)
+            ? ' WHERE ' . implode(' AND ', $where)
+            : '';
+
+        return [$sqlWhere, $params];
+    }
+
+
     public function getAllRol(): array
     {
         try {
@@ -110,54 +193,103 @@ class Usuario
         }
     }
     // Obtener el total de usuarios para calcular el total de páginas
-    public function getTotalUsuarios(): int
+
+    public function getTotalUsuarios(array $filtros = []): int
     {
         try {
-            $stmt = $this->db->query('SELECT COUNT(*) FROM usuarios');
+            [$sqlWhere, $params] = $this->construirCondicionesUsuarios($filtros);
+
+            $sql = "
+            SELECT COUNT(*)
+            FROM usuarios u
+            INNER JOIN personas p ON p.id_persona = u.id_persona
+            {$sqlWhere}
+        ";
+
+            $stmt = $this->db->prepare($sql);
+
+            foreach ($params as $nombre => $valor) {
+                $tipo = is_int($valor) ? PDO::PARAM_INT : PDO::PARAM_STR;
+                $stmt->bindValue($nombre, $valor, $tipo);
+            }
+
+            $stmt->execute();
+
             return (int) $stmt->fetchColumn();
+
         } catch (PDOException $e) {
+            error_log('Error al contar usuarios: ' . $e->getMessage());
             return 0;
         }
     }
 
+
     // Obtener los usuarios de la página actual
-    public function getUsuariosPaginados(int $pagina = 1, int $porPagina = 10): array
-    {
+
+    public function getUsuariosPaginados(
+        int $pagina = 1,
+        int $porPagina = 10,
+        array $filtros = []
+    ): array {
         try {
-            // Calculamos a partir de qué registro empezar
+            $pagina = max(1, $pagina);
+            $porPagina = max(1, $porPagina);
             $offset = ($pagina - 1) * $porPagina;
 
-            $stmt = $this->db->prepare(
-                'SELECT 
-                    u.id_usuario, 
-                    u.avatar,
-                    u.username, 
-                    p.nombres,
-                    p.apellido_paterno,
-                    p.apellido_materno,
-                    a.nombre AS area_nombre,
-                    u.estado, 
-                    u.creado_en,
-                    r.nombre AS rol_nombre
-            FROM usuarios AS u
-            INNER JOIN personas p ON p.id_persona = u.id_persona
-            INNER JOIN areas a on a.id_area = u.id_area 
-            LEFT JOIN usuario_roles ur ON u.id_usuario = ur.id_usuario
-            LEFT JOIN roles r ON ur.id_rol = r.id_rol
-            ORDER BY u.id_usuario DESC 
-            LIMIT :limit OFFSET :offset'
-            );
+            [$sqlWhere, $params] = $this->construirCondicionesUsuarios($filtros);
 
-            // PDO requiere asociar LIMIT y OFFSET como ENTEROS
+            $sql = "
+            SELECT
+                u.id_usuario,
+                u.avatar,
+                u.username,
+                p.nombres,
+                p.apellido_paterno,
+                p.apellido_materno,
+                a.nombre AS area_nombre,
+                u.estado,
+                u.creado_en,
+                (
+                    SELECT GROUP_CONCAT(
+                        r2.nombre
+                        ORDER BY r2.nombre
+                        SEPARATOR ', '
+                    )
+                    FROM usuario_roles ur2
+                    INNER JOIN roles r2 ON r2.id_rol = ur2.id_rol
+                    WHERE ur2.id_usuario = u.id_usuario
+                ) AS rol_nombre
+
+            FROM usuarios u
+            INNER JOIN personas p ON p.id_persona = u.id_persona
+            LEFT JOIN areas a ON a.id_area = u.id_area
+
+            {$sqlWhere}
+
+            ORDER BY u.id_usuario DESC
+            LIMIT :limit OFFSET :offset
+        ";
+
+            $stmt = $this->db->prepare($sql);
+
+            foreach ($params as $nombre => $valor) {
+                $tipo = is_int($valor) ? PDO::PARAM_INT : PDO::PARAM_STR;
+                $stmt->bindValue($nombre, $valor, $tipo);
+            }
+
             $stmt->bindValue(':limit', $porPagina, PDO::PARAM_INT);
             $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+
             $stmt->execute();
 
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
+
         } catch (PDOException $e) {
+            error_log('Error al obtener usuarios paginados: ' . $e->getMessage());
             return [];
         }
     }
+
     /**
      * Buscar una persona por su tipo y número de documento
      */
@@ -557,8 +689,14 @@ class Usuario
         try {
             $stmt = $this->db->prepare($sql);
             $stmt->execute([
-                ':a' => $id, ':b' => $id, ':c' => $id, ':d' => $id,
-                ':e' => $id, ':f' => $id, ':g' => $id, ':h' => $id,
+                ':a' => $id,
+                ':b' => $id,
+                ':c' => $id,
+                ':d' => $id,
+                ':e' => $id,
+                ':f' => $id,
+                ':g' => $id,
+                ':h' => $id,
             ]);
             $fila = $stmt->fetch(PDO::FETCH_ASSOC);
 
