@@ -6,7 +6,7 @@ use Src\Core\Conexion;
 
 
 
-class ConsutlaExpediente
+class ConsultaExpediente
 {
     private $db;
 

@@ -77,6 +77,36 @@ class ObservacionController extends Controller
         );
 
         if ($resultado['success']) {
+            // E13-4: encolar aviso por correo (best-effort).
+            try {
+                $derivacion = $contexto['derivacion'];
+                $idExp = (int) ($derivacion['id_expediente'] ?? 0);
+                if ($idExp > 0) {
+                    $db = \Src\Core\Conexion::getConexion();
+                    $stmt = $db->prepare(
+                        "SELECT e.codigo_expediente, e.asunto, p.email
+                         FROM expedientes e
+                         INNER JOIN personas p ON p.id_persona = e.id_remitente
+                         WHERE e.id_expediente = :id LIMIT 1"
+                    );
+                    $stmt->execute([':id' => $idExp]);
+                    $row = $stmt->fetch(\PDO::FETCH_ASSOC);
+                    if ($row && !empty($row['email']) && filter_var($row['email'], FILTER_VALIDATE_EMAIL)) {
+                        $html = '<p>Su expediente ' . htmlspecialchars($row['codigo_expediente']) . ' ha sido observado.</p>'
+                            . '<p>Motivo: ' . htmlspecialchars($datos['descripcion']) . '</p>'
+                            . '<p>Subsane en: ' . htmlspecialchars(\App\Services\PdfCargoService::urlConsulta($row['codigo_expediente'])) . '</p>';
+                        (new \App\Models\CorreoCola())->encolar([
+                            'destinatario' => $row['email'],
+                            'cc' => null,
+                            'asunto' => 'Expediente observado - ' . $row['codigo_expediente'],
+                            'cuerpo_html' => $html,
+                            'id_expediente' => $idExp,
+                        ]);
+                    }
+                }
+            } catch (\Throwable $e) {
+                error_log('E13 observacion encolar: ' . $e->getMessage());
+            }
             Flash::exito($resultado['message']);
         } else {
             Flash::error($resultado['message']);

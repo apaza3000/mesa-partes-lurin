@@ -8,6 +8,11 @@ Router::get("/entregas", [EntregaController::class, "index"]);
 Router::get("/entregas/exitoso", [EntregaController::class, "exitoso"]);
 Router::post("/entregas/store", [EntregaController::class, "store"]);
 
+// EPICA 11 — envío de documento para usuario autenticado (E11-3)
+use App\Controllers\EnvioDocumentoController;
+Router::get("/enviar-documento", [EnvioDocumentoController::class, "index"]);
+Router::post("/enviar-documento/store", [EnvioDocumentoController::class, "store"]);
+
 
 
 Router::get("/consulta", [ConsultaExpedienteController::class, "index"]);

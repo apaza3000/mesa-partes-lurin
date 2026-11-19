@@ -22,6 +22,24 @@ $rutaActual = (string) (parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) 
 $rutaActual = rtrim($rutaActual, '/') ?: '/';
 $tokenCsrf = Csrf::token();
 
+// TAREA E11-1 (parcial): el ítem principal cambia según el rol. Mesa de Partes
+// atiende ventanilla; el resto de roles usa el envío de documentos.
+$esMesaPartes = in_array(Roles::MESA_DE_PARTES, $rolesUsuario, true);
+
+$itemEnvioDocumento = $esMesaPartes
+    ? [
+        'title' => 'Recepción en ventanilla',
+        'icon' => 'bi bi-inbox-fill',
+        'url' => '/mesa-partes/registrar',
+        'roles' => Roles::MesaDePartes,
+    ]
+    : [
+        'title' => 'Enviar documento',
+        'icon' => 'bi bi-send-fill',
+        'url' => '/enviar-documento',
+        'roles' => Roles::Todos,
+    ];
+
 // Cada destino debe coincidir con una ruta registrada.
 $navigation = [
     ['header' => 'PANEL'],
@@ -33,12 +51,7 @@ $navigation = [
     ],
 
     ['header' => 'MESA DE PARTES'],
-    [
-        'title' => 'Recepción en ventanilla',
-        'icon' => 'bi bi-inbox-fill',
-        'url' => '/mesa-partes/registrar',
-        'roles' => Roles::MesaDePartes,
-    ],
+    $itemEnvioDocumento,
     [
         'title' => 'Bandeja de Mesa de Partes',
         'icon' => 'bi bi-tray-fill',
@@ -46,10 +59,10 @@ $navigation = [
         'roles' => Roles::MesaDePartes,
     ],
     [
-        'title' => 'Mesa de Partes Virtual',
-        'icon' => 'bi bi-envelope-paper-fill',
-        'url' => '/entregas',
-        'roles' => Roles::Todos,
+        'title' => 'Archivo central',
+        'icon' => 'bi bi-archive-fill',
+        'url' => '/archivo',
+        'roles' => Roles::MesaDePartes,
     ],
 
     ['header' => 'GESTIÓN DE ÁREA'],
@@ -65,6 +78,12 @@ $navigation = [
         'url' => '/area/documentos-derivados',
         'roles' => Roles::AtencionArea,
     ],
+    [
+        'title' => 'Subsanaciones',
+        'icon' => 'bi bi-clipboard2-check-fill',
+        'url' => '/area/subsanaciones',
+        'roles' => Roles::AtencionArea,
+    ],
 
     ['header' => 'CONSULTAS'],
     [
@@ -72,6 +91,20 @@ $navigation = [
         'icon' => 'bi bi-search',
         'url' => '/consulta',
         'roles' => Roles::Todos,
+    ],
+    [
+        'title' => 'Trazabilidad',
+        'icon' => 'bi bi-diagram-2',
+        'url' => '/trazabilidad',
+        'roles' => Roles::Todos,
+    ],
+
+    ['header' => 'REPORTES'],
+    [
+        'title' => 'Reportes documentarios',
+        'icon' => 'bi bi-graph-up-arrow',
+        'url' => '/reportes',
+        'roles' => [Roles::ADMINISTRADOR, Roles::RESPONSABLE_AREA],
     ],
 
     ['header' => 'ADMINISTRACIÓN'],
@@ -111,6 +144,12 @@ $navigation = [
                 'url' => '/roles',
                 'roles' => Roles::Administracion,
             ],
+            [
+                'title' => 'Tipos de documento',
+                'icon' => 'bi bi-file-earmark-text-fill',
+                'url' => '/tipos-documento',
+                'roles' => Roles::Administracion,
+            ],
         ],
     ],
     [
@@ -132,8 +171,20 @@ $navigation = [
             ],
         ],
     ],
+    [
+        'title' => 'Auditoría del sistema',
+        'icon' => 'bi bi-shield-check',
+        'url' => '/auditoria',
+        'roles' => Roles::Administracion,
+    ],
 
     ['header' => 'SISTEMA'],
+    [
+        'title' => 'Mi perfil',
+        'icon' => 'bi bi-person-circle',
+        'url' => '/perfil',
+        'roles' => Roles::Todos,
+    ],
     [
         'title' => 'Cerrar sesión',
         'icon' => 'bi bi-box-arrow-right',

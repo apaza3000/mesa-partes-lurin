@@ -55,43 +55,59 @@ $token = App\Support\Csrf::token();
         </ul>
 
         <ul class="navbar-nav ms-auto">
-            <!-- Notificaciones reales del usuario autenticado -->
+            <!-- TAREA E08-1: notificaciones reales del usuario autenticado -->
             <li class="nav-item dropdown">
-                <a class="nav-link" data-bs-toggle="dropdown" href="#"
+                <a class="nav-link" data-bs-toggle="dropdown" href="#" id="notif-toggle"
                     aria-label="Notificaciones: <?= $sinLeer ?> sin leer">
                     <i class="bi bi-bell-fill"></i>
-                    <?php if ($sinLeer > 0): ?>
-                        <span class="navbar-badge badge text-bg-danger"><?= (int) $sinLeer ?></span>
-                    <?php endif; ?>
+                    <span id="notif-badge" class="navbar-badge badge text-bg-danger <?= $sinLeer > 0 ? '' : 'd-none' ?>"><?= (int) $sinLeer ?></span>
                 </a>
-                <div class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
-                    <span class="dropdown-item dropdown-header">
+                <div class="dropdown-menu dropdown-menu-lg dropdown-menu-end" id="notif-menu">
+                    <span class="dropdown-item dropdown-header" id="notif-header">
                         <?= $sinLeer ?> notificaci<?= $sinLeer === 1 ? 'ón' : 'ones' ?> sin leer
                     </span>
                     <div class="dropdown-divider"></div>
-                    <?php if ($listaNotificaciones === []): ?>
-                        <a href="#" class="dropdown-item text-muted">No tiene notificaciones pendientes.</a>
-                    <?php else: ?>
-                        <?php foreach ($listaNotificaciones as $notificacion): ?>
-                            <a href="#" class="dropdown-item">
-                                <div class="d-flex">
-                                    <div class="flex-grow-1">
-                                        <p class="dropdown-item-title">
+                    <div id="notif-lista">
+                        <?php if ($listaNotificaciones === []): ?>
+                            <a href="#" class="dropdown-item text-muted" id="notif-vacio">No tiene notificaciones pendientes.</a>
+                        <?php else: ?>
+                            <?php foreach ($listaNotificaciones as $notificacion): ?>
+                                <?php
+                                $codigoNotif = (string) ($notificacion['codigo_expediente'] ?? '');
+                                $enlaceNotif = $codigoNotif !== ''
+                                    ? '/consulta?codigo=' . rawurlencode($codigoNotif)
+                                    : '/consulta';
+                                ?>
+                                <div class="dropdown-item d-flex align-items-start gap-2 notif-item"
+                                     data-id="<?= (int) $notificacion['id_notificacion'] ?>">
+                                    <a href="<?= htmlspecialchars($enlaceNotif, ENT_QUOTES, 'UTF-8') ?>"
+                                       class="flex-grow-1 text-decoration-none text-reset">
+                                        <p class="dropdown-item-title mb-1 fw-semibold">
                                             <?= htmlspecialchars((string) ($notificacion['titulo'] ?? ''), ENT_QUOTES, 'UTF-8') ?>
                                         </p>
-                                        <p class="fs-7">
-                                            <?= htmlspecialchars(mb_strimwidth((string) ($notificacion['mensaje'] ?? ''), 0, 90, '…'), ENT_QUOTES, 'UTF-8') ?>
+                                        <p class="fs-7 mb-1">
+                                            <?= htmlspecialchars(mb_strimwidth((string) ($notificacion['mensaje'] ?? ''), 0, 110, '…'), ENT_QUOTES, 'UTF-8') ?>
                                         </p>
-                                        <p class="fs-7 text-secondary">
+                                        <p class="fs-7 text-secondary mb-0">
                                             <i class="bi bi-clock-fill me-1"></i>
                                             <?= htmlspecialchars((string) ($notificacion['creado_en'] ?? ''), ENT_QUOTES, 'UTF-8') ?>
                                         </p>
-                                    </div>
+                                    </a>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary notif-leer"
+                                            data-id="<?= (int) $notificacion['id_notificacion'] ?>"
+                                            title="Marcar como leída" aria-label="Marcar como leída">
+                                        <i class="bi bi-check2"></i>
+                                    </button>
                                 </div>
-                            </a>
-                            <div class="dropdown-divider"></div>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
+                                <div class="dropdown-divider"></div>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </div>
+                    <div class="dropdown-footer text-center">
+                        <button type="button" class="btn btn-sm btn-link" id="notif-marcar-todas">
+                            Marcar todas como leídas
+                        </button>
+                    </div>
                 </div>
             </li>
 
@@ -167,3 +183,138 @@ $token = App\Support\Csrf::token();
         </ul>
     </div>
 </nav>
+
+<script>
+(function () {
+    'use strict';
+
+    const token = <?= json_encode($token, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
+    const badge = document.getElementById('notif-badge');
+    const header = document.getElementById('notif-header');
+    const lista = document.getElementById('notif-lista');
+    const marcarTodas = document.getElementById('notif-marcar-todas');
+
+    if (!badge || !header || !lista) {
+        return;
+    }
+
+    function actualizarContador(total) {
+        const n = Math.max(0, parseInt(total, 10) || 0);
+        badge.textContent = String(n);
+        badge.classList.toggle('d-none', n === 0);
+        header.textContent = n + (n === 1 ? ' notificación sin leer' : ' notificaciones sin leer');
+        const toggle = document.getElementById('notif-toggle');
+        if (toggle) {
+            toggle.setAttribute('aria-label', 'Notificaciones: ' + n + ' sin leer');
+        }
+    }
+
+    function mostrarVacio() {
+        if (lista.querySelector('.notif-item')) {
+            return;
+        }
+        let vacio = document.getElementById('notif-vacio');
+        if (!vacio) {
+            vacio = document.createElement('a');
+            vacio.id = 'notif-vacio';
+            vacio.href = '#';
+            vacio.className = 'dropdown-item text-muted';
+            vacio.textContent = 'No tiene notificaciones pendientes.';
+            lista.appendChild(vacio);
+        }
+    }
+
+    function quitarItem(boton) {
+        const item = boton.closest('.notif-item');
+        if (!item) {
+            return;
+        }
+        const separador = item.nextElementSibling;
+        if (separador && separador.classList.contains('dropdown-divider')) {
+            separador.remove();
+        }
+        item.remove();
+        mostrarVacio();
+    }
+
+    function peticion(url, cuerpo) {
+        return fetch(url, {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: cuerpo
+        }).then(function (respuesta) {
+            return respuesta.json().catch(function () {
+                return { success: false, sin_leer: null };
+            });
+        });
+    }
+
+    lista.addEventListener('click', function (evento) {
+        const boton = evento.target.closest('.notif-leer');
+        if (!boton) {
+            return;
+        }
+        evento.preventDefault();
+        evento.stopPropagation();
+
+        const id = boton.getAttribute('data-id');
+        boton.disabled = true;
+
+        peticion('/notificaciones/leer', 'csrf_token=' + encodeURIComponent(token) + '&id=' + encodeURIComponent(id))
+            .then(function (datos) {
+                if (!datos.success) {
+                    boton.disabled = false;
+                    return;
+                }
+                quitarItem(boton);
+                actualizarContador(datos.sin_leer);
+            })
+            .catch(function () {
+                boton.disabled = false;
+            });
+    });
+
+    if (marcarTodas) {
+        marcarTodas.addEventListener('click', function () {
+            marcarTodas.disabled = true;
+            peticion('/notificaciones/leer-todas', 'csrf_token=' + encodeURIComponent(token))
+                .then(function (datos) {
+                    if (datos.success) {
+                        lista.querySelectorAll('.notif-item').forEach(function (item) {
+                            item.remove();
+                        });
+                        lista.querySelectorAll('.dropdown-divider').forEach(function (d) {
+                            d.remove();
+                        });
+                        mostrarVacio();
+                        actualizarContador(0);
+                    }
+                    marcarTodas.disabled = false;
+                })
+                .catch(function () {
+                    marcarTodas.disabled = false;
+                });
+        });
+    }
+
+    // E08-1.8: refresco del contador cada 60 segundos, sin recargar la página.
+    setInterval(function () {
+        fetch('/notificaciones/contador', {
+            credentials: 'same-origin',
+            headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+        })
+            .then(function (respuesta) { return respuesta.json(); })
+            .then(function (datos) {
+                if (datos && datos.success) {
+                    actualizarContador(datos.sin_leer);
+                }
+            })
+            .catch(function () { /* silencio: el header no debe romper la pantalla */ });
+    }, 60000);
+})();
+</script>

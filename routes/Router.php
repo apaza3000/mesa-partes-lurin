@@ -18,6 +18,13 @@ require_once __DIR__ . "/dashboard.php";
 require_once __DIR__ . "/bandeja_area.php";
 require_once __DIR__ . "/observaciones.php";
 require_once __DIR__ . "/mesa_partes.php";
+require_once __DIR__ . "/archivo.php";
+require_once __DIR__ . "/tipos_documento.php";
+require_once __DIR__ . "/notificaciones.php";
+require_once __DIR__ . "/reportes.php";
+require_once __DIR__ . "/auditoria.php";
+require_once __DIR__ . "/perfil.php";
+require_once __DIR__ . "/trazabilidad.php";
 
 // La raíz es la landing pública (punto de llegada del ciudadano); el panel
 // autenticado vive en /home y /dashboard.
@@ -32,11 +39,6 @@ $requestUri = explode("?", $uri)[0];
 $requestMethod = $_SERVER['REQUEST_METHOD'];
 
 
-// Verificar si la URL contiene "/api-instituto"
-if (strpos($requestUri, '/backend') === 0) {
-    // Extraer la parte después de "/api-instituto"
-    $requestUri = substr($requestUri, strlen('/backend'));
-}
 
 function error404()
 {

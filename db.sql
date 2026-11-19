@@ -71,6 +71,9 @@ CREATE TABLE `expedientes` (
   `fecha_registro` DATETIME NOT NULL DEFAULT (CURRENT_TIMESTAMP),
   `fecha_atencion` DATETIME,
   `fecha_archivado` DATETIME,
+  `caja` VARCHAR(50),
+  `archivador` VARCHAR(50),
+  `estante` VARCHAR(50),
   `creado_en` TIMESTAMP NOT NULL DEFAULT (CURRENT_TIMESTAMP),
   `actualizado_en` TIMESTAMP NOT NULL DEFAULT (CURRENT_TIMESTAMP)
 );
@@ -298,3 +301,31 @@ VALUES
 
 -- Re-enable foreign key checks
 SET FOREIGN_KEY_CHECKS = 1;
+-- E13-5: cola de correos
+CREATE TABLE IF NOT EXISTS correos_cola (
+    id_correo INT AUTO_INCREMENT PRIMARY KEY,
+    destinatario VARCHAR(150) NOT NULL,
+    cc VARCHAR(150) NULL,
+    asunto VARCHAR(200) NOT NULL,
+    cuerpo_html LONGTEXT NOT NULL,
+    adjunto_nombre VARCHAR(200) NULL,
+    adjunto_contenido LONGBLOB NULL,
+    estado ENUM('Pendiente','Enviado','Error') NOT NULL DEFAULT 'Pendiente',
+    intentos INT NOT NULL DEFAULT 0,
+    ultimo_error TEXT NULL,
+    id_expediente INT NULL,
+    creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    enviado_en TIMESTAMP NULL DEFAULT NULL,
+    INDEX idx_estado (estado),
+    INDEX idx_creado (creado_en)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- SEC-01: rate limiting de login
+CREATE TABLE IF NOT EXISTS intentos_login (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    identificador VARCHAR(100) NOT NULL,
+    ip VARCHAR(45) NOT NULL,
+    exitoso TINYINT(1) NOT NULL DEFAULT 0,
+    creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_intentos_ident_ip (identificador, ip, creado_en)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

@@ -163,6 +163,13 @@ class EntregaController extends Controller
             'email'  => $datos['email'],
         ];
 
+        // E13: encolar correo de constancia con ficha PDF.
+        try {
+            $this->encolarCorreoConstancia($resultado['codigo'], $datos);
+        } catch (\Throwable $e) {
+            error_log('E13 encolar correo: ' . $e->getMessage());
+        }
+
         $this->redirect("/entregas/exitoso");
         exit;
     }
@@ -272,6 +279,88 @@ class EntregaController extends Controller
             $errors['terminos'][] = 'Debe aceptar la declaración jurada.';
 
         return $errors;
+    }
+
+    /**
+     * E13: encola el correo de constancia con la ficha en PDF.
+     */
+    private function encolarCorreoConstancia(string $codigo, array $datos): void
+    {
+        if (empty($datos['email']) || !filter_var($datos['email'], FILTER_VALIDATE_EMAIL)) {
+            return;
+        }
+        $config = require \Src\Core\Path::base('config') . DIRECTORY_SEPARATOR . 'mail.php';
+        $cc = !empty($config['mesa_partes']) ? $config['mesa_partes'] : null;
+
+        // Renderizar plantilla.
+        $urlConsulta = \App\Services\PdfCargoService::urlConsulta($codigo);
+        ob_start();
+        $datosPlantilla = [
+            'codigo'       => $codigo,
+            'asunto'       => $datos['asunto'] ?? '',
+            'area_destino' => 'Mesa de Partes',
+            'fecha'        => date('d/m/Y H:i'),
+            'url_consulta' => $urlConsulta,
+        ];
+        extract($datosPlantilla);
+        include \Src\Core\Path::base('view') . DIRECTORY_SEPARATOR . 'emails' . DIRECTORY_SEPARATOR . 'registro-expediente.php';
+        $html = ob_get_clean();
+
+        // Generar cargo PDF en memoria (best-effort).
+        $adjNombre = null;
+        $adjContenido = null;
+        try {
+            $service = new \App\Services\PdfCargoService();
+            $remitenteNombre = trim(implode(' ', array_filter([
+                $datos['nombres'] ?? '',
+                $datos['apellido_paterno'] ?? '',
+                $datos['apellido_materno'] ?? '',
+            ])));
+            if ($remitenteNombre === '' && !empty($datos['razon_social'])) {
+                $remitenteNombre = $datos['razon_social'];
+            }
+            $d = [
+                'codigo'         => $codigo,
+                'canal'          => 'Virtual',
+                'prioridad'      => $datos['prioridad'] ?? 'Normal',
+                'estado'         => 'Registrado',
+                'asunto'         => $datos['asunto'] ?? '',
+                'fecha_registro' => date('Y-m-d H:i:s'),
+                'remitente'      => [
+                    'tipo_documento'  => $datos['tipo_documento'] ?? '',
+                    'numero_documento' => $datos['numero_documento'] ?? '',
+                    'nombre'         => $remitenteNombre,
+                    'direccion'      => $datos['direccion'] ?? '',
+                    'telefono'       => $datos['telefono'] ?? '',
+                    'email'          => $datos['email'] ?? '',
+                ],
+                'documentos'     => [[
+                    'tipo'    => '',
+                    'numero'  => $datos['doc_numero'] ?? '',
+                    'asunto'  => $datos['doc_asunto'] ?? ($datos['asunto'] ?? ''),
+                    'folios'  => (int) ($datos['doc_folios'] ?? 1),
+                ]],
+                'total_folios'   => (int) ($datos['doc_folios'] ?? 1),
+                'derivaciones'   => [],
+                'consulta_url'   => $urlConsulta,
+            ];
+            $pdf = $service->generarCargo($d);
+            $adjNombre = 'Cargo-' . $codigo . '.pdf';
+            $adjContenido = $pdf;
+        } catch (\Throwable $e) {
+            error_log('E13 generar cargo: ' . $e->getMessage());
+        }
+
+        $cola = new \App\Models\CorreoCola();
+        $cola->encolar([
+            'destinatario'      => $datos['email'],
+            'cc'                => $cc,
+            'asunto'            => 'Constancia de registro - ' . $codigo,
+            'cuerpo_html'       => $html,
+            'adjunto_nombre'    => $adjNombre,
+            'adjunto_contenido' => $adjContenido,
+            'id_expediente'     => null,
+        ]);
     }
 
     /** SEC-07 / VAL-02: sin HTML ni caracteres que MySQL rechace. */

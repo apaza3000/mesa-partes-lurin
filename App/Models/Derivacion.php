@@ -242,6 +242,19 @@ class Derivacion implements InterfaceModel
                 ':id_usuario' => $idUsuarioRecibe
             ]);
 
+            // 4.b E08-1.5: avisar a quien derivó que el área ya recepcionó.
+            $stmtInfo = $this->db->prepare("SELECT codigo_expediente, asunto FROM expedientes WHERE id_expediente = :id");
+            $stmtInfo->execute([':id' => $idExpediente]);
+            $info = $stmtInfo->fetch(PDO::FETCH_ASSOC) ?: [];
+
+            (new Notificacion())->crear([
+                'id_usuario'    => (int) ($derivacion['id_usuario_envia'] ?? 0) ?: null,
+                'id_expediente' => $idExpediente,
+                'titulo'        => 'Derivación recepcionada — ' . ($info['codigo_expediente'] ?? ''),
+                'mensaje'       => 'El área de destino recepcionó el expediente '
+                    . ($info['codigo_expediente'] ?? '') . ' (' . ($info['asunto'] ?? '') . ').',
+            ]);
+
             // 5. Registro de auditoría
             $auditoria = new Auditoria();
             $auditoria->insertar(
@@ -311,6 +324,17 @@ class Derivacion implements InterfaceModel
                 ':id_exp'     => $idExpediente,
                 ':id_usuario' => $idUsuario,
                 ':comentario' => "Expediente devuelto: " . mb_substr($motivo, 0, 950)
+            ]);
+
+            // 2.b E08-1.6: avisar al área de origen de la devolución.
+            $stmtInfo = $this->db->prepare("SELECT codigo_expediente FROM expedientes WHERE id_expediente = :id");
+            $stmtInfo->execute([':id' => $idExpediente]);
+            $codigo = (string) ($stmtInfo->fetchColumn() ?: '');
+
+            (new Notificacion())->paraArea((int) $derivacion['id_area_origen'], [
+                'id_expediente' => $idExpediente,
+                'titulo'        => 'Expediente devuelto — ' . $codigo,
+                'mensaje'       => 'El expediente ' . $codigo . ' fue devuelto por el área de destino. Motivo: ' . $motivo,
             ]);
 
             // 3. Auditoría
@@ -425,6 +449,17 @@ class Derivacion implements InterfaceModel
                 ':comentario' => $comentarioHist
             ]);
 
+            // 6.b E08-1: avisar al área que recibe la re-derivación.
+            $stmtInfo = $this->db->prepare("SELECT codigo_expediente FROM expedientes WHERE id_expediente = :id");
+            $stmtInfo->execute([':id' => $idExpediente]);
+            $codigo = (string) ($stmtInfo->fetchColumn() ?: '');
+
+            (new Notificacion())->paraArea($idAreaDestino, [
+                'id_expediente' => $idExpediente,
+                'titulo'        => 'Nuevo expediente derivado — ' . $codigo,
+                'mensaje'       => 'Se le derivó el expediente ' . $codigo . '. Proveído: ' . $observaciones,
+            ]);
+
             // 7. Auditoría
             $auditoria = new Auditoria();
             $auditoria->insertar(
@@ -481,7 +516,7 @@ class Derivacion implements InterfaceModel
             $idExpediente = (int) $derivacion['id_expediente'];
 
             // 2. Expediente con su estado real (para el historial)
-            $stmt = $this->db->prepare('SELECT codigo_expediente, estado_actual FROM expedientes WHERE id_expediente = :id FOR UPDATE');
+            $stmt = $this->db->prepare('SELECT codigo_expediente, estado_actual, id_remitente FROM expedientes WHERE id_expediente = :id FOR UPDATE');
             $stmt->execute([':id' => $idExpediente]);
             $expediente = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -537,6 +572,28 @@ class Derivacion implements InterfaceModel
                     . ' (documento de respuesta registrado).',
             ]);
 
+            // 6.b E08-1.6: avisar al área de origen y al remitente (si tiene cuenta).
+            $notificador = new Notificacion();
+
+            $notificador->paraArea((int) $derivacion['id_area_origen'], [
+                'id_expediente' => $idExpediente,
+                'titulo'        => 'Expediente atendido — ' . $expediente['codigo_expediente'],
+                'mensaje'       => 'El expediente ' . $expediente['codigo_expediente']
+                    . ' fue atendido con el documento ' . $respuesta['numero_documento'] . '.',
+            ]);
+
+            $idUsuarioRemitente = $this->usuarioDePersona((int) ($expediente['id_remitente'] ?? 0));
+            if ($idUsuarioRemitente !== null) {
+                $notificador->crear([
+                    'id_usuario'    => $idUsuarioRemitente,
+                    'id_persona'    => (int) $expediente['id_remitente'],
+                    'id_expediente' => $idExpediente,
+                    'titulo'        => 'Su expediente fue atendido — ' . $expediente['codigo_expediente'],
+                    'mensaje'       => 'El expediente ' . $expediente['codigo_expediente']
+                        . ' fue atendido. Documento de respuesta: ' . $respuesta['numero_documento'] . '.',
+                ]);
+            }
+
             // 7. Auditoría
             $auditoria = new Auditoria();
             $auditoria->insertar(
@@ -591,6 +648,26 @@ class Derivacion implements InterfaceModel
             return $documentos;
         } catch (PDOException $e) {
             return [];
+        }
+    }
+
+    /**
+     * Cuenta de usuario vinculada a una persona (si existe).
+     */
+    private function usuarioDePersona(int $idPersona): ?int
+    {
+        if ($idPersona <= 0) {
+            return null;
+        }
+
+        try {
+            $stmt = $this->db->prepare("SELECT id_usuario FROM usuarios WHERE id_persona = :id LIMIT 1");
+            $stmt->execute([':id' => $idPersona]);
+            $id = (int) $stmt->fetchColumn();
+
+            return $id > 0 ? $id : null;
+        } catch (PDOException $e) {
+            return null;
         }
     }
 }

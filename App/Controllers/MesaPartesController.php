@@ -202,6 +202,17 @@ class MesaPartesController extends Controller
                 . ($documento['numero_documento'] !== '' ? ' N° ' . $documento['numero_documento'] : ''),
         ];
 
+        // E13-4: encolar correo de constancia si hay email válido.
+        try {
+            $ctrl = new \App\Controllers\EntregaController();
+            $ref = new \ReflectionClass($ctrl);
+            $m = $ref->getMethod('encolarCorreoConstancia');
+            $m->setAccessible(true);
+            $m->invoke($ctrl, $resultado['codigo'], $datos);
+        } catch (\Throwable $e) {
+            error_log('E13 ventanilla encolar: ' . $e->getMessage());
+        }
+
         $this->redirect('/mesa-partes/exitoso');
     }
 

@@ -3,7 +3,7 @@
 namespace App\Controllers;
 
 use App\Controllers\Concerns\AuthorizesRequest;
-use App\Models\ConsutlaExpediente;
+use App\Models\ConsultaExpediente;
 use App\Services\PdfCargoService;
 use App\Support\Roles;
 use Src\Core\Controller;
@@ -19,7 +19,7 @@ class ConsultaExpedienteController extends Controller
 
     public function __construct()
     {
-        $this->model = new ConsutlaExpediente();
+        $this->model = new ConsultaExpediente();
     }
 
     /* ============================================================

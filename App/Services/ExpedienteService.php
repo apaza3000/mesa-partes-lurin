@@ -79,6 +79,10 @@ class ExpedienteService
         try {
             $this->db->beginTransaction();
 
+            // E11-4: si viene id_persona forzado (usuario autenticado), úsalo.
+            $idUsuarioCreador = isset($datos['id_usuario_creador']) && $datos['id_usuario_creador'] !== ''
+                ? (int) $datos['id_usuario_creador'] : null;
+
             // 1. Persona: buscar o crear (patrón compartido con ventanilla).
             $idPersona = $this->resolverPersona($datos);
 
@@ -107,7 +111,7 @@ class ExpedienteService
                  (id_expediente, id_tipo_doc, numero_documento, asunto, folios,
                   fecha_documento, tipo_documento_registro, es_principal, creado_por)
                  VALUES (:id_exp, :id_tipo, :numero, :asunto, :folios,
-                         :fecha, :tipo_registro, 1, NULL)'
+                         :fecha, :tipo_registro, 1, :creado_por)'
             );
             $stmt->execute([
                 ':id_exp'         => $idExpediente,
@@ -117,6 +121,7 @@ class ExpedienteService
                 ':folios'         => (int) $documento['folios'],
                 ':fecha'          => $documento['fecha_documento'] ?: null,
                 ':tipo_registro'  => 'Ingresado',
+                ':creado_por'     => $idUsuarioCreador,
             ]);
             $idDocumento = (int) $this->db->lastInsertId();
 
@@ -147,10 +152,11 @@ class ExpedienteService
             $stmt = $this->db->prepare(
                 "INSERT INTO historial_expediente
                  (id_expediente, estado_anterior, estado_nuevo, id_usuario, comentario)
-                 VALUES (:id_exp, NULL, 'Registrado', NULL, :comentario)"
+                 VALUES (:id_exp, NULL, 'Registrado', :id_usuario, :comentario)"
             );
             $stmt->execute([
                 ':id_exp'      => $idExpediente,
+                ':id_usuario'  => $idUsuarioCreador,
                 ':comentario'  => $datos['comentario_historial'] ?? 'Expediente registrado por el ciudadano vía web',
             ]);
 
@@ -178,6 +184,15 @@ class ExpedienteService
     /** Busca o crea la persona remitente por tipo + número de documento. */
     private function resolverPersona(array $datos): int
     {
+        // E11-4: si viene id_persona forzado y existe, úsalo directamente.
+        if (!empty($datos['id_persona'])) {
+            $stmt = $this->db->prepare('SELECT id_persona FROM personas WHERE id_persona = :id LIMIT 1');
+            $stmt->execute([':id' => (int) $datos['id_persona']]);
+            if ($stmt->fetchColumn()) {
+                return (int) $datos['id_persona'];
+            }
+        }
+
         $stmt = $this->db->prepare(
             'SELECT id_persona FROM personas WHERE tipo_documento = :tipo AND numero_documento = :numero LIMIT 1'
         );

@@ -11,9 +11,12 @@ class ApiDecolectaService
 
     public function __construct()
     {
-        $this->token = env("API_DECOLECTA_TOKEN", "sk_19999.DGFTLn6K2ecgD2b42qVE09SklINSGth4");
+        $this->token = trim((string) env("API_DECOLECTA_TOKEN", ""));
         $this->uri = rtrim(env("API_DECOLECTA_SERVER", "https://api.decolecta.com/v1"), '/');
         $this->accept = "application/json";
+        if ($this->token === '') {
+            error_log("[ApiDecolectaService] API_DECOLECTA_TOKEN no está configurado en .env; las consultas RENIEC/SUNAT no funcionarán.");
+        }
     }
 
     /**
@@ -25,6 +28,14 @@ class ApiDecolectaService
      */
     public function request(string $endpoint, string $numero, string $token = ''): array
     {
+        $tokenEfectivo = $token !== '' ? $token : $this->token;
+        if ($tokenEfectivo === '') {
+            return [
+                'encontrado' => false,
+                'mensaje' => 'El servicio de consulta no está configurado (falta API_DECOLECTA_TOKEN).',
+                'http' => 0,
+            ];
+        }
         $url = $this->uri . $endpoint . urlencode($numero);
         $curl = curl_init($url);
 
@@ -41,7 +52,7 @@ class ApiDecolectaService
             CURLOPT_TIMEOUT => 10,
             CURLOPT_HTTPHEADER => [
                 'Accept: ' . $this->accept,
-                'Authorization: Bearer ' . ($token !== '' ? $token : $this->token),
+                'Authorization: Bearer ' . $tokenEfectivo,
                 'Referer: https://apis.net.pe/'
             ]
         ]);

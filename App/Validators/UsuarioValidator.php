@@ -32,8 +32,17 @@ class UsuarioValidator
             $errores[] = "El campo 'Usuario (Username)' es obligatorio.";
         }
 
-        if (empty($datos['password']) || strlen($datos['password']) < 6) {
-            $errores[] = "La contraseña es obligatoria y debe tener al menos 6 caracteres.";
+        $password = (string) ($datos['password'] ?? '');
+        if ($password === '') {
+            $errores[] = "La contraseña es obligatoria.";
+        } elseif (strlen($password) < 8) {
+            $errores[] = "La contraseña debe tener al menos 8 caracteres.";
+        } elseif (!preg_match('/[A-Z]/', $password)) {
+            $errores[] = "La contraseña debe incluir al menos una letra mayúscula.";
+        } elseif (!preg_match('/[0-9]/', $password)) {
+            $errores[] = "La contraseña debe incluir al menos un número.";
+        } elseif (!preg_match('/[^A-Za-z0-9]/', $password)) {
+            $errores[] = "La contraseña debe incluir al menos un carácter especial.";
         }
 
         if (empty($datos['id_rol'])) {
