@@ -235,8 +235,9 @@ class MesaPartesController extends Controller
         $request = new Request();
 
         $hoy = date('Y-m-d');
+        $hace7Dias = date('Y-m-d', strtotime('-7 days'));
         $filtros = [
-            'desde'  => $this->fechaValida((string) ($request->get('desde') ?? '')) ? (string) $request->get('desde') : $hoy,
+            'desde'  => $this->fechaValida((string) ($request->get('desde') ?? '')) ? (string) $request->get('desde') : $hace7Dias,
             'hasta'  => $this->fechaValida((string) ($request->get('hasta') ?? '')) ? (string) $request->get('hasta') : $hoy,
             'canal'  => in_array((string) ($request->get('canal') ?? ''), ['Presencial', 'Interno'], true) ? (string) $request->get('canal') : '',
             'estado' => $this->estadoPermitido((string) ($request->get('estado') ?? '')) ? (string) $request->get('estado') : '',

@@ -34,6 +34,15 @@ class ConsultaExpedienteController extends Controller
             return $this->buscar();
         }
 
+        $auth = Session::isAuthenticated();
+
+        if ($auth) {
+            return $this->view("consulta/consulta-login", [
+                'errors'       => [],
+                'datos_viejos' => [],
+            ], "app");
+        }
+
         return $this->view("consulta/index", [
             'errors'       => [],
             'datos_viejos' => [],
@@ -53,24 +62,27 @@ class ConsultaExpedienteController extends Controller
         $codigo   = trim($datos['codigo'] ?? '');
         $numDoc   = trim($datos['numero_documento'] ?? '');
 
+        $ruta = Session::isAuthenticated() ? "consulta/consulta-login" : "consulta/index";
+        $app = Session::isAuthenticated() ? "app" : null;
+
         if ($codigo === '') {
             $errors['codigo'][] = 'Ingrese el código del expediente.';
         }
 
         if (!empty($errors)) {
-            return $this->view("consulta/index", [
+            return $this->view($ruta, [
                 'errors'       => $errors,
                 'datos_viejos' => $datos,
-            ]);
+            ], $app);
         }
 
         $expediente = $this->model->buscarPorCodigo($codigo, $numDoc ?: null);
 
         if (!$expediente) {
-            return $this->view("consulta/index", [
+            return $this->view($ruta, [
                 'errors'       => ['general' => ['No se encontró ningún expediente con los datos proporcionados.']],
                 'datos_viejos' => $datos,
-            ]);
+            ], $app);
         }
 
         // Cargar data relacionada
@@ -79,13 +91,15 @@ class ConsultaExpedienteController extends Controller
         $derivaciones   = $this->model->obtenerDerivaciones($expediente['id_expediente']);
         $observaciones  = $this->model->obtenerObservaciones($expediente['id_expediente']);
 
-        return $this->view("consulta/detalle", [
+
+        $detalle = Session::isAuthenticated() ? "consulta/detalle-login" : "consulta/detalle";
+        return $this->view($detalle, [
             'expediente'    => $expediente,
             'documentos'    => $documentos,
             'historial'     => $historial,
             'derivaciones'  => $derivaciones,
             'observaciones' => $observaciones,
-        ]);
+        ], $app);
     }
 
     /* ============================================================
