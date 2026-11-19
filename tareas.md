@@ -1,322 +1,528 @@
-# 📋 Análisis Funcional y Plan de Tareas Pendientes — Mesa de Partes Lurín
+# 📋 Plan de Tareas Corregido — Mesa de Partes Lurín
 
-> **Documento:** `tareas.md`  
-> **Sistema:** Sistema de Trámite Documentario y Mesa de Partes — Municipalidad de Lurín  
-> **Referencia Técnica:** Esquema de Base de Datos `db.sql` y Guía de Arquitectura `arquitectura.md`  
-> **Fecha:** 04 de Noviembre de 2026
+> **Documento:** `tareas.md` (versión 2 — corregida y ampliada)
+> **Sistema:** Sistema de Trámite Documentario y Mesa de Partes — Municipalidad de Lurín
+> **Fecha de revisión:** 19 de Noviembre de 2026
+> **Fuentes analizadas:** `spec.md`, `arquitectura.md`, `observaciones.md` y verificación estática del código (`App/`, `routes/`, `view/`, `db.sql`).
+> **Tipo de verificación:** inspección del árbol de archivos, rutas registradas, controladores, modelos y vistas. **No** se ejecutaron pruebas funcionales ni de navegador.
 
 ---
 
-## 📌 1. Diagnóstico del Sistema: Lo que Existe vs. Lo que Falta
+## 📌 Índice
 
-A partir del análisis exhaustivo del esquema relacional en `db.sql` y el código fuente en `App/`, se contrastan las capacidades actuales del software frente a las exigencias operativas de una **Mesa de Partes Municipal formal**:
+1. [Leyenda de estados](#0-leyenda-de-estados)
+2. [Resumen de la verificación](#1-resumen-de-la-verificación)
+3. [Tareas completadas verificadas](#2-tareas-completadas-verificadas)
+4. [Tareas pendientes y parciales (Épicas 5–10)](#3-tareas-pendientes-y-parciales-épicas-510)
+5. [Deuda técnica heredada de `spec.md`](#4-deuda-técnica-heredada-de-specmd)
+6. [Nuevas tareas derivadas de `observaciones.md`](#5-nuevas-tareas-derivadas-de-observacionesmd)
+7. [Roadmap actualizado](#6-roadmap-actualizado)
+8. [Criterios de aceptación global](#7-criterios-de-aceptación-global)
 
-```mermaid
-flowchart TD
-    subgraph EXISTENTE["✅ Capacidades Ya Implementadas"]
-        A1["Recepción Virtual (Ciudadano)"]
-        A2["Consulta Pública de Expediente"]
-        A3["CRUD de Usuarios y Roles"]
-        A4["CRUD de Personas con RENIEC/SUNAT"]
-        A5["CRUD de Áreas Municipales"]
-        A6["Dashboard con Métricas Básicas"]
-        A7["Registro en Historial y Auditoría"]
-    end
+---
 
-    subgraph FALTANTE["🔴 Funcionalidades Faltantes para Sistema Completo"]
-        B1["Recepción Presencial y Ventanilla (Mesa de Partes Física)"]
-        B2["Bandeja de Entrada/Salida por Área (Aceptar/Rechazar Derivaciones)"]
-        B3["Atención de Trámites y Emisión de Documentos de Respuesta"]
-        B4["Gestión de Observaciones y Subsanaciones (TUPA)"]
-        B5["Generación de Cargo de Recepción / Ticket con QR (PDF)"]
-        B6["Sistema de Notificaciones (Campana Web y Alertas)"]
-        B7["Módulo de Archivo Central de Expedientes"]
-        B8["Administración de Tipos de Documento"]
-        B9["Reportes Estadísticos y Exportación a Excel/PDF"]
-        B10["Visor Administrativo de Auditoría"]
-    end
+## 0. Leyenda de estados
+
+| Símbolo | Estado | Significado |
+|---|---|---|
+| ✅ | **Completada** | Implementada y verificada en el código actual. |
+| 🟡 | **Parcial** | Existe una base funcional, pero faltan piezas para cumplir el criterio de aceptación. |
+| ⏳ | **Pendiente** | No existe implementación o solo existe el modelo sin interfaz ni rutas. |
+| 🗑️ | **Obsoleta** | La tarea dejó de aplicar porque el código fue reemplazado por otra solución. |
+
+> **Regla:** una tarea solo pasa a ✅ cuando cumple **todas** sus subtareas y su criterio de aceptación. Tener el archivo creado no la convierte en completada.
+
+---
+
+## 1. Resumen de la verificación
+
+### 1.1. Épicas de `tareas.md`
+
+| ID | Tarea | Marca anterior | Estado real | Evidencia principal |
+|---|---|---|---|---|
+| **E01-1** | Bandeja de Entrada del Área | ✅ | ✅ **Completada** | `App/Controllers/BandejaAreaController.php`, `routes/bandeja_area.php`, `view/pages/area/bandeja.php` |
+| **E01-2** | Re-derivación entre Áreas | ✅ | ✅ **Completada** | `BandejaAreaController::derivar()`, ruta `POST /area/derivar` |
+| **E02-1** | Registro en Ventanilla | ✅ | ✅ **Completada** | `MesaPartesController::register/store`, `routes/mesa_partes.php` |
+| **E02-2** | Bandeja de Mesa de Partes | ✅ | ✅ **Completada** | `MesaPartesController::bandeja`, `view/pages/mesa-partes/bandeja.php` |
+| **E03-1** | Cargo de Recepción PDF con QR | *(sin marca)* | ✅ **Completada** | `App/Services/PdfCargoService.php`, `MesaPartesController::cargoPdf`, `GET /consulta/cargo/{codigo}` |
+| **E03-2** | Hoja de Ruta | *(sin marca)* | ✅ **Completada** | `MesaPartesController::hojaRuta`, `GET /mesa-partes/hoja-ruta/{id}` |
+| **E04-1** | Atención de Expediente | ✅ | ✅ **Completada** | `BandejaAreaController::atender/storeAtencion`, `view/pages/area/atender.php` |
+| **E05-1** | Registro de Observaciones | ✅ | ✅ **Completada** | `ObservacionController::crear`, `POST /area/observar`, modal |
+| **E05-2** | Subsanación de Observación | *(sin marca)* | ⏳ **Pendiente** | No hay controlador, ruta ni vista de subsanación |
+| **E06-1** | Bandeja de Archivo Central | *(sin marca)* | ⏳ **Pendiente** | No existe `ArchivoController` ni ruta `/archivo` |
+| **E07-1** | CRUD de Tipos de Documento | *(sin marca)* | ⏳ **Pendiente** | Solo `TipoDocumento::obtenerActivos()` (lectura) |
+| **E08-1** | Notificaciones Web | *(sin marca)* | 🟡 **Parcial** | `Notificacion::sinLeer/ultimas` y badge en header; sin dropdown, marcar leída ni disparadores |
+| **E09-1** | Reportes Documentarios | *(sin marca)* | ⏳ **Pendiente** | No existe `ReporteController` ni vista |
+| **E10-1** | Visor de Auditoría | *(sin marca)* | ⏳ **Pendiente** | Solo el modelo `Auditoria` (inserción) |
+
+### 1.2. Tareas de `spec.md`
+
+| ID | Tarea | Estado declarado en `spec.md` | Estado real verificado |
+|---|---|---|---|
+| **BUG-01** | Sintaxis SQL en `Usuario::obtenerAllPorId` | ✅ Resuelto | ✅ **Confirmado** (sin `;` antes de `LIMIT 1`) |
+| **BUG-02** | Validación en `UsuarioController::store` | ✅ Resuelto | ✅ **Confirmado** (`if (!$resultadoValidacion['esValido'])`) |
+| **BUG-03** | Variables `.env` en `ApiDecolectaService` | ✅ Resuelto | ✅ **Funcional**, pero con **token hardcodeado** (ver SEC-03) |
+| **BUG-04** | Import de `Conexion` en `Documento.php` | ✅ Resuelto | ✅ **Confirmado** (`use Src\Core\Conexion;`) |
+| **REF-01** | Renombrar `ConsutlaExpediente` | *(sin marca)* | ⏳ **Pendiente** (el typo sigue en modelo y controlador) |
+| **REF-02** | Modernizar `DerivacionController` / `DocumentoController` | *(sin marca)* | 🗑️ **Obsoleta / Resuelta** (los controladores ya no existen; su función la cubren `BandejaAreaController` y `MesaPartesController`) |
+| **REF-03** | Unificar conexión y eliminar `backend/` | *(sin marca)* | 🟡 **Parcial** (`backend/` solo conserva `database/migration_utf8mb4.sql`) |
+| **REF-04** | Deduplicar widgets del Dashboard | *(sin marca)* | ✅ **Completada** (ya no existe `components/`; solo `dashboard/index.php`) |
+| **REF-05** | Estandarizar `UsuarioServices` | *(sin marca)* | ✅ **Completada** (el servicio desapareció; no hay referencias) |
+| **SEC-01** | Rate limiting en login | *(sin marca)* | ⏳ **Pendiente** (sin intentos ni bloqueo) |
+| **SEC-02** | Política de contraseñas + CSRF AJAX | *(sin marca)* | ⏳ **Pendiente** (sigue `min:6`; sin política de complejidad) |
+| **FEAT-01** | Rutas huérfanas del sidebar | *(sin marca)* | 🟡 **Parcial** (no quedan `href="#"` de primer nivel; faltan perfil, trazabilidad y reportes) |
+| **FEAT-02** | Visor de auditoría | *(sin marca)* | ⏳ **Pendiente** (equivalente a E10-1) |
+| **DOC-01** | `readme.md` del proyecto | *(sin marca)* | ⏳ **Pendiente** (`readme.md` = 0 bytes) |
+
+### 1.3. Cambios de criterio respecto a la versión anterior
+
+1. **E03-1 y E03-2 pasan a completadas:** ya estaban implementadas pero sin marca en el documento.
+2. **REF-02 se marca obsoleta:** los controladores legacy fueron eliminados; ya no hay redirecciones `index.php?page=`.
+3. **REF-03 baja a parcial:** la conexión duplicada ya no existe, pero queda un archivo de migración dentro de `backend/`.
+4. **E08-1 baja de "sin implementar" a parcial:** hay modelo de lectura y badge real en el header.
+5. **FEAT-01 sigue parcial:** los `href="#"` que quedan son solo los *toggles* de submenú (correcto en AdminLTE), pero faltan módulos completos.
+6. **Se agrega SEC-03 (nueva):** token de Decolecta embebido como valor por defecto en el código.
+
+---
+
+## 2. Tareas completadas verificadas
+
+Estas tareas **no requieren trabajo**, solo pruebas de regresión antes de cerrar la fase:
+
+- [x] **E01-1** Bandeja de entrada del área con pestañas por estado.
+- [x] **E01-2** Re-derivación con instrucciones y actualización de historial.
+- [x] **E02-1** Registro presencial/interno con búsqueda RENIEC/SUNAT y adjuntos PDF.
+- [x] **E02-2** Bandeja diaria de Mesa de Partes con filtros y reimpresión de cargos.
+- [x] **E03-1** Cargo de recepción en PDF con QR (TCPDF) y descarga pública.
+- [x] **E03-2** Hoja de ruta imprimible para el expediente físico.
+- [x] **E04-1** Atención con documento de respuesta y cierre del expediente.
+- [x] **E05-1** Registro de observaciones con notificación al administrado.
+- [x] **REF-02** Migración de controladores legacy (obsoleta por reemplazo).
+- [x] **REF-04** Dashboard deduplicado a una sola vista por rol.
+- [x] **REF-05** Capa de servicios de usuario eliminada sin referencias.
+- [x] **BUG-01 … BUG-04** Correcciones de la Fase 1 de `spec.md`.
+
+> **Pendiente de verificación funcional:** ejecutar `php -l` sobre los archivos tocados y probar los flujos en navegador (login, ventanilla, bandeja de área, cargo PDF) antes de declarar la fase cerrada.
+
+---
+
+## 3. Tareas pendientes y parciales (Épicas 5–10)
+
+### ÉPICA 5 — Observaciones y Subsanaciones
+
+#### ⏳ TAREA E05-2: Subsanación de Observación
+- **Estado:** ⏳ Pendiente (no hay implementación).
+- **Brecha:** el área puede observar (`E05-1`), pero el administrado no tiene forma de presentar la subsanación ni el área de levantarla. El expediente queda atrapado en `Observado`.
+- **Estimación:** 1.5 días.
+
+**Subtareas para completar:**
+- [ ] **E05-2.1** Reutilizar `Observacion::listarPorExpediente()` (ya existe) y agregar `subsanar(int $idObservacion, int $idUsuario, string $comentario)` y `levantar(int $idObservacion, int $idUsuario)` con transacción PDO.
+- [ ] **E05-2.2** Crear `App/Controllers/SubsanacionController.php` (extiende `Src\Core\Controller`) con `formulario()`, `store()` y `levantar()`.
+- [ ] **E05-2.3** Registrar rutas en `routes/observaciones.php`:
+  - `GET /consulta/subsanar/{codigo}` (público, valida código de expediente).
+  - `POST /consulta/subsanar` (público, con CSRF y adjuntos).
+  - `GET /area/subsanaciones` (roles de área).
+  - `POST /area/observacion/levantar` (roles de área).
+- [ ] **E05-2.4** Crear `view/pages/consulta/subsanar.php` con carga de documentos y motivo, y `view/pages/area/subsanaciones.php` con bandeja de observaciones `Subsanada`.
+- [ ] **E05-2.5** Al subsanar: cambiar `observaciones.estado = 'Subsanada'`, `fecha_subsanacion = NOW()`, insertar en `historial_expediente` y crear `notificaciones` para el área.
+- [ ] **E05-2.6** Al levantar: `estado = 'Levantada'`, `expedientes.estado_actual = 'En_Proceso'`, historial y notificación al administrado.
+- [ ] **E05-2.7** Reutilizar la validación de adjuntos de `MesaPartesController` (PDF, máximo 10 MB) y auditar cada acción con `App\Models\Auditoria`.
+
+**Archivos:** `App/Models/Observacion.php`, `App/Controllers/SubsanacionController.php` (nuevo), `routes/observaciones.php`, `view/pages/consulta/subsanar.php` (nuevo), `view/pages/area/subsanaciones.php` (nuevo), `view/includes/sidebar.php`.
+
+**Criterio de aceptación:** un expediente `Observado` puede pasar a `Subsanada` desde el portal público y luego a `Levantada` desde el área, con historial completo y notificación en ambos sentidos.
+
+---
+
+### ÉPICA 6 — Archivo Central
+
+#### ⏳ TAREA E06-1: Bandeja de Archivo y Cierre de Expedientes
+- **Estado:** ⏳ Pendiente.
+- **Brecha:** no existe ubicación física ni cierre formal. `expedientes` solo tiene `fecha_archivado`.
+- **Estimación:** 1 día.
+
+**Subtareas para completar:**
+- [ ] **E06-1.1** Definir el almacenamiento de la ubicación física. Opción recomendada: columnas `caja`, `archivador`, `estante` en `expedientes`; alternativa: tabla `ubicaciones_archivo`. Actualizar `db.sql`.
+- [ ] **E06-1.2** Crear `App/Models/Archivo.php` con `listarAtendidos(array $filtros)`, `archivar(int $idExpediente, array $ubicacion, int $idUsuario)` y `reubicar(...)`.
+- [ ] **E06-1.3** Crear `App/Controllers/ArchivoController.php` con `index()`, `archivar()` y `reimprimirCargo()`.
+- [ ] **E06-1.4** Registrar `routes/archivo.php` y cargarlo en `routes/Router.php`.
+- [ ] **E06-1.5** Crear `view/pages/archivo/index.php` (DataTables, filtros por año, área y código).
+- [ ] **E06-1.6** Al archivar: `estado_actual = 'Archivado'`, `fecha_archivado = NOW()`, historial + auditoría.
+- [ ] **E06-1.7** Agregar el ítem "Archivo central" al sidebar solo para `ADMINISTRADOR` y `MESA_DE_PARTES`.
+
+**Criterio de aceptación:** un expediente `Atendido` se archiva con ubicación física obligatoria, cambia a `Archivado` y queda consultable por código y ubicación.
+
+---
+
+### ÉPICA 7 — Catálogo de Tipos de Documento
+
+#### ⏳ TAREA E07-1: CRUD de `tipos_documento`
+- **Estado:** ⏳ Pendiente (el modelo solo lee activos).
+- **Estimación:** 0.5 día.
+
+**Subtareas para completar:**
+- [ ] **E07-1.1** Ampliar `App/Models/TipoDocumento.php` con `getAll()`, `getById()`, `create()`, `update()`, `cambiarEstado()` y `existeNombre()` (implementando `InterfaceModel`).
+- [ ] **E07-1.2** Crear `App/Controllers/TipoDocumentoController.php` con `index`, `crear`, `store`, `editar`, `update`, `cambiarEstado`, protegido por `Roles::Administracion`.
+- [ ] **E07-1.3** Validar nombre obligatorio, único (excepto en edición) y máximo 100 caracteres.
+- [ ] **E07-1.4** Crear `view/pages/tipo-documento/{index,crear,editar}.php` con el patrón de `view/pages/areas/`.
+- [ ] **E07-1.5** Registrar `routes/tipos_documento.php` y cargarlo en `routes/Router.php`.
+- [ ] **E07-1.6** Enlazar "Tipos de documento" en el sidebar (Administración) y auditar cada cambio.
+- [ ] **E07-1.7** Impedir inactivar un tipo con documentos asociados o mostrar advertencia con conteo.
+
+**Criterio de aceptación:** el administrador crea, edita e inactiva tipos; los inactivos dejan de aparecer en los formularios de ventanilla y portal.
+
+---
+
+### ÉPICA 8 — Notificaciones Web
+
+#### 🟡 TAREA E08-1: Componente de Notificaciones en el Header
+- **Estado:** 🟡 Parcial.
+- **Ya existe:** `Notificacion::sinLeer()` y `ultimas()`, badge real en `view/includes/header.php`, inserción desde `Observacion::observar()`.
+- **Falta:** desplegable, marcar como leída, disparadores en derivación/atención y enlace al expediente.
+- **Estimación:** 1 día.
+
+**Subtareas para completar:**
+- [ ] **E08-1.1** Agregar a `App/Models/Notificacion.php`: `crear(array $datos)`, `marcarLeida(int $id, int $idUsuario)`, `marcarTodasLeidas(int $idUsuario)` y `listar(int $idUsuario, bool $soloNoLeidas)`.
+- [ ] **E08-1.2** Crear `App/Controllers/NotificacionController.php` con `index()`, `marcarLeida()` y `marcarTodas()`; responder JSON y validar CSRF en POST.
+- [ ] **E08-1.3** Implementar el dropdown real en `view/includes/header.php` (lista, hora relativa, enlace a `/area/derivacion/{id}` o `/consulta`).
+- [ ] **E08-1.4** Registrar `routes/notificaciones.php` en `routes/Router.php`.
+- [ ] **E08-1.5** Disparar notificación al **recepcionar una derivación** (`BandejaAreaController::recepcionar`).
+- [ ] **E08-1.6** Disparar notificación al **atender** un expediente y al **devolver** una derivación.
+- [ ] **E08-1.7** Al observar/subsanar, enlazar la notificación al expediente (`id_expediente`) y al usuario correcto.
+- [ ] **E08-1.8** Actualizar el contador por AJAX cada 60 s sin recargar la página.
+
+**Criterio de aceptación:** el badge coincide con `notificaciones` no leídas, el desplegable lista las últimas 5, marcar leída persiste y los cuatro eventos del flujo generan notificación.
+
+---
+
+### ÉPICA 9 — Reportes
+
+#### ⏳ TAREA E09-1: Módulo de Reportes con Filtros y Exportación
+- **Estado:** ⏳ Pendiente.
+- **Estimación:** 2 días.
+
+**Subtareas para completar:**
+- [ ] **E09-1.1** Crear `App/Models/Reporte.php` con consultas agregadas: volumen por rango, por área, por tipo, por estado, por canal y tiempo promedio de atención.
+- [ ] **E09-1.2** Crear `App/Controllers/ReporteController.php` con `index()` (filtros + gráficos), `exportarCsv()` y `exportarPdf()`; roles `ADMINISTRADOR` y `RESPONSABLE_AREA` (este último limitado a su área).
+- [ ] **E09-1.3** Crear `view/pages/reportes/index.php` con filtros (fecha desde/hasta, área, tipo, estado, canal, prioridad) y Chart.js.
+- [ ] **E09-1.4** Implementar exportación CSV con BOM UTF-8 (Excel) y PDF con TCPDF reutilizando `PdfCargoService` como referencia de estilo.
+- [ ] **E09-1.5** Calcular indicadores SLA: atendidos dentro de plazo, fuera de plazo y pendientes por área.
+- [ ] **E09-1.6** Registrar `routes/reportes.php`, cargarlo en el router y enlazarlo en el sidebar.
+- [ ] **E09-1.7** Auditar cada exportación (usuario, filtros, cantidad de filas).
+
+**Criterio de aceptación:** los filtros devuelven datos consistentes con la base, y ambos formatos de exportación respetan exactamente el filtro aplicado.
+
+---
+
+### ÉPICA 10 — Auditoría
+
+#### ⏳ TAREA E10-1: Pantalla de Auditoría del Sistema
+- **Estado:** ⏳ Pendiente (solo existe inserción).
+- **Estimación:** 1 día.
+
+**Subtareas para completar:**
+- [ ] **E10-1.1** Ampliar `App/Models/Auditoria.php` con `listar(array $filtros, int $pagina, int $porPagina)`, `contar(array $filtros)` y `obtener(int $id)`.
+- [ ] **E10-1.2** Crear `App/Controllers/AuditoriaController.php` con `index()` y `detalle(int $id)`, restringido a `ADMINISTRADOR`.
+- [ ] **E10-1.3** Crear `view/pages/auditoria/index.php` con DataTables server-side o paginación nativa; columnas: fecha, usuario, módulo, acción, tabla, IP.
+- [ ] **E10-1.4** Agregar filtros por rango de fechas, usuario, módulo, acción y texto libre.
+- [ ] **E10-1.5** Agregar modal de detalle con JSON de datos anteriores/nuevos escapado con `htmlspecialchars`.
+- [ ] **E10-1.6** Registrar `routes/auditoria.php`, cargar en el router y enlazar en el sidebar.
+- [ ] **E10-1.7** Limitar la consulta por defecto a los últimos 30 días y documentarlo en la vista.
+
+**Criterio de aceptación:** solo el administrador accede; los filtros combinan correctamente; el detalle no ejecuta HTML/JS del JSON almacenado.
+
+---
+
+## 4. Deuda técnica heredada de `spec.md`
+
+### ⏳ REF-01: Renombrar `ConsutlaExpediente` → `ConsultaExpediente`
+- **Estado:** ⏳ Pendiente.
+- **Evidencia:** `App/Models/ConsutlaExpediente.php` (clase y archivo con typo) y `App/Controllers/ConsultaExpedienteController.php:6,22`.
+
+**Subtareas:**
+- [ ] **REF-01.1** Renombrar el archivo a `App/Models/ConsultaExpediente.php` conservando el historial (`git mv`).
+- [ ] **REF-01.2** Renombrar la clase a `ConsultaExpediente` y ajustar el `namespace`.
+- [ ] **REF-01.3** Actualizar `use` e instanciación en `ConsultaExpedienteController`.
+- [ ] **REF-01.4** Buscar cualquier otra referencia con `grep -ri "consutla"` y corregirla.
+- [ ] **REF-01.5** Verificar con `php -l` y probar consulta pública y consulta autenticada.
+
+### 🟡 REF-03: Resto de la unificación de `backend/`
+- **Estado:** 🟡 Parcial. La conexión duplicada ya no existe; queda `backend/database/migration_utf8mb4.sql`.
+- **Subtareas:**
+  - [ ] **REF-03.1** Mover la migración a `database/migrations/` (crear la carpeta si no existe) o documentarla en `db.sql`.
+  - [ ] **REF-03.2** Eliminar la carpeta `backend/` vacía.
+  - [ ] **REF-03.3** Revisar `routes/Router.php:36` y retirar el *rewrite* de `/backend` si ya no aplica.
+  - [ ] **REF-03.4** Confirmar con `grep -ri "backend"` que no queden referencias activas.
+
+### ⏳ SEC-01: Rate limiting y bloqueo de login
+- **Estado:** ⏳ Pendiente. `AuthController::login()` no registra intentos.
+- **Subtareas:**
+  - [ ] **SEC-01.1** Crear tabla `intentos_login` (`id`, `identificador`, `ip`, `exitoso`, `creado_en`) o usar sesión si se decide no persistir; justificar la elección.
+  - [ ] **SEC-01.2** Registrar cada intento fallido por usuario + IP en `AuthController::login()`.
+  - [ ] **SEC-01.3** Bloquear tras 5 fallos en 15 minutos y mostrar minutos restantes en `view/pages/login.php`.
+  - [ ] **SEC-01.4** Limpiar el contador al autenticar correctamente.
+  - [ ] **SEC-01.5** Auditar bloqueos y desbloqueos.
+  - [ ] **SEC-01.6** Agregar pruebas manuales: 4 fallos, 5.º bloqueo, espera, acceso correcto.
+
+### ⏳ SEC-02: Política de contraseñas y CSRF en AJAX
+- **Estado:** ⏳ Pendiente. `UsuarioValidator.php:35` exige solo 6 caracteres; `AuthController::postRegister` usa `minLength => 6`.
+- **Subtareas:**
+  - [ ] **SEC-02.1** Implementar en `UsuarioValidator` mínimo 8, al menos una mayúscula, un número y un carácter especial.
+  - [ ] **SEC-02.2** Aplicar la misma regla en `AuthController::postRegister` y en el cambio de contraseña.
+  - [ ] **SEC-02.3** Actualizar los mensajes de error y las ayudas visuales en `view/pages/usuarios/crear.php` y `editar.php`.
+  - [ ] **SEC-02.4** Verificar que todos los `fetch` con método POST en `view/assets/js/` envíen `X-CSRF-TOKEN` (helper JS único).
+  - [ ] **SEC-02.5** Rechazar con HTTP 419/403 y JSON cuando el token falte o sea inválido.
+  - [ ] **SEC-02.6** Documentar las reglas de contraseña en `readme.md`.
+
+### ⏳ SEC-03 (nueva): Eliminar credenciales embebidas
+- **Estado:** ⏳ Pendiente.
+- **Hallazgo:** `App/Services/ApiDecolectaService.php:14` define un token real como valor por defecto.
+- **Subtareas:**
+  - [ ] **SEC-03.1** Quitar el token por defecto y lanzar error controlado si no existe en `.env`.
+  - [ ] **SEC-03.2** Rotar la credencial expuesta en el proveedor.
+  - [ ] **SEC-03.3** Documentar `API_DECOLECTA_TOKEN` y `API_DECOLECTA_SERVER` en `.env.example`.
+  - [ ] **SEC-03.4** Revisar el resto del código con `grep` por `sk_`, `password`, `token` y claves hardcodeadas.
+
+### 🟡 FEAT-01: Rutas y módulos faltantes del sidebar
+- **Estado:** 🟡 Parcial. Se corrigieron los `href="#"`, pero faltan destinos.
+- **Subtareas:**
+  - [ ] **FEAT-01.1** Implementar "Mi perfil" (`GET/POST /perfil`) con datos de la persona y cambio de contraseña.
+  - [ ] **FEAT-01.2** Implementar "Trazabilidad / Seguimiento" (`GET /trazabilidad` o `/expedientes/{codigo}/historial`) con el timeline de `historial_expediente`.
+  - [ ] **FEAT-01.3** Enlazar "Reportes documentarios" a `E09-1` cuando exista.
+  - [ ] **FEAT-01.4** Enlazar "Documentos recibidos / atendidos / derivados" a filtros de la bandeja de área (o crear vistas específicas).
+  - [ ] **FEAT-01.5** Verificar que `sidebarActivo()` marque correctamente los nuevos ítems.
+  - [ ] **FEAT-01.6** Probar el sidebar con los 5 roles y confirmar que no queda ningún enlace roto.
+
+### ⏳ DOC-01: `readme.md`
+- **Estado:** ⏳ Pendiente (`readme.md` está vacío, 0 bytes).
+- **Subtareas:**
+  - [ ] **DOC-01.1** Requisitos: PHP 8.x, extensiones (`pdo_mysql`, `mbstring`, `fileinfo`, `openssl`), Apache con `mod_rewrite`, MySQL 8.
+  - [ ] **DOC-01.2** Instalación: clonar, `composer install`, importar `db.sql`, copiar `.env.example` a `.env`.
+  - [ ] **DOC-01.3** Variables de entorno: BD, `APP_ENV`, `APP_TIMEZONE`, `APP_URL`, Decolecta y correo.
+  - [ ] **DOC-01.4** Credenciales por defecto por rol y advertencia de cambio obligatorio.
+  - [ ] **DOC-01.5** Estructura de carpetas, convenciones MVC y enlaces a `arquitectura.md`, `spec.md` y `tareas.md`.
+  - [ ] **DOC-01.6** Sección de despliegue en producción (permisos de `public/uploads`, logs, HTTPS).
+
+---
+
+## 5. Nuevas tareas derivadas de `observaciones.md`
+
+> Estas tareas **no existían** en la versión anterior y se agregan por las tres observaciones del usuario.
+
+### ÉPICA 11 — "Enviar documento" para usuario autenticado (OBS-01)
+
+> **Observación:** al estar logueado, el menú debe decir **"Enviar documento"** en lugar de "Mesa de Partes Virtual"; el formulario debe abrirse con los datos del usuario ya cargados y **bloqueados**, permitiendo completar solo la información del documento, salvo el campo de Mesa de Partes.
+
+#### ⏳ TAREA E11-1: Renombrar y separar el acceso en el sidebar
+- **Estado:** ⏳ Pendiente.
+- **Estimación:** 30 min.
+- **Subtareas:**
+  - [ ] **E11-1.1** En `view/includes/sidebar.php`, cambiar el ítem "Mesa de Partes Virtual" (`/entregas`) por **"Enviar documento"** apuntando a `/enviar-documento` para todos los roles autenticados.
+  - [ ] **E11-1.2** Verificar que el portal público `/entregas` siga existiendo y sea accesible sin sesión (no depende del sidebar).
+  - [ ] **E11-1.3** Revisar el resto de enlaces públicos (`LandingController`, `view/pages/index.php`) y confirmar que "Mesa de Partes Virtual" se mantenga ahí para invitados.
+  - [ ] **E11-1.4** No duplicar el ítem: debe existir una sola entrada de envío en el sidebar.
+
+#### ⏳ TAREA E11-2: Exponer la persona del usuario en la sesión
+- **Estado:** ⏳ Pendiente.
+- **Brecha:** `Session` guarda `usuario_id`, `usuario_nombre`, roles y área, pero **no** `id_persona` ni documento/correo, necesarios para precargar el formulario.
+- **Subtareas:**
+  - [ ] **E11-2.1** En `AuthController::login()`, guardar `usuario_persona` con `id_persona`, `tipo_documento`, `numero_documento`, `nombres`, `apellido_paterno`, `apellido_materno`, `razon_social`, `email`, `telefono`, `direccion`.
+  - [ ] **E11-2.2** Extender `Src\Core\Session` (o `App\Support\UsuarioActual`) con un accesor `persona()` que devuelva esos datos.
+  - [ ] **E11-2.3** Agregar un *fallback*: si la sesión no tiene los datos (sesiones antiguas), consultarlos con `App\Models\Persona` por `id_usuario`.
+  - [ ] **E11-2.4** Refrescar `usuario_persona` cuando el usuario actualice su perfil (`FEAT-01.1`).
+  - [ ] **E11-2.5** No romper `Session::user()` ni las vistas existentes que lo consumen.
+
+#### ⏳ TAREA E11-3: Vista y controlador de envío autenticado
+- **Estado:** ⏳ Pendiente.
+- **Estimación:** 1.5 días.
+- **Subtareas:**
+  - [ ] **E11-3.1** Crear `App/Controllers/EnvioDocumentoController.php` (extiende `Src\Core\Controller`, usa `AuthorizesRequest`) con `index()` y `store()`.
+  - [ ] **E11-3.2** Registrar en `routes/entrega.php`: `GET /enviar-documento` y `POST /enviar-documento/store`, protegidos por `Session::isAuthenticated()` y `Roles::Todos`.
+  - [ ] **E11-3.3** Crear `view/pages/envio/index.php` renderizada con el layout `app` (no una página suelta), tomando como base el formulario de `view/pages/mesa-partes/registrar.php`.
+  - [ ] **E11-3.4** Precargar el bloque de remitente (tipo y número de documento, nombres, apellidos, correo, teléfono, dirección) con los datos de `E11-2`.
+  - [ ] **E11-3.5** Renderizar esos campos como `readonly`/`disabled` **y** enviarlos por `hidden` para que el `POST` no dependa de campos deshabilitados.
+  - [ ] **E11-3.6** Mantener editable el selector de **Mesa de Partes / área destino** (única excepción indicada en la observación).
+  - [ ] **E11-3.7** Mantener editables los campos propios del documento: tipo de documento, número, asunto, folios, fecha, prioridad y adjuntos.
+  - [ ] **E11-3.8** Mostrar un aviso visible: "Los datos personales se toman de tu cuenta. Para cambiarlos, actualiza tu perfil."
+  - [ ] **E11-3.9** Validar en servidor que el `id_persona` enviado coincida con el de la sesión (nunca confiar en el `POST`).
+  - [ ] **E11-3.10** Reutilizar el validador de adjuntos (PDF/JPG/PNG, máximo 10 MB) y el token CSRF.
+
+#### ⏳ TAREA E11-4: Registro del expediente autenticado
+- **Estado:** ⏳ Pendiente.
+- **Subtareas:**
+  - [ ] **E11-4.1** Extender `ExpedienteService::crearExpedienteVirtual()` para aceptar `id_persona` forzado y `id_usuario_creador`.
+  - [ ] **E11-4.2** Guardar `canal_ingreso = 'Virtual'` y `documentos.creado_por = id_usuario_actual`.
+  - [ ] **E11-4.3** Registrar el historial inicial con `id_usuario` (no `NULL`) y comentario "Expediente registrado por usuario autenticado".
+  - [ ] **E11-4.4** Registrar auditoría (`expedientes`, `crear`) con la IP real.
+  - [ ] **E11-4.5** Derivar automáticamente a Mesa de Partes o al área elegida, replicando la regla de `EntregaModel`.
+  - [ ] **E11-4.6** Mostrar pantalla de confirmación con código, resumen y enlace al cargo PDF (`/consulta/cargo/{codigo}`).
+  - [ ] **E11-4.7** Enviar el correo de constancia cuando `E13` esté implementado (integrar, no duplicar).
+
+#### ⏳ TAREA E11-5: Pruebas y regresión del flujo autenticado
+- **Estado:** ⏳ Pendiente.
+- **Subtareas:**
+  - [ ] **E11-5.1** Probar con los 5 roles: el formulario debe abrir con datos correctos y sin errores de permisos.
+  - [ ] **E11-5.2** Intentar manipular `id_persona` por `POST` y confirmar que se ignora.
+  - [ ] **E11-5.3** Verificar que el sidebar muestre "Enviar documento" y no "Mesa de Partes Virtual".
+  - [ ] **E11-5.4** Verificar que un usuario sin sesión que entra a `/enviar-documento` sea redirigido a `/login`.
+  - [ ] **E11-5.5** Revisar que el layout móvil del formulario no se rompa.
+
+---
+
+### ÉPICA 12 — Salvaguarda del portal público de entregas (OBS-02)
+
+> **Observación:** la vista `entregar` **no debe modificarse**; la URL llega desde fuera. "Entregar documento" es solo para personas o empresas **sin login**; cualquier persona puede registrar sin usuario.
+
+#### ⏳ TAREA E12-1: Contrato de no regresión del portal público
+- **Estado:** ⏳ Pendiente (verificación, no rediseño).
+- **Estimación:** 2 horas.
+- **Subtareas:**
+  - [ ] **E12-1.1** Congelar `view/pages/entrega/index.php`, `view/pages/entrega/exitoso.php` y `EntregaController`: no se rediseñan ni se envuelven en el layout `app`.
+  - [ ] **E12-1.2** Confirmar que `GET /entregas` y `POST /entregas/store` funcionan sin sesión y sin redirección a login.
+  - [ ] **E12-1.3** Confirmar que el envío anónimo sigue creando/actualizando la persona por documento y registrando el expediente con `canal_ingreso = 'Virtual'`.
+  - [ ] **E12-1.4** Asegurar que el formulario público **no** exija `id_persona` ni datos de sesión.
+  - [ ] **E12-1.5** Documentar en `readme.md` que `/entregas` es la URL pública que se comparte externamente y que no debe cambiarse sin redirect 301.
+  - [ ] **E12-1.6** Agregar una prueba manual: navegador en incógnito → registrar expediente → obtener código → consultar en `/consulta`.
+  - [ ] **E12-1.7** Si en el futuro se unifican ambos formularios, hacerlo por composición de parciales, **sin** tocar la vista pública.
+
+**Criterio de aceptación:** un ciudadano sin cuenta completa el registro en `/entregas` exactamente como hoy; los cambios de `E11` no alteran esa ruta ni su diseño.
+
+---
+
+### ÉPICA 13 — Notificaciones por correo con PHPMailer (OBS-03)
+
+> **Observación:** implementar notificación por correo cuando se registre un nuevo documento, enviando la ficha o registro correcto, usando `phpmailer/phpmailer` y credenciales configuradas en `.env`.
+
+#### ⏳ TAREA E13-1: Dependencia y configuración de correo
+- **Estado:** ⏳ Pendiente.
+- **Estimación:** 4 horas.
+- **Subtareas:**
+  - [ ] **E13-1.1** Ejecutar `composer require phpmailer/phpmailer` y confirmar que `vendor/autoload.php` lo carga.
+  - [ ] **E13-1.2** Crear `config/mail.php` que lea únicamente variables de entorno.
+  - [ ] **E13-1.3** Agregar a `.env` y `.env.example`: `MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_ENCRYPTION`, `MAIL_FROM_ADDRESS`, `MAIL_FROM_NAME`, `MAIL_MESA_PARTES`, `MAIL_HABILITADO`.
+  - [ ] **E13-1.4** Agregar `APP_URL` para construir enlaces absolutos dentro del correo.
+  - [ ] **E13-1.5** Validar al arrancar que, si `MAIL_HABILITADO=true` y falta una credencial, se registre en el log y no se rompa la aplicación.
+  - [ ] **E13-1.6** Nunca versionar el `.env` real ni imprimir credenciales en pantalla.
+
+#### ⏳ TAREA E13-2: Servicio de envío desacoplado
+- **Estado:** ⏳ Pendiente.
+- **Subtareas:**
+  - [ ] **E13-2.1** Crear `App/Services/MailService.php` con `enviar(string $para, string $asunto, string $html, array $adjuntos = [], ?string $cc = null): bool`.
+  - [ ] **E13-2.2** Configurar SMTP con TLS/SSL, timeout y `CharSet = 'UTF-8'`.
+  - [ ] **E13-2.3** Capturar `PHPMailer\PHPMailer\Exception`, registrar en `storage/logs` y devolver `false` sin lanzar al usuario.
+  - [ ] **E13-2.4** Permitir modo simulación (`MAIL_HABILITADO=false`) que escribe el correo en log para desarrollo.
+  - [ ] **E13-2.5** Sanitizar asunto y destinatarios; validar con `FILTER_VALIDATE_EMAIL`.
+
+#### ⏳ TAREA E13-3: Ficha de registro en PDF adjunta
+- **Estado:** ⏳ Pendiente.
+- **Subtareas:**
+  - [ ] **E13-3.1** Reutilizar `PdfCargoService` para generar el cargo con QR y código de expediente.
+  - [ ] **E13-3.2** Generar el PDF en memoria (`Output(..., 'S')`) para adjuntarlo sin dejar archivos temporales.
+  - [ ] **E13-3.3** Nombrar el adjunto `Cargo-{codigo}.pdf`.
+  - [ ] **E13-3.4** Incluir en el cuerpo del correo: código, asunto, fecha/hora, área destino y enlace de consulta.
+  - [ ] **E13-3.5** Verificar que el QR del PDF apunte a `APP_URL . '/consulta?codigo=...'`.
+
+#### ⏳ TAREA E13-4: Disparadores del correo
+- **Estado:** ⏳ Pendiente.
+- **Subtareas:**
+  - [ ] **E13-4.1** Enviar al **remitente** cuando se registre un expediente en `/entregas` (portal público), si tiene correo válido.
+  - [ ] **E13-4.2** Enviar al **remitente autenticado** cuando registre en `/enviar-documento`.
+  - [ ] **E13-4.3** Enviar en el registro de **ventanilla** (`MesaPartesController::store`) si el remitente tiene correo.
+  - [ ] **E13-4.4** Enviar copia (CC) a `MAIL_MESA_PARTES` en todos los registros nuevos.
+  - [ ] **E13-4.5** Enviar aviso cuando el expediente se **observe** (con enlace a `/consulta/subsanar/{codigo}`).
+  - [ ] **E13-4.6** Enviar aviso cuando el expediente se **atienda**, adjuntando o enlazando la respuesta.
+  - [ ] **E13-4.7** No bloquear la transacción principal: encolar y procesar después (ver E13-5).
+  - [ ] **E13-4.8** Evitar duplicados: un correo por expediente y evento.
+
+#### ⏳ TAREA E13-5: Cola de correos y reintentos
+- **Estado:** ⏳ Pendiente.
+- **Subtareas:**
+  - [ ] **E13-5.1** Crear tabla `correos_cola` en `db.sql` con: `id_correo`, `destinatario`, `cc`, `asunto`, `cuerpo_html`, `adjunto_ruta`, `estado` (`Pendiente`, `Enviado`, `Error`), `intentos`, `ultimo_error`, `id_expediente`, `creado_en`, `enviado_en`.
+  - [ ] **E13-5.2** Crear `App/Models/CorreoCola.php` con `encolar()`, `pendientes(int $limite)`, `marcarEnviado()` y `marcarError()`.
+  - [ ] **E13-5.3** Crear `bin/procesar-correos.php` (CLI) que procese hasta N pendientes y actualice estados.
+  - [ ] **E13-5.4** Documentar la tarea programada (cron cada 5 minutos o Task Scheduler en Windows).
+  - [ ] **E13-5.5** Si no hay cron disponible, ofrecer un envío síncrono controlado con timeout de 5 s como *fallback*.
+  - [ ] **E13-5.6** Reintentar hasta 3 veces con espera progresiva y dejar el error registrado.
+
+#### ⏳ TAREA E13-6: Plantillas y pruebas de correo
+- **Estado:** ⏳ Pendiente.
+- **Subtareas:**
+  - [ ] **E13-6.1** Crear `view/emails/registro-expediente.php` y `view/emails/observacion.php` con HTML simple e inline CSS.
+  - [ ] **E13-6.2** Usar una función de render (`ob_start` + `include`) que escape todos los datos con `htmlspecialchars`.
+  - [ ] **E13-6.3** Probar con un buzón real y con Mailtrap/MailHog en desarrollo.
+  - [ ] **E13-6.4** Verificar que el correo no caiga en spam (SPF/DKIM del dominio institucional) y documentarlo.
+  - [ ] **E13-6.5** Probar los escenarios: correo válido, correo inexistente, SMTP caído, adjunto grande.
+  - [ ] **E13-6.6** Auditar cada envío (éxito/error) con `App\Models\Auditoria`.
+
+**Criterio de aceptación:** al registrar un documento se encola un correo con la ficha en PDF y el código del expediente; el destinatario lo recibe en menos de 5 minutos; un fallo de SMTP no rompe el registro y queda registrado para reintento.
+
+---
+
+## 6. Roadmap actualizado
+
+```
+┌──────────────────────────────────────────────────────────────────────┐
+│ FASE A (Semana 1) — Cierre operativo y observaciones prioritarias    │
+│ • E11  Enviar documento autenticado (OBS-01)                        │
+│ • E12  Salvaguarda del portal público (OBS-02)                      │
+│ • E13  Correo con PHPMailer + ficha PDF (OBS-03)                    │
+├──────────────────────────────────────────────────────────────────────┤
+│ FASE B (Semana 2) — Completar el ciclo documentario                  │
+│ • E05-2 Subsanaciones                                                │
+│ • E06-1 Archivo central                                              │
+│ • E07-1 CRUD tipos de documento                                      │
+├──────────────────────────────────────────────────────────────────────┤
+│ FASE C (Semana 3) — Control y visibilidad                            │
+│ • E08-1 Notificaciones web completas                                 │
+│ • E09-1 Reportes y exportaciones                                     │
+│ • E10-1 Visor de auditoría                                           │
+├──────────────────────────────────────────────────────────────────────┤
+│ FASE D (Semana 4) — Deuda técnica y endurecimiento                   │
+│ • REF-01 Renombrar ConsultaExpediente                                │
+│ • REF-03 Limpiar backend/                                            │
+│ • SEC-01 Rate limiting de login                                      │
+│ • SEC-02 Política de contraseñas y CSRF AJAX                         │
+│ • SEC-03 Quitar credenciales embebidas                               │
+│ • FEAT-01 Perfil y trazabilidad                                      │
+│ • DOC-01 readme.md                                                   │
+└──────────────────────────────────────────────────────────────────────┘
 ```
 
-### Tabla Comparativa por Tabla de Base de Datos
-
-| Tabla en `db.sql`      | Estado en Código Actual                        | Brecha / Funcionalidad Faltante                                                                                                                    |
-| ---------------------- | ---------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `expedientes`          | Parcial (solo `canal_ingreso = 'Virtual'`)     | Falta registro `Presencial` (con foliatura física) e `Interno` (entre áreas). Falta ciclo de vida completo (`Observado`, `Atendido`, `Archivado`). |
-| `documentos`           | Parcial (solo documento inicial del ciudadano) | Falta registrar documentos generados internamente (`tipo_documento_registro`: `Generado`, `Respuesta`) como informes o memorandos.                 |
-| `archivos_adjuntos`    | Implementado (subida en recepción)             | Falta previsualizador integrado (PDF viewer) y adjuntos en respuestas.                                                                             |
-| `derivaciones`         | Muy básico (`DerivacionController` legacy)     | **No existe Bandeja de Entrada de Área**: los usuarios de área no pueden _recibir_, _atender_ ni _devolver_ derivaciones.                          |
-| `observaciones`        | 🔴 **Sin implementar**                         | No hay interfaz para observar expedientes por falta de requisitos ni módulo de subsanación.                                                        |
-| `historial_expediente` | Parcial (solo inserción inicial)               | Debe actualizarse automáticamente ante cada cambio de estado (observado, recibido, atendido, archivado).                                           |
-| `notificaciones`       | 🔴 **Sin implementar**                         | No hay lógica ni interfaz para notificar a los usuarios internos o al administrado.                                                                |
-| `tipos_documento`      | Solo consulta en dropdowns                     | Falta módulo CRUD administrativo para crear nuevos tipos de documentos.                                                                            |
-| `auditoria`            | Solo inserción                                 | Falta pantalla de consulta y filtros para el Administrador.                                                                                        |
-| `numeradores`          | Implementado para expedientes                  | Listo (se puede extender para numerar documentos internos si se requiere).                                                                         |
+**Justificación del orden:**
+1. Las observaciones del usuario son cambios de experiencia visibles y dependen de piezas ya existentes (formulario de ventanilla, `ExpedienteService`, `PdfCargoService`).
+2. La subsanación y el archivo cierran el ciclo de vida del expediente.
+3. Reportes y auditoría dependen de que el flujo genere datos completos.
+4. La deuda técnica se paga al final, salvo SEC-03 (credencial expuesta), que debería adelantarse si el repositorio es compartido.
 
 ---
 
-## 🎯 2. Matriz de Épicas y Tareas Priorizadas
+## 7. Criterios de aceptación global
 
-| ID      | Épica / Módulo                                                         | Prioridad  | Complejidad |
-| ------- | ---------------------------------------------------------------------- | ---------- | ----------- | ------------------- |
-| **E01** | Bandeja de Gestión Documental de Áreas (Recepción, Atención, Rechazo)  | 🔴 Crítica | Alta        | (E01-1 ✅ E01-2 ✅) |
-| **E02** | Recepción Presencial e Interna en Ventanilla (Mesa de Partes Operador) | 🔴 Crítica | Alta        | (E02-1 ✅ E02-2 ✅) |
-| **E03** | Generación de Cargo de Recepción e Impresión de Ticket con QR          | 🟠 Alta    | Media       |
-| **E04** | Ciclo de Atención y Emisión de Documento de Respuesta                  | 🟠 Alta    | Media       | (E04-1 ✅) |
-| **E05** | Módulo de Observaciones y Subsanaciones de Requisitos                  | 🟠 Alta    | Media       | (E05-1 ✅) |
-| **E06** | Bandeja de Archivo Central y Cierre de Expedientes                     | 🟡 Media   | Baja        |
-| **E07** | CRUD Administrativo de Tipos de Documento                              | 🟡 Media   | Baja        |
-| **E08** | Sistema de Notificaciones Web (Campanita en Header)                    | 🟡 Media   | Media       |
-| **E09** | Reportes Documentarios e Indicadores de Cumplimiento (SLA)             | 🟡 Media   | Media       |
-| **E10** | Visor de Auditoría del Sistema                                         | 🟢 Baja    | Baja        |
+Para considerar el sistema estabilizado:
 
----
-
-## 📝 3. Desglose Detallado de Tareas Técnicas
+1. **Cero errores 500/fatales** en las rutas CRUD de Usuarios, Personas, Roles, Áreas, Expedientes, Tipos de Documento y Archivo.
+2. **Registro de expedientes 100 % funcional** en los tres canales: público (`/entregas`), autenticado (`/enviar-documento`) y ventanilla (`/mesa-partes/registrar`), con correlativo `EXP-YYYY-XXXXX`.
+3. **Portal público intacto:** `/entregas` funciona sin sesión y sin cambios visuales.
+4. **Ciclo completo:** `Registrado → En_Proceso → Observado → Subsanada → En_Proceso → Atendido → Archivado`, con historial en cada transición.
+5. **Notificaciones:** badge y dropdown reflejan datos reales; el correo con ficha PDF llega al remitente y a Mesa de Partes.
+6. **Trazabilidad:** todo cambio de estado genera fila en `historial_expediente` y en `auditoria`.
+7. **Seguridad:** sin credenciales en el código, login con bloqueo por intentos, contraseñas robustas y CSRF en todos los POST.
+8. **Sin enlaces muertos:** el sidebar de los 5 roles no contiene rutas inexistentes.
+9. **Calidad:** `php -l` sin errores en todos los archivos modificados y `readme.md` completo.
 
 ---
 
-### ÉPICA 1: Bandeja de Gestión Documental de Áreas (Trabajo Diario)
+## 8. Registro de decisiones pendientes de confirmar
 
-> **Problema:** Actualmente las áreas no tienen interfaz para trabajar los expedientes que les derivan; la derivación muere en base de datos.
-
-#### 📌 TAREA E01-1: Bandeja de Entrada del Área (`/area/bandeja-entrada`) ✅ [Completada]
-
-- **Descripción:** Pantalla para los roles `RESPONSABLE_AREA` y `USUARIO_AREA` que lista los expedientes derivados a su área.
-- **Pestañas/Filtros requeridos:**
-  1. _Pendientes de Recepción_ (`derivaciones.estado = 'Pendiente'`).
-  2. _En Proceso / En Atención_ (`derivaciones.estado = 'Recibido'` o `'En_Atencion'`).
-  3. _Atendidos / Devueltos_.
-- **Acciones operativas:**
-  - **Botón "Recepcionar":** Actualiza `derivaciones.estado = 'Recibido'`, asigna `derivaciones.id_usuario_recibe = id_usuario_actual`, `fecha_recepcion = NOW()`, actualiza `expedientes.estado_actual = 'En_Proceso'`, e inserta en `historial_expediente`.
-  - **Botón "Rechazar / Devolver":** Solicita motivo obligatorio, actualiza `derivaciones.estado = 'Devuelto'` y devuelve el expediente al área de origen.
-- **Archivos a crear/modificar:**
-  - `App/Controllers/BandejaAreaController.php`
-  - `App/Models/Derivacion.php` (métodos `recepcionar()`, `devolver()`, `listarPorArea()`)
-  - `routes/area.php`
-  - `view/pages/area/bandeja.php`
-  - `view/includes/sidebar.php` (enlazar a la ruta real)
-
-#### 📌 TAREA E01-2: Re-derivación entre Áreas (`/area/derivar`) ✅ [Completada]
-
-- **Descripción:** Permitir que un área receptora pueda derivar el expediente a otra sub-área o área complementaria con instrucciones específicas.
-- **Archivos a crear/modificar:**
-  - `App/Controllers/DerivacionController.php` (modernizar según `arquitectura.md`)
-  - `view/pages/area/derivar_modal.php`
-
----
-
-### ÉPICA 2: Recepción Presencial e Interna (Ventanilla Municipal)
-
-> **Problema:** El registro actual (`/entrega`) es un portal público ciudadano. Falta el formulario interno para el personal de ventanilla que atiende personas físicas o recibe oficios de otras instituciones.
-
-#### 📌 TAREA E02-1: Formulario de Registro en Ventanilla (`/mesa-partes/registrar`) ✅ [Completada]
-
-- **Descripción:** Interfaz rápida y optimizada para el rol `MESA_DE_PARTES`:
-  - Selector de Canal: `Presencial` o `Interno`.
-  - Búsqueda en vivo de Persona/Remitente (DNI/RUC) con autocompletado RENIEC/SUNAT.
-  - Registro de número de documento físico, asunto, folios exactos, y área destino inicial.
-  - Escaneo o subida de PDF con validación de tamaño.
-  - Asignación de Prioridad (`Normal`, `Urgente`).
-- **Archivos a crear/modificar:**
-  - `App/Controllers/MesaPartesController.php`
-  - `view/pages/mesa-partes/registrar.php`
-  - `routes/mesa_partes.php`
-
-#### 📌 TAREA E02-2: Bandeja de Mesa de Partes (`/mesa-partes/bandeja`) ✅ [Completada]
-
-- **Descripción:** Visualizador de todos los documentos ingresados en el día, con filtros por fecha, estado de derivación inicial y opción de reimprimir cargos.
-- **Archivos a crear/modificar:**
-  - `App/Controllers/MesaPartesController.php`
-  - `view/pages/mesa-partes/bandeja.php`
-
----
-
-### ÉPICA 3: Generación de Cargo de Recepción y Hoja de Ruta en PDF
-
-> **Problema:** Toda mesa de partes debe emitir una constancia formal física o descargable con sellos y código de seguimiento.
-
-#### 📌 TAREA E03-1: Comprobante / Cargo de Recepción en PDF con QR
-
-- **Descripción:** Generar el cargo formal de recepción que incluya:
-  - Escudo institucional de la Municipalidad de Lurín.
-  - Código único del expediente (`EXP-2026-XXXXX`).
-  - Código QR que enlaza a la consulta pública web (`/consulta?codigo=...`).
-  - Datos del remitente, asunto, número de folios, fecha y hora exacta con sellos digitales del sistema.
-- **Tecnología sugerida:** Integrar librería ligera como FPDF o TCPDF en `vendor/`.
-- **Archivos a crear/modificar:**
-  - `App/Services/PdfCargoService.php`
-  - `App/Controllers/ConsultaExpedienteController.php` (método `imprimirCargo($codigo)`)
-  - `routes/entrega.php`
-
-#### 📌 TAREA E03-2: Hoja de Ruta para Trámite Físico
-
-- **Descripción:** Generar formato de "Hoja de Trámite / Ruta" para pegar en la carátula del expediente físico con casilleros para firmas y sellos de pase entre áreas.
-
----
-
-### ÉPICA 4: Ciclo de Atención y Documento de Respuesta
-
-> **Problema:** En el flujo municipal, un trámite concluye cuando el área emite un documento resolutivo o de respuesta (oficio de respuesta, informe técnico, etc.).
-
-#### 📌 TAREA E04-1: Formulario de Atención de Expediente (`/area/atender/{id}`) ✅ [Completada]
-
-- **Descripción:**
-  - Selector de Tipo de Documento de Respuesta (Resolución, Oficio, Notificación).
-  - Número de documento emitido (ej. _Oficio N° 124-2026-MDL/GDU_).
-  - Resumen o conclusión de la respuesta.
-  - Subida de archivo adjunto de respuesta (`tipo_documento_registro = 'Respuesta'`).
-  - Actualización de `expedientes.estado_actual = 'Atendido'`, `fecha_atencion = NOW()`.
-  - Inserción en `historial_expediente`.
-- **Archivos a crear/modificar:**
-  - `App/Controllers/BandejaAreaController.php` (método `atender()`, `storeAtencion()`)
-  - `App/Models/Documento.php` (soporte para documentos de respuesta)
-  - `view/pages/area/atender.php`
-
----
-
-### ÉPICA 5: Módulo de Observaciones y Subsanaciones (TUPA)
-
-> **Problema:** Si a un ciudadano le falta un requisito, el trámite no debe rechazarse de plano, sino observarse para que pueda subsanar dentro del plazo de ley.
-
-#### 📌 TAREA E05-1: Registro de Observaciones por el Área ✅ [Completada]
-
-- **Descripción:**
-  - El usuario del área selecciona "Observar Expediente".
-  - Detalla los motivos o requisitos faltantes (ej: _Falta plano visado, comprobante de pago de tasa ilegible_).
-  - Inserta en tabla `observaciones` (`estado = 'Pendiente'`).
-  - Cambia `expedientes.estado_actual = 'Observado'`.
-  - Genera notificación para el administrado.
-- **Archivos a crear/modificar:**
-  - `App/Models/Observacion.php` (nuevo modelo)
-  - `App/Controllers/ObservacionController.php` (nuevo controlador)
-  - `view/pages/observaciones/modal_crear.php`
-
-#### 📌 TAREA E05-2: Subsanación de Observación
-
-- **Descripción:**
-  - Desde ventanilla o portal de consulta, el remitente presenta la subsanación adjuntando nuevos documentos.
-  - El estado de la observación cambia a `Subsanada`.
-  - El área evalúa la subsanación y si es conforme marca `Levantada`, retornando el expediente a `En_Proceso`.
-
----
-
-### ÉPICA 6: Módulo de Archivo Central y Cierre
-
-> **Problema:** Los expedientes atendidos quedan sin archivado formal físico/digital.
-
-#### 📌 TAREA E06-1: Bandeja de Archivo (`/archivo`)
-
-- **Descripción:**
-  - Lista expedientes con estado `Atendido`.
-  - Permite indicar ubicación física (Caja N°, Archivador N°, Estante N°).
-  - Cambia `expedientes.estado_actual = 'Archivado'` con `fecha_archivado = NOW()`.
-- **Archivos a crear/modificar:**
-  - `App/Controllers/ArchivoController.php`
-  - `view/pages/archivo/index.php`
-  - `routes/archivo.php`
-
----
-
-### ÉPICA 7: Catálogo Administrativo de Tipos de Documento
-
-> **Problema:** La opción en el sidebar apunta a `#` y no hay CRUD para mantener la tabla `tipos_documento`.
-
-#### 📌 TAREA E07-1: CRUD Completo de `tipos_documento` (`/tipos-documento`)
-
-- **Descripción:**
-  - Listado con DataTables, creación, edición y activación/inactivación de tipos documentales.
-  - Validación de nombre único.
-- **Archivos a crear/modificar:**
-  - `App/Controllers/TipoDocumentoController.php`
-  - `App/Models/TipoDocumento.php`
-  - `view/pages/tipo-documento/index.php`, `crear.php`, `editar.php`
-  - `routes/tipos_documento.php`
-
----
-
-### ÉPICA 8: Sistema de Notificaciones Internas y Web
-
-> **Problema:** La tabla `notificaciones` existe en `db.sql` pero está inactiva en el sistema.
-
-#### 📌 TAREA E08-1: Componente de Notificaciones en el Header
-
-- **Descripción:**
-  - Menú desplegable con campana en `view/includes/header.php`.
-  - Badge con contador de notificaciones no leídas (`leida = 0`).
-  - Endpoint AJAX para marcar como leída y ver detalle.
-- **Disparadores automáticos de notificación:**
-  1. Cuando un área recibe una nueva derivación.
-  2. Cuando un expediente asignado es observado o subsanado.
-  3. Cuando un expediente es atendido.
-- **Archivos a crear/modificar:**
-  - `App/Models/Notificacion.php` (nuevo)
-  - `App/Controllers/NotificacionController.php` (nuevo)
-  - `view/includes/header.php`
-
----
-
-### ÉPICA 9: Reportes Documentarios e Indicadores de Gestión
-
-> **Problema:** Los directivos de la municipalidad necesitan reportes exportables para medir la eficiencia de las gerencias.
-
-#### 📌 TAREA E09-1: Módulo de Reportes con Filtros Avanzados (`/reportes`)
-
-- **Descripción:**
-  - Filtros: Rango de Fechas, Área, Tipo de Documento, Estado, Canal de Ingreso, Prioridad.
-  - Gráficos de barra y pastel con Chart.js.
-  - Indicadores clave:
-    - _Volumen total de expedientes._
-    - _Porcentaje de atención a tiempo vs atrasados._
-    - _Áreas con mayor carga de expedientes pendientes._
-  - Botones de exportación: **Excel (CSV)** y **PDF**.
-- **Archivos a crear/modificar:**
-  - `App/Controllers/ReporteController.php`
-  - `view/pages/reportes/index.php`
-  - `routes/reportes.php`
-
----
-
-### ÉPICA 10: Visor Administrativo de Auditoría
-
-> **Problema:** Los registros de la tabla `auditoria` no se pueden consultar desde la interfaz gráfica.
-
-#### 📌 TAREA E10-1: Pantalla de Auditoría del Sistema (`/auditoria`)
-
-- **Descripción:**
-  - Solo accesible por el rol `ADMINISTRADOR`.
-  - Tabla interactiva con DataTables con paginación y búsqueda por usuario, fecha, módulo o IP.
-- **Archivos a crear/modificar:**
-  - `App/Controllers/AuditoriaController.php`
-  - `view/pages/auditoria/index.php`
-  - `routes/auditoria.php`
-
----
-
-## 🗺️ 4. Roadmap Recomendado de Implementación
-
-Para asegurar que el sistema sea utilizable de inmediato por el municipio, se sugiere seguir este orden de fases:
-
-```
-┌──────────────────────────────────────────────────────────────────┐
-│ FASE 1 (Semana 1) — Núcleo Operativo del Área y Ventanilla        │
-│ • E01: Bandeja de Entrada de Área (Recepcionar y Devolver)      │
-│ • E02: Registro Presencial en Ventanilla                        │
-│ • E04: Atención de Trámites y Emisión de Respuesta              │
-├──────────────────────────────────────────────────────────────────┤
-│ FASE 2 (Semana 2) — Instrumentos Formales y Catálogos            │
-│ • E03: Impresión de Cargo de Recepción en PDF con QR            │
-│ • E05: Módulo de Observaciones y Subsanaciones                  │
-│ • E07: CRUD de Tipos de Documento                               │
-├──────────────────────────────────────────────────────────────────┤
-│ FASE 3 (Semana 3) — Control, Indicadores y Cierre               │
-│ • E06: Bandeja de Archivo Central                               │
-│ • E08: Notificaciones Web en Tiempo Real                        │
-│ • E09: Reportes Estadísticos y Exportación                      │
-│ • E10: Visor de Auditoría                                       │
-└──────────────────────────────────────────────────────────────────┘
-```
+| # | Duda | Propuesta por defecto |
+|---|---|---|
+| 1 | En `E11-3`, ¿"excepción a mesa de partes" significa que el selector de área destino queda editable? | Sí: remitente bloqueado, área/Mesa de Partes destino editable. Confirmar antes de implementar. |
+| 2 | ¿El expediente autenticado debe derivarse automáticamente a Mesa de Partes o permitir elegir área? | Permitir elegir; por defecto, el área de Mesa de Partes. |
+| 3 | ¿Se persiste el rate limiting en BD o en sesión? | BD (`intentos_login`), porque la sesión se evade fácilmente. |
+| 4 | ¿La cola de correos se procesa por cron o al final de la petición? | Cron cada 5 min; *fallback* síncrono con timeout. |
+| 5 | ¿El cargo PDF se adjunta siempre o solo si el remitente tiene correo? | Solo si hay correo válido; el PDF siempre queda descargable por código. |
 
 ---
 
 > [!TIP]
-> Cada una de estas tareas debe implementarse respetando estrictamente las pautas, convenciones y patrones documentados en [arquitectura.md](file:///c:/laragon/www/mesa-partes-lurin/arquitectura.md).
+> Toda implementación debe respetar `arquitectura.md`: PHP 8 nativo, PDO con consultas preparadas, controladores que extienden `Src\Core\Controller`, vistas PHP planas con notación `carpeta.archivo`, auditoría obligatoria y `php -l` antes de cerrar cada tarea.
