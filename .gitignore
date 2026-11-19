@@ -2,3 +2,4 @@
 /public/
 /storage/*
 !/storage/.gitkeep
+.env
