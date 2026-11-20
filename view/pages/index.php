@@ -129,14 +129,14 @@ $auth = Session::isAuthenticated();
                         </div>
                         <h5>Consulta de Expedientes</h5>
                         <p>Verifica el estado y ubicación de tu expediente en tiempo real.</p>
-                        <span class="link-more">Próximamente</span>
+                        <span class="link-more">Comenzar <i class="fas fa-arrow-right"></i></span>
                     </a>
                 </div>
 
 
                 <!-- Seguimiento -->
                 <div class="col-lg-4 col-md-6 mb-4">
-                    <a href="#" class="card-atajo">
+                    <a href="#" class="card-atajo is-unavailable">
                         <div class="icon-box bg-grad-3">
                             <i class="fas fa-route"></i>
                         </div>
