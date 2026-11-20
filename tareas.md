@@ -458,6 +458,37 @@ Estas tareas **no requieren trabajo**, solo pruebas de regresión antes de cerra
 
 ---
 
+### ÉPICA 14 — Recuperación de contraseña por correo
+
+> **Observación del usuario:** implementar "me olvidé mi contraseña" en la vista de login, enviar al correo una URL para restablecer la contraseña y completar el proceso en frontend y backend.
+
+#### ✅ TAREA E14-1: Infraestructura de tokens de recuperación
+- **Estado:** ✅ Completada.
+- **Subtareas:**
+  - [x] **E14-1.1** Tabla `password_resets` (id, id_usuario, token_hash, expira_en, usado, creado_en) en `db.sql` y migración `database/migrations/2026_11_20_password_resets.sql`.
+  - [x] **E14-1.2** `Usuario::obtenerPorEmail()` para localizar la cuenta por correo.
+  - [x] **E14-1.3** `Usuario::crearTokenRecuperacion()`, `validarTokenRecuperacion()` y `usarTokenRecuperacion()` (hash SHA-256, expiración 1 hora, un solo uso).
+
+#### ✅ TAREA E14-2: Flujo backend de recuperación
+- **Estado:** ✅ Completada.
+- **Subtareas:**
+  - [x] **E14-2.1** `AuthController::showRecuperar()` y `enviarRecuperacion()` (POST `/recuperar`): valida email, busca usuario, genera token seguro, envía correo, respuesta genérica (sin enumeración).
+  - [x] **E14-2.2** `AuthController::showRestablecer()` (GET `/restablecer?token=...`): valida token y muestra formulario.
+  - [x] **E14-2.3** `AuthController::restablecer()` (POST `/restablecer`): valida token, política SEC-02, actualiza contraseña, invalida token.
+  - [x] **E14-2.4** Rutas registradas en `routes/auth.php`.
+  - [x] **E14-2.5** Uso de `APP_URL` (config/mail.php) con fallback a `HTTP_HOST`.
+
+#### ✅ TAREA E14-3: Flujo frontend y correo
+- **Estado:** ✅ Completada.
+- **Subtareas:**
+  - [x] **E14-3.1** Enlace "¿Olvidaste tu contraseña?" en `view/pages/login.php`.
+  - [x] **E14-3.2** Vista `view/pages/recuperar.php`.
+  - [x] **E14-3.3** Vista `view/pages/restablecer.php`.
+  - [x] **E14-3.4** Plantilla `view/emails/recuperar-password.php` con enlace absoluto.
+  - [x] **E14-3.5** Envío mediante `MailService` (SMTP o simulación).
+
+**Criterio de aceptación:** un usuario solicita recuperación por correo, recibe un enlace válido por 1 hora, restablece la contraseña y puede iniciar sesión; los tokens expirados o usados se rechazan.
+
 ## 6. Roadmap actualizado
 
 ```

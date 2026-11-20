@@ -81,9 +81,100 @@ class Usuario
         ]);
     }
 
-    // 1. Obtener usuario por email para el Login
-    public function obtenerPorEmail(string $email)
+    // Obtener usuario activo por correo electrónico (para recuperación de contraseña).
+    public function obtenerPorEmail(string $email): ?array
     {
+        $sql = "SELECT u.id_usuario, u.id_persona, u.username, u.estado,
+                       p.email, p.nombres, p.apellido_paterno
+                FROM usuarios u
+                INNER JOIN personas p ON p.id_persona = u.id_persona
+                WHERE u.estado = 'Activo' AND p.email = :email
+                LIMIT 1";
+        try {
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([':email' => trim($email)]);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $row ?: null;
+        } catch (PDOException $e) {
+            return null;
+        }
+    }
+
+    // ---- Recuperación de contraseña ----
+
+    /**
+     * Crea (o reemplaza) un token de recuperación para el usuario.
+     * Guarda el HASH sha256 del token; el token en claro solo viaja por correo.
+     */
+    public function crearTokenRecuperacion(int $idUsuario, string $tokenHash, \DateTimeInterface $expira): void
+    {
+        try {
+            // Invalidar tokens previos del usuario.
+            $stmt = $this->db->prepare("DELETE FROM password_resets WHERE id_usuario = :u");
+            $stmt->execute([':u' => $idUsuario]);
+
+            $stmt = $this->db->prepare(
+                "INSERT INTO password_resets (id_usuario, token_hash, expira_en) VALUES (:u, :t, :e)"
+            );
+            $stmt->execute([
+                ':u' => $idUsuario,
+                ':t' => $tokenHash,
+                ':e' => $expira->format('Y-m-d H:i:s'),
+            ]);
+        } catch (PDOException $e) {
+            error_log('crearTokenRecuperacion: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Valida un token en claro y devuelve el id_usuario si es válido y no expirado.
+     */
+    public function validarTokenRecuperacion(string $token): ?int
+    {
+        $hash = hash('sha256', $token);
+        try {
+            $stmt = $this->db->prepare(
+                "SELECT id_usuario FROM password_resets
+                 WHERE token_hash = :t AND usado = 0 AND expira_en > NOW()
+                 LIMIT 1"
+            );
+            $stmt->execute([':t' => $hash]);
+            $id = $stmt->fetchColumn();
+            return $id ? (int) $id : null;
+        } catch (PDOException $e) {
+            return null;
+        }
+    }
+
+    /**
+     * Marca como usado el token y actualiza la contraseña del usuario.
+     */
+    public function usarTokenRecuperacion(string $token, string $nuevoHash): bool
+    {
+        $hash = hash('sha256', $token);
+        $idUsuario = $this->validarTokenRecuperacion($token);
+        if (!$idUsuario) {
+            return false;
+        }
+        try {
+            $this->db->beginTransaction();
+            $stmt = $this->db->prepare("UPDATE usuarios SET password = :p, actualizado_en = NOW() WHERE id_usuario = :id");
+            $stmt->execute([':p' => $nuevoHash, ':id' => $idUsuario]);
+
+            $stmt = $this->db->prepare("UPDATE password_resets SET usado = 1 WHERE token_hash = :t");
+            $stmt->execute([':t' => $hash]);
+
+            // Invalidar cualquier otro token del usuario.
+            $stmt = $this->db->prepare("DELETE FROM password_resets WHERE id_usuario = :u AND token_hash <> :t");
+            $stmt->execute([':u' => $idUsuario, ':t' => $hash]);
+
+            $this->db->commit();
+            return true;
+        } catch (PDOException $e) {
+            $this->db->rollBack();
+            error_log('usarTokenRecuperacion: ' . $e->getMessage());
+            return false;
+        }
     }
 
 

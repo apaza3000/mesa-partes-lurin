@@ -84,6 +84,9 @@ $errors = $errors ?? [];
                     <?php endif; ?>
                 </div>
 
+                <p style="text-align:right;margin:4px 0 12px;">
+                    <a href="/recuperar" style="font-size:0.9rem;">¿Olvidaste tu contraseña?</a>
+                </p>
                 <button class="btn-submit" type="submit" id="login-submit">
                     <span class="submit-label">Iniciar sesión</span>
                     <span class="spinner hidden" aria-hidden="true"></span>

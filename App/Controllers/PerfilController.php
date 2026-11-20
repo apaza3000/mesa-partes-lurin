@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Controllers;
 
 use App\Models\Usuario;
@@ -13,7 +14,10 @@ class PerfilController extends Controller
 {
     public function index(): void
     {
-        if (!Session::isAuthenticated()) { $this->redirect('/login'); return; }
+        if (!Session::isAuthenticated()) {
+            $this->redirect('/login');
+            return;
+        }
         $idUsuario = (int) Session::get('usuario_id');
         $usuario = (new Usuario())->obtenerAllPorId($idUsuario);
         $this->view('perfil.index', [
@@ -26,10 +30,12 @@ class PerfilController extends Controller
 
     public function actualizar(): void
     {
-        if (!Session::isAuthenticated()) { $this->redirect('/login'); return; }
+        if (!Session::isAuthenticated()) {
+            $this->redirect('/login');
+            return;
+        }
         $request = new Request();
         $datos = $request->all();
-        $this->requerirCsrf($datos, '/perfil');
 
         $idUsuario = (int) Session::get('usuario_id');
         $passwordActual = (string) ($datos['password_actual'] ?? '');
