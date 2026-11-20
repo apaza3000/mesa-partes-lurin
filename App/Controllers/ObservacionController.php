@@ -92,9 +92,19 @@ class ObservacionController extends Controller
                     $stmt->execute([':id' => $idExp]);
                     $row = $stmt->fetch(\PDO::FETCH_ASSOC);
                     if ($row && !empty($row['email']) && filter_var($row['email'], FILTER_VALIDATE_EMAIL)) {
+                        $urlConsulta = \App\Services\PdfCargoService::urlConsulta($row['codigo_expediente']);
+                        $qrBase64 = '';
+                        try {
+                            $barcode = new \TCPDF2DBarcode($urlConsulta, 'QRCODE,M');
+                            $png = $barcode->getBarcodePngData(4, 4, [0, 0, 0]);
+                            if ($png) { $qrBase64 = base64_encode($png); }
+                        } catch (\Throwable $e) { error_log('E13 qr obs: ' . $e->getMessage()); }
                         $html = '<p>Su expediente ' . htmlspecialchars($row['codigo_expediente']) . ' ha sido observado.</p>'
                             . '<p>Motivo: ' . htmlspecialchars($datos['descripcion']) . '</p>'
-                            . '<p>Subsane en: ' . htmlspecialchars(\App\Services\PdfCargoService::urlConsulta($row['codigo_expediente'])) . '</p>';
+                            . '<p>Subsane en: <a href="' . htmlspecialchars($urlConsulta) . '">' . htmlspecialchars($urlConsulta) . '</a></p>';
+                        if ($qrBase64 !== '') {
+                            $html .= '<div style="text-align:center;margin-top:12px;"><img src="data:image/png;base64,' . $qrBase64 . '" alt="QR" width="120" height="120"></div>';
+                        }
                         (new \App\Models\CorreoCola())->encolar([
                             'destinatario' => $row['email'],
                             'cc' => null,

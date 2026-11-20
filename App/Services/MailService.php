@@ -18,7 +18,7 @@ class MailService
      * Envía un correo HTML con adjuntos opcionales.
      * Devuelve true si se envió (o se simuló en log), false si falló.
      */
-    public function enviar(string $para, string $asunto, string $html, array $adjuntos = [], ?string $cc = null): bool
+    public function enviar(string $para, string $asunto, string $html, array $adjuntos = [], ?string $cc = null, $imagenes = []): bool
     {
         $para = trim($para);
         if (!filter_var($para, FILTER_VALIDATE_EMAIL)) {
@@ -67,6 +67,18 @@ class MailService
             $mail->Subject = $asunto;
             $mail->Body = $html;
             $mail->AltBody = strip_tags($html);
+
+            // Imágenes incrustadas desde Base64 convertido a binario
+            foreach ($imagenes as $imagen) {
+
+                $mail->addStringEmbeddedImage(
+                    $imagen['contenido'],
+                    $imagen['cid'],
+                    $imagen['nombre'],
+                    'base64',
+                    $imagen['mime']
+                );
+            }
 
             foreach ($adjuntos as $adj) {
                 if (isset($adj['contenido']) && isset($adj['nombre'])) {

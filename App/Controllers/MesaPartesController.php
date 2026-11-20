@@ -208,7 +208,7 @@ class MesaPartesController extends Controller
             $ref = new \ReflectionClass($ctrl);
             $m = $ref->getMethod('encolarCorreoConstancia');
             $m->setAccessible(true);
-            $m->invoke($ctrl, $resultado['codigo'], $datos);
+            $m->invoke($ctrl, $resultado['codigo'], $datos, $resultado['id_expediente'] ?? null);
         } catch (\Throwable $e) {
             error_log('E13 ventanilla encolar: ' . $e->getMessage());
         }

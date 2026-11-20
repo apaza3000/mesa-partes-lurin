@@ -350,13 +350,13 @@ Estas tareas **no requieren trabajo**, solo pruebas de regresión antes de cerra
 #### ✅ TAREA E11-4: Registro del expediente autenticado
 - **Estado:** ✅ Completada. `ExpedienteService` acepta `id_persona`/`id_usuario_creador`; derivación automática a Mesa de Partes/área; correo encolado.
 - **Subtareas:**
-  - [ ] **E11-4.1** Extender `ExpedienteService::crearExpedienteVirtual()` para aceptar `id_persona` forzado y `id_usuario_creador`.
-  - [ ] **E11-4.2** Guardar `canal_ingreso = 'Virtual'` y `documentos.creado_por = id_usuario_actual`.
-  - [ ] **E11-4.3** Registrar el historial inicial con `id_usuario` (no `NULL`) y comentario "Expediente registrado por usuario autenticado".
-  - [ ] **E11-4.4** Registrar auditoría (`expedientes`, `crear`) con la IP real.
-  - [ ] **E11-4.5** Derivar automáticamente a Mesa de Partes o al área elegida, replicando la regla de `EntregaModel`.
-  - [ ] **E11-4.6** Mostrar pantalla de confirmación con código, resumen y enlace al cargo PDF (`/consulta/cargo/{codigo}`).
-  - [ ] **E11-4.7** Enviar el correo de constancia cuando `E13` esté implementado (integrar, no duplicar).
+  - [x] **E11-4.1** Extender `ExpedienteService::crearExpedienteVirtual()` para aceptar `id_persona` forzado y `id_usuario_creador`.
+  - [x] **E11-4.2** Guardar `canal_ingreso = 'Virtual'` y `documentos.creado_por = id_usuario_actual`.
+  - [x] **E11-4.3** Registrar el historial inicial con `id_usuario` (no `NULL`) y comentario "Expediente registrado por usuario autenticado".
+  - [ ] **E11-4.4** Registrar auditoría (`expedientes`, `crear`) con la IP real. (pendiente)
+  - [x] **E11-4.5** Derivar automáticamente a Mesa de Partes o al área elegida, replicando la regla de `EntregaModel`.
+  - [x] **E11-4.6** Mostrar pantalla de confirmación con código, resumen y enlace al cargo PDF (`/consulta/cargo/{codigo}`).
+  - [x] **E11-4.7** Enviar el correo de constancia (integrado; sin adjunto PDF, con QR + enlace en HTML).
 
 #### ⏳ TAREA E11-5: Pruebas y regresión del flujo autenticado
 - **Estado:** ⏳ Pendiente.
@@ -413,21 +413,21 @@ Estas tareas **no requieren trabajo**, solo pruebas de regresión antes de cerra
   - [ ] **E13-2.4** Permitir modo simulación (`MAIL_HABILITADO=false`) que escribe el correo en log para desarrollo.
   - [ ] **E13-2.5** Sanitizar asunto y destinatarios; validar con `FILTER_VALIDATE_EMAIL`.
 
-#### ✅ TAREA E13-3: Ficha de registro en PDF adjunta
-- **Estado:** ✅ Completada. PDF generado en memoria (`Output('S')`) y adjuntado como `Cargo-{codigo}.pdf`.
+#### ✅ TAREA E13-3: Constancia de registro por correo (sin adjunto PDF)
+- **Estado:** ✅ Completada (redefinida). El correo incluye datos del expediente, enlace de consulta y código QR incrustado en HTML. El PDF del cargo sigue disponible on-demand en `/mesa-partes/cargo-pdf/{id}` y `/consulta/cargo/{codigo}`.
 - **Subtareas:**
-  - [ ] **E13-3.1** Reutilizar `PdfCargoService` para generar el cargo con QR y código de expediente.
-  - [ ] **E13-3.2** Generar el PDF en memoria (`Output(..., 'S')`) para adjuntarlo sin dejar archivos temporales.
-  - [ ] **E13-3.3** Nombrar el adjunto `Cargo-{codigo}.pdf`.
-  - [ ] **E13-3.4** Incluir en el cuerpo del correo: código, asunto, fecha/hora, área destino y enlace de consulta.
-  - [ ] **E13-3.5** Verificar que el QR del PDF apunte a `APP_URL . '/consulta?codigo=...'`.
+  - [x] **E13-3.1** Generar el QR en base64 con `TCPDF2DBarcode` + GD e incrustarlo en el HTML.
+  - [x] **E13-3.2** Incluir en el cuerpo del correo: código, remitente, asunto, fecha/hora, área destino y enlace de consulta.
+  - [x] **E13-3.3** Eliminar la generación/adjunto del PDF en `encolarCorreoConstancia` (no más `Cargo-{codigo}.pdf`).
+  - [x] **E13-3.4** Corregir el bug por el que el código llegaba `null` (el include reasignaba `$codigo`): la plantilla ya no sobrescribe la variable.
+  - [x] **E13-3.5** Corregir el bug por el que `id_expediente` llegaba `null`: ahora se pasa `$resultado['id_expediente']` a la cola.
 
 #### ✅ TAREA E13-4: Disparadores del correo
 - **Estado:** ✅ Completada. Disparadores en portal público, envío autenticado, ventanilla y observación.
 - **Subtareas:**
-  - [ ] **E13-4.1** Enviar al **remitente** cuando se registre un expediente en `/entregas` (portal público), si tiene correo válido.
-  - [ ] **E13-4.2** Enviar al **remitente autenticado** cuando registre en `/enviar-documento`.
-  - [ ] **E13-4.3** Enviar en el registro de **ventanilla** (`MesaPartesController::store`) si el remitente tiene correo.
+  - [x] **E13-4.1** Enviar al **remitente** cuando se registre un expediente en `/entregas` (portal público), si tiene correo válido.
+  - [x] **E13-4.2** Enviar al **remitente autenticado** cuando registre en `/enviar-documento`.
+  - [x] **E13-4.3** Enviar en el registro de **ventanilla** (`MesaPartesController::store`) si el remitente tiene correo.
   - [ ] **E13-4.4** Enviar copia (CC) a `MAIL_MESA_PARTES` en todos los registros nuevos.
   - [ ] **E13-4.5** Enviar aviso cuando el expediente se **observe** (con enlace a `/consulta/subsanar/{codigo}`).
   - [ ] **E13-4.6** Enviar aviso cuando el expediente se **atienda**, adjuntando o enlazando la respuesta.
