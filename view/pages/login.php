@@ -25,7 +25,7 @@ $errors = $errors ?? [];
                 Regresar al inicio
             </a>
             <header class="brand-header">
-                <h1 class="brand-title" id="login-title">Mesa de Partes</h1>
+                <h1 class="brand-title auth-title" id="login-title">Mesa de Partes</h1>
                 <p class="brand-subtitle">IESTP Lurín</p>
                 <span class="badge">Sistema de gestión documentaria</span>
             </header>
@@ -34,7 +34,7 @@ $errors = $errors ?? [];
                 <p class="error-text" role="alert"><?= htmlspecialchars($flashItem['mensaje'] ?? '', ENT_QUOTES, 'UTF-8') ?></p>
             <?php endforeach; ?>
 
-            <form action="/login" method="POST" id="login-form">
+            <form action="/login" method="POST" id="login-form" data-title="Inicio de Sesión">
                 <?= \App\Support\Csrf::campo() ?>
                 <div class="form-group">
                     <label class="form-label" for="identificador">Usuario o correo electrónico</label>

@@ -3,41 +3,42 @@ body {
     min-height: 100vh;
     font-family: 'Roboto', 'Segoe UI', Arial, sans-serif;
     background-color: #1b3668;
-    background-image: 
-    linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
-    radial-gradient(circle at 15% 25%, rgba(59, 130, 246, 0.4) 0%, transparent 40%),
-    radial-gradient(circle at 85% 75%, rgba(59, 130, 246, 0.35) 0%, transparent 45%);
+    background-image:
+        linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+        radial-gradient(circle at 15% 25%, rgba(59, 130, 246, 0.4) 0%, transparent 40%),
+        radial-gradient(circle at 85% 75%, rgba(59, 130, 246, 0.35) 0%, transparent 45%);
     background-size: 40px 40px, 40px 40px, 100% 100%, 100% 100%;
     background-position: center center;
     display: flex;
     justify-content: center;
-    align-items: center; 
+    align-items: center;
     position: relative;
     overflow-x: hidden;
 }
+
 
 body::before {
     content: "";
     position: absolute;
     top: 35px;
-    right: 45px; 
-    left: auto; 
-    transform: none; 
-    width: 170px; 
-    height: 190px; 
+    right: 45px;
+    left: auto;
+    transform: none;
+    width: 170px;
+    height: 190px;
     background: url('/view/assets/img/logo.png') no-repeat center right;
     background-size: contain;
-    z-index: 101; 
+    z-index: 101;
     filter: drop-shadow(0 4px 15px rgba(255, 255, 255, 0.25)) drop-shadow(0 10px 20px rgba(0, 0, 0, 0.35));
 }
 
 .back-home {
-    position: fixed; 
+    position: fixed;
     top: 40px;
-    left: 40px; 
-    margin: 0; 
-    color: rgba(255, 255, 255, 0.8) !important; 
+    left: 40px;
+    margin: 0;
+    color: rgba(255, 255, 255, 0.8) !important;
     text-decoration: none;
     font-size: 1rem;
     font-weight: 500;
@@ -45,19 +46,19 @@ body::before {
     align-items: center;
     gap: 6px;
     transition: color 0.2s;
-    z-index: 1000; 
+    z-index: 1000;
 }
 
-.back-home:hover { 
-    color: #ffffff !important; 
-    text-decoration: underline; 
+.back-home:hover {
+    color: #ffffff !important;
+    text-decoration: underline;
 }
 
 .login-card {
     background: transparent !important;
     box-shadow: none !important;
     width: 100%;
-    max-width: 750px; 
+    max-width: 750px;
     padding: 0 !important;
     border: none !important;
     margin: 0 !important;
@@ -65,16 +66,18 @@ body::before {
     z-index: 10;
 }
 
-.top-bar { display: none; }
+.top-bar {
+    display: none;
+}
 
 .login-body {
-    position: relative; 
+    position: relative;
     width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 25px; 
-    margin-top: 0; 
+    gap: 25px;
+    margin-top: 0;
 }
 
 .brand-header {
@@ -84,19 +87,56 @@ body::before {
     padding: 0;
 }
 
-#login-title {
-    font-size: 3.8rem; 
+/* Títulos compartidos */
+.auth-title {
+    font-size: 3.8rem;
     font-weight: 800;
     margin: 0 0 5px 0;
     color: #ffffff;
     line-height: 1.1;
     letter-spacing: -0.5px;
-    text-shadow: 0 4px 15px rgba(0,0,0,0.3); 
+    text-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Formularios compartidos */
+.auth-form {
+    width: 100%;
+    background: #ffffff;
+    padding: 60px 55px;
+    border-radius: 16px;
+    border: none;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+    box-sizing: border-box;
+    position: relative;
+}
+
+/* Línea superior decorativa */
+.auth-form::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 8px;
+    background: linear-gradient(to right, #244b8c 50%, #facc15 50%);
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+}
+
+/* Subtítulo dinámico */
+.auth-form::before {
+    content: attr(data-title);
+    display: block;
+    text-align: center;
+    font-size: 2.2rem;
+    color: #244b8c;
+    font-weight: 800;
+    margin-bottom: 35px;
 }
 
 .brand-subtitle {
     font-size: 1.5rem;
-    color: #facc15; 
+    color: #facc15;
     margin: 0 0 5px 0;
     font-weight: 600;
     text-transform: uppercase;
@@ -105,72 +145,108 @@ body::before {
 
 .badge {
     font-size: 1.2rem;
-    color: rgba(255, 255, 255, 0.8); 
+    color: rgba(255, 255, 255, 0.8);
     background: transparent !important;
     padding: 0;
     display: block;
 }
 
-#login-form {
-    width: 100%; 
-    background: #ffffff;
-    padding: 60px 55px; 
-    border-radius: 16px; 
-    border: none;
-    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5); 
-    box-sizing: border-box;
-    position: relative;
-}
 
-#login-form::after {
+
+/* Línea superior decorativa para ambos formularios */
+#login-form::after,
+#recuperar-form::after {
     content: "";
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
-    height: 8px; 
+    height: 8px;
     background: linear-gradient(to right, #244b8c 50%, #facc15 50%);
     border-top-left-radius: 16px;
     border-top-right-radius: 16px;
 }
 
-#login-form::before {
-    content: "Inicio de Sesión";
+/* Título dinámico de cada formulario */
+#login-form::before,
+#recuperar-form::before {
+    content: attr(data-title);
     display: block;
     text-align: center;
-    font-size: 2.2rem; 
-    color: #244b8c; 
+    font-size: 2.2rem;
+    color: #244b8c;
     font-weight: 800;
     margin-bottom: 35px;
 }
 
-.form-group { margin-bottom: 30px; text-align: left; }
-.form-label { display: block; font-size: 1rem; color: #4a5568; margin-bottom: 12px; font-weight: 700; text-transform: uppercase; }
-.form-input { 
-    width: 100%; 
-    padding: 18px 20px; 
-    border: 2px solid #cbd5e1; 
-    border-radius: 8px; 
-    box-sizing: border-box; 
-    font-size: 1.15rem; 
-    color: #0f172a; 
-    background-color: #f8fafc; 
+#login-form,
+#recuperar-form {
+    width: 100%;
+    background: #ffffff;
+    padding: 60px 55px;
+    border-radius: 16px;
+    border: none;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+    box-sizing: border-box;
+    position: relative;
+}
+
+.form-group {
+    margin-bottom: 30px;
+    text-align: left;
+}
+
+.form-label {
+    display: block;
+    font-size: 1rem;
+    color: #4a5568;
+    margin-bottom: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.form-input {
+    width: 100%;
+    padding: 18px 20px;
+    border: 2px solid #cbd5e1;
+    border-radius: 8px;
+    box-sizing: border-box;
+    font-size: 1.15rem;
+    color: #0f172a;
+    background-color: #f8fafc;
     transition: all 0.2s;
 }
-.form-input:focus { outline: none; border-color: #244b8c; background-color:#ffffff; box-shadow: 0 0 0 4px rgba(36, 75, 140, 0.15); }
 
-.password-field { position: relative; display: flex; }
-.password-toggle { 
-    position: absolute; right: 20px; top: 50%; transform: translateY(-50%); 
-    background: transparent; border: none; cursor: pointer; color: #244b8c; 
-    font-size: 1rem; font-weight: 700; 
+.form-input:focus {
+    outline: none;
+    border-color: #244b8c;
+    background-color: #ffffff;
+    box-shadow: 0 0 0 4px rgba(36, 75, 140, 0.15);
+}
+
+.password-field {
+    position: relative;
+    display: flex;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: #244b8c;
+    font-size: 1rem;
+    font-weight: 700;
 }
 
 .btn-submit {
     width: 100%;
-    background-color: #244b8c !important; 
+    background-color: #244b8c !important;
     color: #ffffff !important;
-    padding: 22px; 
+    padding: 22px;
     border: none;
     border-radius: 8px;
     font-size: 1.3rem;
@@ -181,14 +257,205 @@ body::before {
     box-shadow: 0 6px 15px rgba(36, 75, 140, 0.25);
 }
 
-.btn-submit:hover { background-color: #1a386b !important; transform: translateY(-2px); box-shadow: 0 10px 20px rgba(36, 75, 140, 0.35); }
-.btn-submit:active { transform: translateY(1px); box-shadow: none; }
+.btn-submit:hover {
+    background-color: #1a386b !important;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(36, 75, 140, 0.35);
+}
 
+.btn-submit:active {
+    transform: translateY(1px);
+    box-shadow: none;
+}
+
+
+/* =========================================
+   RESPONSIVE - AUTENTICACIÓN
+========================================= */
+
+/* Tablets y pantallas medianas */
 @media (max-width: 800px) {
-    body::before { top: 20px; right: 20px; width: 100px; height: 110px; } 
-    .login-card { max-width: 90%; }
-    .login-body { margin-top: 120px; padding: 0; }
-    #login-title { font-size: 2.5rem; }
-    #login-form { padding: 40px 25px; } 
-    .back-home { top: 20px; left: 20px; font-size: 0.85rem; } 
+
+    body {
+        min-height: 100vh;
+        min-height: 100dvh;
+        padding: 30px 0;
+        box-sizing: border-box;
+    }
+
+    body::before {
+        top: 15px;
+        right: 15px;
+        width: 85px;
+        height: 95px;
+    }
+
+    .login-card {
+        width: 90%;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .login-body {
+        margin-top: 100px;
+        gap: 20px;
+    }
+
+    .auth-title {
+        font-size: 2.5rem;
+    }
+
+    .brand-subtitle {
+        font-size: 1.2rem;
+    }
+
+    .badge {
+        font-size: 1rem;
+    }
+
+    #login-form,
+    #recuperar-form {
+        padding: 40px 30px;
+    }
+
+    #login-form::before,
+    #recuperar-form::before {
+        font-size: 1.8rem;
+        margin-bottom: 25px;
+    }
+
+    .form-group {
+        margin-bottom: 22px;
+    }
+
+    .form-input {
+        padding: 15px;
+        font-size: 1rem;
+    }
+
+    .btn-submit {
+        padding: 17px;
+        font-size: 1.1rem;
+    }
+
+    .back-home {
+        top: 20px;
+        left: 20px;
+        font-size: 0.85rem;
+    }
+}
+
+/* Celulares */
+@media (max-width: 480px) {
+
+    body {
+        padding: 20px 0;
+    }
+
+    body::before {
+        top: 12px;
+        right: 12px;
+        width: 65px;
+        height: 75px;
+    }
+
+    .login-card {
+        width: 92%;
+    }
+
+    .login-body {
+        margin-top: 85px;
+        gap: 18px;
+    }
+
+    .auth-title {
+        font-size: 2rem;
+        line-height: 1.15;
+    }
+
+    .brand-subtitle {
+        font-size: 1rem;
+        letter-spacing: 1.5px;
+    }
+
+    .badge {
+        font-size: 0.85rem;
+    }
+
+    #login-form,
+    #recuperar-form {
+        padding: 35px 20px;
+        border-radius: 12px;
+    }
+
+    #login-form::after,
+    #recuperar-form::after {
+        height: 6px;
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+    }
+
+    #login-form::before,
+    #recuperar-form::before {
+        font-size: 1.5rem;
+        margin-bottom: 25px;
+    }
+
+    .form-label {
+        font-size: 0.85rem;
+        margin-bottom: 9px;
+    }
+
+    .form-input {
+        padding: 14px 12px;
+        font-size: 1rem;
+    }
+
+    .password-toggle {
+        right: 12px;
+        font-size: 0.85rem;
+    }
+
+    .btn-submit {
+        padding: 15px;
+        font-size: 1rem;
+        margin-top: 15px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .back-home {
+        top: 15px;
+        left: 12px;
+        font-size: 0.78rem;
+    }
+}
+
+/* Celulares pequeños */
+@media (max-width: 360px) {
+
+    .login-card {
+        width: 94%;
+    }
+
+    .auth-title {
+        font-size: 1.7rem;
+    }
+
+    #login-form,
+    #recuperar-form {
+        padding: 30px 15px;
+    }
+
+    #login-form::before,
+    #recuperar-form::before {
+        font-size: 1.3rem;
+    }
+
+    body::before {
+        width: 55px;
+        height: 65px;
+    }
 }
