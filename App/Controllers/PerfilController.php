@@ -12,6 +12,8 @@ use Src\Core\Session;
 
 class PerfilController extends Controller
 {
+    use \App\Controllers\Concerns\AuthorizesRequest;
+
     public function index(): void
     {
         if (!Session::isAuthenticated()) {
@@ -36,6 +38,8 @@ class PerfilController extends Controller
         }
         $request = new Request();
         $datos = $request->all();
+
+        $this->requerirCsrf($datos, '/perfil');
 
         $idUsuario = (int) Session::get('usuario_id');
         $passwordActual = (string) ($datos['password_actual'] ?? '');

@@ -115,6 +115,7 @@
                         </div>
 
                         <form method="POST" action="/consulta/buscar" novalidate>
+                            <?= \App\Support\Csrf::campo() ?>
                             <div class="card-body">
 
                                 <?php if (!empty($errors)): ?>
