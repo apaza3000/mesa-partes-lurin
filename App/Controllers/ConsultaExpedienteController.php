@@ -57,6 +57,11 @@ class ConsultaExpedienteController extends Controller
         $request = new Request();
         $datos   = $request->all();
 
+        // CSRF solo en envíos POST del formulario público/privado.
+        if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
+            $this->requerirCsrf($datos, Session::isAuthenticated() ? '/consulta' : '/consulta');
+        }
+
         $errors = [];
 
         $codigo   = trim($datos['codigo'] ?? '');
