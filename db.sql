@@ -297,7 +297,7 @@ VALUES
   ('Otros', 'Otros tipos de documentos');
 INSERT INTO `numeradores` (`tipo`, `anio`, `ultimo_numero`)
 VALUES
-  ('EXPEDIENTE', CAST('2026' AS YEAR), 0);
+  ('EXPEDIENTE', 2026, 0);
 
 -- Re-enable foreign key checks
 SET FOREIGN_KEY_CHECKS = 1;
